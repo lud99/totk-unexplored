@@ -2,11 +2,8 @@
 
 #include "Graphics/Mesh.hpp"
 #include "Graphics/Shader.h" 
-#include "Graphics/Texture2D.h"
-#include "Graphics/BasicVertices.h"
 
-#include "Map.h"
-#include "Legend.h"
+#include "Data.h"
 
 #include <glm/vec2.hpp>
 #include <iostream>
@@ -16,15 +13,13 @@ class Texture2D;
 class MapObject
 {
 public:
-    static const int ObjectTypesCount = 10;
-
-    static Texture2D* m_Textures[ObjectTypesCount];
+    static Texture2D* m_Textures[(int)Data::ObjectType::Count];
     static Shader m_Shader;
-    static Mesh<TextureVertex> m_Meshes[ObjectTypesCount];
+    static Mesh<TextureVertex> m_Meshes[(int)Data::ObjectType::Count];
 
     Data::Object* m_ObjectData;
 
-    int m_UniqueType;
+    Data::ObjectType m_ObjectType;
 
     glm::vec2 m_Position = glm::vec2(0.0f, 0.0f); // The position on screen
     bool m_Found = false;
@@ -34,21 +29,14 @@ public:
 public:
     MapObject();
 
-    static void Init(const std::string& path, int count);
+    void Init(const std::string& texturePath, Data::ObjectType type);
 
     void AddToMesh();
 
     void Update(bool clear = false);
-    static void Render();
+    void Render();
 
     bool IsClicked(glm::vec2 position);
 
     ~MapObject();
 };
-
-Texture2D* MapObject::m_Textures[MapOb];
-Shader MapObject::m_Shader;
-Mesh<TextureVertex> MapObject::m_Mesh;
-
-bool MapObject<T>::m_ShowAnyway = false;
-float MapObject<T>::m_Scale;

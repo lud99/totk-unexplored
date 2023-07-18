@@ -1,0 +1,1 @@
+start "" yuzu.exe ./totk-unexplored.nro
