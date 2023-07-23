@@ -28,7 +28,7 @@ bool SavefileIO::LoadGamesave(bool loadMasterMode, bool chooseProfile)
     // Try to mount the save directory
     int mountStatus = MountSavefile(chooseProfile);
 
-    bool dialogWasOpen = Map::m_GameRunningDialog->m_IsOpen || /*Map::m_MasterModeDialog->m_IsOpen || */Map::m_NoSavefileDialog->m_IsOpen;
+    //bool dialogWasOpen = Map::m_GameRunningDialog->m_IsOpen || /*Map::m_MasterModeDialog->m_IsOpen || */Map::m_NoSavefileDialog->m_IsOpen;
 
     Map::m_GameRunningDialog->SetOpen(false);
     //Map::m_MasterModeDialog->SetOpen(false);

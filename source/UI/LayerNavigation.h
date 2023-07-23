@@ -29,10 +29,13 @@ public:
     // TextureQuad has its position at the center of the texture
     bool ButtonIsClicked(TexturedQuad& button, glm::vec2 touchPosition);
 
+    bool IsPositionOn(glm::vec2 position);
+
     ~LayerNavigation();
 
 private:
     Layer m_CurrentLayer = Layer::Surface;
+    Layer m_PreviousLayer = m_CurrentLayer;
 
     TexturedQuad m_Buttons[3];
     TexturedQuad m_UpIcon;

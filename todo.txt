@@ -1,6 +1,6 @@
-- Buttons for changing layer (with touch)
-- open info without touch (cursor)
-- fix opengl 1281 error with lines 
-- fix zoom?
 
-- b to mark anything as found (and save it)
+- write changelog
+- take screenshots
+
+future:
+- qr coded

@@ -9,7 +9,6 @@
 #include "Legend.h"
 #include "Dialog.h"
 #include "MapObject.h"
-#include "KorokDialog.h"
 #include "ObjectInfo.h"
 #include "./UI/LayerNavigation.h"
 #include "Log.h"
@@ -21,6 +20,11 @@ constexpr float MapScale = 0.125;
 glm::vec2 TransformPositionTo2DMap(glm::vec3 position) 
 {
     return glm::vec2(position.x, -position.z) * MapScale;
+}
+
+float lerp(float a, float b, float t)
+{
+    return a * (1.0 - t) + (b * t);
 }
 
 void Map::Init()
@@ -43,7 +47,6 @@ void Map::Init()
 
     m_LineRenderer = new LineRenderer();
 
-    m_KorokDialog = new KorokDialog();
     m_ObjectInfo = new ObjectInfo();
 
     // Create UI
@@ -54,7 +57,7 @@ void Map::Init()
     m_LayerNavigation = new LayerNavigation();
 
     m_Cursor.Create("romfs:/icons/cursor.png");
-    m_Cursor.m_Position = glm::vec2(0 - m_Cursor.m_Texture->m_Width / 2, 0 - m_Cursor.m_Texture->m_Height / 2);
+    m_Cursor.m_Position = glm::vec2(0.0f, 0.0f);
     m_Cursor.m_ProjectionMatrix = &m_ProjectionMatrix;
 
     LoadLayerImage();
@@ -111,10 +114,21 @@ void Map::UpdateMapObjects()
     Log("Updated map objects");
 }
 
+void Map::SetCameraPosition(glm::vec2 position)
+{
+    m_TargetCameraPosition = position;
+}
+
 void Map::Update()
 {
     if (m_Pad == nullptr) return;
 
+    m_CameraPosition.x = lerp(m_CameraPosition.x, m_TargetCameraPosition.x, m_CameraLerpSpeed);
+    m_CameraPosition.y = lerp(m_CameraPosition.y, m_TargetCameraPosition.y, m_CameraLerpSpeed);
+
+    m_Cursor.m_Position.x = lerp(m_Cursor.m_Position.x, m_TargetCursorPosition.x, m_CameraLerpSpeed);
+    m_Cursor.m_Position.y = lerp(m_Cursor.m_Position.y, m_TargetCursorPosition.y, m_CameraLerpSpeed);
+    
     // Load map texture if it hasn't been loaded
     if (!m_MapBackgrounds[(int)m_LayerNavigation->GetLayer()].m_Texture)
         LoadLayerImage();
@@ -148,7 +162,7 @@ void Map::Update()
     if (buttonsPressed & HidNpadButton_StickL)
     {
         m_Zoom = m_DefaultZoom;
-        m_CameraPosition = glm::vec2(0.0f, 0.0f);
+        SetCameraPosition(glm::vec2(0.0f, 0.0f));
     }
 
     if (m_Zoom < minZoom) m_Zoom = minZoom;
@@ -165,29 +179,32 @@ void Map::Update()
         }
     }
 
-    // Toggle legend
-    if (buttonsPressed & HidNpadButton_X)
-    {
-        // Close the korok dialog first, then if it's not open close the legend
-        if (m_KorokDialog->m_IsOpen)
-            m_KorokDialog->SetOpen(false);
-        else if (m_ObjectInfo->m_IsOpen)
-            m_ObjectInfo->SetOpen(false);
-        else if (!m_NoSavefileDialog->m_IsOpen)
-            m_Legend->m_IsOpen = !m_Legend->m_IsOpen;
-    }
-
+    // Open and close dialogs
     if (buttonsPressed & HidNpadButton_B)
     {
-        if (m_KorokDialog->m_IsOpen) 
+        // Open legend if all other dialogs are closed
+        if (!m_NoSavefileDialog->m_IsOpen && !m_ObjectInfo->m_IsOpen && !m_Legend->m_IsOpen)
+            m_Legend->m_IsOpen = true;
+        else
+            m_Legend->m_IsOpen = false; // Close legend
+        
+        // Close object info
+        if (m_ObjectInfo->m_IsOpen)
+            m_ObjectInfo->m_IsOpen = false;
+    }
+
+    if (buttonsPressed & HidNpadButton_A)
+    {
+        if (!m_Legend->m_IsOpen)
         {
-            int index = m_KorokDialog->m_KorokIndex;
-            if (index < 800)
-                m_MapObjects[Data::ObjectType::HiddenKorok][index].m_Found = true;
-            if (index >= 800)
-                m_MapObjects[Data::ObjectType::CarryKorok][index].m_Found = true;
-            
-            m_KorokDialog->SetOpen(false);
+            MapObject* object = GetObjectInCursor();
+            if (object)
+            {
+                m_ObjectInfo->SetObject(object);
+                m_ObjectInfo->SetOpen(true);
+
+                SetCameraPosition(object->m_Position);
+            }
         }
     }
 
@@ -200,7 +217,14 @@ void Map::Update()
    
     float distanceToCenter = glm::distance(stickLPosition, glm::vec2(0.0f, 0.0f));
     if (distanceToCenter >= deadzone)
-        m_CameraPosition += stickLPosition * (analogStickMovementSpeed / m_Zoom);
+    {
+        //m_CameraPosition = cursorWorldPos;
+        //SetCameraPosition(m_CameraPosition + stickLPosition * (analogStickMovementSpeed / m_Zoom));
+        SetCameraPosition(m_TargetCameraPosition + stickLPosition * (analogStickMovementSpeed / m_Zoom));
+        // SetCameraPosition(m_TargetCursorPosition);
+        m_TargetCursorPosition = glm::vec2(0.0f, 0.0f);
+    }
+        
 
     m_ViewMatrix = glm::mat4(1.0f); // Reset (important)
     m_ViewMatrix = glm::scale(m_ViewMatrix, glm::vec3(m_Zoom, m_Zoom, 0.0f));
@@ -220,21 +244,18 @@ void Map::Update()
             // Dont drag if finger is on the legend
             if (!(m_Legend->m_IsOpen && m_Legend->IsPositionOnLegend(touchPosition)) && 
                 !(m_NoSavefileDialog->m_IsOpen && m_NoSavefileDialog->IsPositionOn(touchPosition)) &&
-                !(m_GameRunningDialog->m_IsOpen && m_GameRunningDialog->IsPositionOn(touchPosition))/* &&
-                !(m_MasterModeDialog->m_IsOpen && m_MasterModeDialog->IsPositionOn(touchPosition))*/)
+                !(m_GameRunningDialog->m_IsOpen && m_GameRunningDialog->IsPositionOn(touchPosition)) &&
+                !(m_LayerNavigation->IsPositionOn(touchPosition)))
             {
                 // Check if the finger was pressed
                 if (state.count == 1)
                 {   
-                    // Check if clicked korok
-                    bool clicked = false;
-
                     // Objects
                     for (int i = 0; i < (int)Data::ObjectType::Count; i++)
                     {
                         Data::ObjectType type = Data::ObjectType(i);
 
-                        if (type == Data::ObjectType::Location) //if (type == Data::ObjectType::HiddenKorok || type == Data::ObjectType::CarryKorok)
+                        if (type == Data::ObjectType::Location)
                             continue;
 
                         int objectCount = Data::m_Objects[type].size();                        
@@ -243,20 +264,16 @@ void Map::Update()
                             MapObject& mapObject = m_MapObjects[type][j];
                             if (mapObject.IsClicked(touchPosition))
                             {
-                                m_ObjectInfo->SetObject(type, mapObject.m_ObjectData);
+                                m_ObjectInfo->SetObject(&mapObject);
                                 m_ObjectInfo->SetOpen(true);
 
-                                m_Legend->m_IsOpen = false;
+                                glm::vec2 objectPositionOnScreen = (mapObject.m_Position - m_CameraPosition) * m_Zoom;
+                                m_TargetCursorPosition = objectPositionOnScreen;
+                                //SetCameraPosition(mapObject.m_Position);
 
-                                clicked = true;
+                                m_Legend->m_IsOpen = false;
                             }
                         }
-                    }
-
-                    // Hide the object info if no object was clicked on
-                    if (!clicked)
-                    {
-                        //m_ObjectInfo->SetOpen(false);
                     }
                     
                     // Only drag if not clicking on object
@@ -278,7 +295,7 @@ void Map::Update()
 
             // Move the camera by the delta. Flip the direction of the y-coordinate and 
             // divide by the zoom to move the same amount irregardless of the zoom
-            m_CameraPosition += (delta * dragAmont) / m_Zoom;
+            SetCameraPosition(m_TargetCameraPosition + (delta * dragAmont) / m_Zoom);
 
             // Set the touch pos to the most recent one, so we only check for the delta between each frame and not from when the drag started
             m_PrevTouchPosition = touchPosition;
@@ -291,6 +308,9 @@ void Map::Update()
 
     if (m_Legend->m_IsOpen)
         m_Legend->Update();
+
+    if (m_ObjectInfo->m_IsOpen)
+        m_ObjectInfo->Update();
 
     if (m_NoSavefileDialog->m_IsOpen) 
         m_NoSavefileDialog->Update();
@@ -333,7 +353,7 @@ void Map::Render()
             for (int i = (int)Data::ObjectType::HiddenKorok; i < (int)Data::ObjectType::CarryKorok + 1; i++)
             {
                 Data::ObjectType type = (Data::ObjectType)i;
-                for (int k = 0; k < m_MapObjects[type].size(); k++)
+                for (int k = 0; k < (int)m_MapObjects[type].size(); k++)
                 {
                     MapObject& korokObject = m_MapObjects[type][k];
                     Data::Korok* korokData = (Data::Korok*)m_MapObjects[type][k].m_ObjectData;
@@ -343,7 +363,7 @@ void Map::Render()
                     auto& pointsOnPath = korokData->m_Path->m_Points;
 
                     // Don't render if found
-                    if (korokObject.m_Found || !korokObject.IsVisible())
+                    if (!korokObject.IsVisible())
                         continue;
 
                     // 0 -> 1
@@ -373,7 +393,7 @@ void Map::Render()
         if (m_Legend->m_Show[IconButton::Caves])
         {
             m_LineRenderer->Clear();
-            for (int i = 0; i < m_MapObjects[Data::ObjectType::Cave].size(); i++)
+            for (int i = 0; i < (int)m_MapObjects[Data::ObjectType::Cave].size(); i++)
             {
                 std::string name = m_MapObjects[Data::ObjectType::Cave][i].m_ObjectData->m_DisplayName;
 
@@ -425,13 +445,10 @@ void Map::Render()
         }
     }
 
-    m_Cursor.Render();
+    if (!m_Legend->m_IsOpen) 
+        m_Cursor.Render();
 
     m_Font.RenderBatch();
-
-    // Draw behind legend
-    //if (m_LoadMasterMode)
-       // m_MasterModeIcon.Render();
 
     m_Font.BeginBatch();
     if (m_Legend->m_IsOpen) 
@@ -444,9 +461,8 @@ void Map::Render()
     
     m_LayerNavigation->Render();
 
-
-    if (!m_Legend->m_IsOpen && !m_KorokDialog->m_IsOpen && !m_ObjectInfo->m_IsOpen && SavefileIO::Get().LoadedSavefile)
-        m_Font.AddTextToBatch("Press X to open legend", glm::vec2(m_ScreenLeft + 20, m_ScreenTop - 30), 0.5f);  
+    if (!m_Legend->m_IsOpen && !m_ObjectInfo->m_IsOpen && SavefileIO::Get().LoadedSavefile)
+        m_Font.AddTextToBatch("Press B to open legend", glm::vec2(m_ScreenLeft + 20, m_ScreenTop - 30), 0.5f);  
 
     if (SavefileIO::Get().LoadedSavefile)
     {
@@ -462,7 +478,6 @@ void Map::Render()
             glm::vec2(bottomTextX, m_ScreenBottom + 20), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);  
     }
 
-    m_KorokDialog->Render(m_ProjectionMatrix, m_ViewMatrix);
     m_ObjectInfo->Render(m_ProjectionMatrix, m_ViewMatrix);
 
     glm::mat4 emptyViewMatrix(1.0);
@@ -505,27 +520,65 @@ void Map::LoadLayerImage()
 
 MapObject* Map::GetObjectInCursor()
 {
-    
+    float baseRadius = 50.0f;
+    float radius = baseRadius / m_Zoom; // The distance is proportional to the zoom. More zoomed => larger radius, zoomed out => smaller
+
+    float closestDistance = 0.0f;
+    MapObject* closestObject = nullptr;
+
+    // zoom+ => distance-- 
+
+    bool firstIteration = true;
+    for (int i = 0; i < (int)Data::ObjectType::Count; i++)
+    {
+        Data::ObjectType type = (Data::ObjectType)i;
+
+        if (type == Data::ObjectType::Location) 
+            continue;
+
+        if (!m_Legend->m_Show[IconButton::ObjectTypeToButtonType(type)])
+            continue;
+
+        for (int j = 0; j < (int)Data::m_Objects[type].size(); j++)
+        {
+            if (!m_MapObjects[type][j].IsVisible())
+                continue;
+
+            glm::vec2 cursorWorldPos = m_Cursor.m_Position / m_Zoom + m_CameraPosition;
+
+            float distanceToCursor = glm::distance(m_MapObjects[type][j].m_Position, cursorWorldPos);
+            if (distanceToCursor < closestDistance || firstIteration)
+            {
+                closestDistance = distanceToCursor;
+                firstIteration = false;
+
+                closestObject = &m_MapObjects[type][j];
+            }
+        }
+    }
+
+    std::cout << radius << ", " << closestDistance <<"\n";
+
+    if (closestDistance > radius) return nullptr;
+    if (!closestObject) return nullptr;
+
+    return closestObject;
 }
 
 void Map::Destory()
 {
-    //delete[] m_Locations;
-
     delete m_Legend;
     delete m_NoSavefileDialog;
     delete m_GameRunningDialog;
 
     delete m_LayerNavigation;
 
-    delete m_KorokDialog;
     delete m_ObjectInfo;
 }
 
 TexturedQuad Map::m_MapBackgrounds[3];
 Font Map::m_Font;
 Font Map::m_LocationsFont;
-Font Map::m_LocationsFont2;
 LineRenderer* Map::m_LineRenderer;
 //TexturedQuad Map::m_MasterModeIcon;
 
@@ -535,7 +588,10 @@ glm::mat4 Map::m_ProjectionMatrix = glm::mat4(1.0f);
 glm::mat4 Map::m_ViewMatrix = glm::mat4(1.0f);
 
 glm::vec2 Map::m_CameraPosition = glm::vec2(0.0f, 0.0f);
+glm::vec2 Map::m_TargetCameraPosition = glm::vec2(0.0f, 0.0f);
 glm::vec2 Map::m_PrevCameraPosition;
+
+glm::vec2 Map::m_TargetCursorPosition = glm::vec2(0.0f, 0.0f);
 
 int Map::m_PrevTouchCount = 0;
 glm::vec2 Map::m_PrevTouchPosition;
@@ -551,7 +607,6 @@ std::unordered_map<Data::ObjectType, std::vector<MapObject>> Map::m_MapObjects;
 TexturedQuad Map::m_Cursor;
 
 Legend* Map::m_Legend;
-KorokDialog* Map::m_KorokDialog;
 ObjectInfo* Map::m_ObjectInfo;
 Dialog* Map::m_NoSavefileDialog;
 Dialog* Map::m_GameRunningDialog;

@@ -106,15 +106,12 @@ void MapObject::Update(bool clear)
     // For text
     if (m_ObjectType == Data::ObjectType::Location)
     {
-        float minScale = 0.125f * 1.25f;
+        float minScale = 0.125f * 0.5f;
         if (m_Scale < minScale)
             m_Scale = minScale;
 
         if (clear)
-        {
             Map::m_LocationsFont.BeginBatch();
-            Map::m_LocationsFont2.BeginBatch();
-        }
 
         if (!IsVisible(false))
             return;
@@ -125,14 +122,12 @@ void MapObject::Update(bool clear)
             return;
 
         glm::vec3 color = glm::vec3(190.0f, 177.0f, 112.0f) / glm::vec3(255.0f);
-        //glm::vec3 colorOutline = glm::vec3(96.0f, 86.0f, 38.0f) / glm::vec3(255.0f);
         Map::m_LocationsFont.AddTextToBatch(m_ObjectData->m_DisplayName, m_Position, m_Scale * 0.5f, color, ALIGN_CENTER);
-        //Map::m_LocationsFont2.AddTextToBatch(m_ObjectData->m_DisplayName, m_Position, m_Scale * 0.54f, colorOutline, ALIGN_CENTER);
     
         return;
     }
 
-    float minScale = 0.125f * 0.25f;
+    float minScale = 0.125f * 0.5f;
     if (m_Scale < minScale)
         m_Scale = minScale;
 
@@ -154,13 +149,8 @@ void MapObject::Render()
 {
     if (m_ObjectType == Data::ObjectType::Location)
     {
-        //Map::m_LocationsFont2.m_ViewMatrix = &Map::m_ViewMatrix;
-        //Map::m_LocationsFont2.RenderBatch();
-
         Map::m_LocationsFont.m_ViewMatrix = &Map::m_ViewMatrix;
         Map::m_LocationsFont.RenderBatch();
-
-
 
         return;
     }

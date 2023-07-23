@@ -3,15 +3,17 @@
 #include "Graphics/Quad.h"
 
 #include "Data.h"
+#include "MapObject.h"
 
 class ObjectInfo
 {
 public:
     ObjectInfo();
 
+    void Update();
     void Render(glm::mat4 projMat = glm::mat4(1.0f), glm::mat4 viewMat = glm::mat4(1.0f));
     
-    void SetObject(Data::ObjectType type, Data::Object* object);
+    void SetObject(MapObject* mapObject);
     void SetOpen(bool open);
 
     void SetPosition(glm::vec2 position);
@@ -28,7 +30,7 @@ public:
 
     std::string m_Text;
     Data::ObjectType m_Type;
-    Data::Object* m_Object;
+    MapObject* m_MapObject;
 
     bool m_IsOpen = false;
 };

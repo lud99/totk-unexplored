@@ -16,7 +16,8 @@ Download ```botw-unexplored.nro``` from the [releases](https://github.com/lud99/
 * Tap a korok to see a guide on how to find it. You can press B to manually mark it as complete. This is useful if you're using the app while playing BotW, as the app won't be able to load your latest savefile in that case. The koroks you've marked as found will be removed once the savefile is able to be loaded it again, so don't worry if you wrongly marked a korok as found.
 
  - Some caves have multiple entrances. All of them are shown on the map, but only is needed to be explored.
-- 
+- Can mark anything as completed
+- Object info panel
 
 
 ## Version History

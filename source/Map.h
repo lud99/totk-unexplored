@@ -20,14 +20,13 @@ class MapLocation;
 class Legend;
 class Dialog;
 class LineRenderer;
-class KorokDialog;
 class LayerNavigation;
-
 namespace Map
 {
     void Init();
 
     void UpdateMapObjects();
+    void SetCameraPosition(glm::vec2 position);
 
     void Update();
     void Render();
@@ -40,17 +39,18 @@ namespace Map
 
     void Destory();
 
-    const float m_DefaultZoom = 0.125f * 2;
+    const float m_DefaultZoom = 0.125f * 4;
     const float m_CameraWidth = 1280.0f;
     const float m_CameraHeight = 720.0f;
     const float m_ScreenLeft = -m_CameraWidth / 2.0f;
     const float m_ScreenRight = m_CameraWidth / 2.0f;
     const float m_ScreenTop = m_CameraHeight / 2.0f;
     const float m_ScreenBottom = -m_CameraHeight / 2.0f;
+    const float m_CameraLerpSpeed = 0.5f;
 
     extern TexturedQuad m_MapBackgrounds[3];
 
-    extern Font m_Font, m_LocationsFont, m_LocationsFont2;
+    extern Font m_Font, m_LocationsFont;
     extern LineRenderer* m_LineRenderer;
 
     extern float m_Zoom;
@@ -58,8 +58,12 @@ namespace Map
     extern glm::mat4 m_ProjectionMatrix;
     extern glm::mat4 m_ViewMatrix;
 
-    extern glm::vec2 m_CameraPosition;
+    extern glm::vec2 m_CameraPosition, m_TargetCameraPosition;
     extern glm::vec2 m_PrevCameraPosition;
+
+    extern glm::vec2 m_TargetCursorPosition;
+
+    //extern float 
 
     extern int m_PrevTouchCount;
     extern glm::vec2 m_PrevTouchPosition;
@@ -75,7 +79,6 @@ namespace Map
     extern TexturedQuad m_Cursor;
 
     extern Legend* m_Legend;
-    extern KorokDialog* m_KorokDialog;
     extern ObjectInfo* m_ObjectInfo;
     extern Dialog* m_NoSavefileDialog;
     extern Dialog* m_GameRunningDialog;

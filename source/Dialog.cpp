@@ -277,7 +277,7 @@ void Button::Render()
     m_Button.Render();
     if (m_IsSelected) m_Border.Render();
 
-    float mainTextMargin = 35.0f;
+    //float mainTextMargin = 35.0f;
     glm::vec2 mainTextPosition(
         m_Position.x + m_Width / 2,
         m_Position.y - (m_Height / 1.65f)

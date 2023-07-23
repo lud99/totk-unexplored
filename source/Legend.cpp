@@ -259,7 +259,7 @@ void Legend::Render()
     float viewLeft = -Map::m_CameraWidth / 2;
     float viewTop = Map::m_CameraHeight / 2;
     Map::m_Font.AddTextToBatch("Legend", glm::vec2(viewLeft + 25.0f, viewTop - 55.0f), 0.75f, glm::vec3(1.0));
-    Map::m_Font.AddTextToBatch("X to close", glm::vec2(viewLeft + m_Width - 26.0f, viewTop - 55.0f), 0.5f, glm::vec3(1.0), ALIGN_RIGHT);
+    Map::m_Font.AddTextToBatch("B to close", glm::vec2(viewLeft + m_Width - 26.0f, viewTop - 55.0f), 0.5f, glm::vec3(1.0), ALIGN_RIGHT);
 
     for (unsigned int i = 0; i < m_Buttons[m_Page].size(); i++)
     {
@@ -492,7 +492,7 @@ bool IconButton::Click(Legend* legend, bool toggled, int state)
             if (showCompletedButton == this) continue;
 
             // If it states is different from this, then click it. That should prevent infinite recursion
-            if (showCompletedButton->m_State != m_State)
+            if (showCompletedButton->m_IsToggled != m_IsToggled || showCompletedButton->m_State != m_State)
                 showCompletedButton->Click(legend, m_IsToggled, m_State);
         }
     }

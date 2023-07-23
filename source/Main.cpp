@@ -22,7 +22,7 @@
 #include "MapObject.h"
 #include "UI/LayerNavigation.h"
 
-#define SETTINGS_VERSION "2.1"
+#define SETTINGS_VERSION "2.1.0"
 
 bool openGLInitialized = false;
 bool nxLinkInitialized = false;
@@ -58,11 +58,15 @@ void cleanUp()
         file << Map::m_Legend->m_HighlightedButton << "\n";
         file << (int)Map::m_Legend->m_ShowLevel << "\n";
         file << Map::m_Legend->m_Page << "\n"; // Legend page
-        for (int j = 0; j < Map::m_Legend->m_Buttons.size(); j++)
+        for (int j = 0; j < (int)Map::m_Legend->m_Buttons.size(); j++)
         {
-            for (int i = 0; i < Map::m_Legend->m_Buttons[j].size(); i++)
+            for (int i = 0; i < (int)Map::m_Legend->m_Buttons[j].size(); i++)
             {
-                file << Map::m_Legend->m_Buttons[j][i]->m_IsToggled << "\n";
+                auto button = Map::m_Legend->m_Buttons[j][i];
+                if (button->m_Type == IconButton::ShowCompleted)
+                    continue;
+
+                file << button->m_IsToggled << "\n";
             }
         }
 
@@ -72,32 +76,36 @@ void cleanUp()
         Log("Failed top open settings file (cleanUp())");
     file.close();
 
-    // Save marked koroks
+    // Save manually marked collectibles
     if (SavefileIO::Get().GameIsRunning)
     {
-        std::ofstream koroksFile("sdmc:/switch/totk-unexplored/koroks.txt");
+        std::ofstream koroksFile("sdmc:/switch/totk-unexplored/found.txt");
         if (koroksFile.is_open())
         {
+            for (int i = 0; i < (int)Data::ObjectType::Count; i++)
+            {
+                Data::ObjectType type = Data::ObjectType(i);
+                int objectCount = Data::m_Objects[type].size();
+                for (int j = 0; j < objectCount; j++)
+                {
+                    koroksFile << Map::m_MapObjects[type][j].m_Found << "\n";
+                }
+            }
 
-            for (auto& entry : Map::m_MapObjects[Data::ObjectType::HiddenKorok])
-                koroksFile << (int)entry.m_Found << "\n";
-            for (auto& entry : Map::m_MapObjects[Data::ObjectType::CarryKorok])
-                koroksFile << (int)entry.m_Found << "\n";
-
-            Log("Saved manually marked koroks");
+            Log("Saved manually marked collectibles");
         }
         else
-            Log("Failed to open koroks file (cleanUp())");
+            Log("Failed to open found file (cleanUp())");
 
         koroksFile.close();
     }
     else
     {
         // Else delete the file so only the actually found koroks are displayed
-        if (remove("sdmc:/switch/totk-unexplored/koroks.txt") != 0)
-            Log("Couldn't delete koroks.txt. It probably doesn't exist");
+        if (remove("sdmc:/switch/totk-unexplored/found.txt") != 0)
+            Log("Couldn't delete found.txt. It probably doesn't exist");
         else
-            Log("koroks.txt successfully deleted to avoid desync");
+            Log("foound.txt successfully deleted to avoid desync");
     }
 
     Map::Destory();
@@ -158,13 +166,13 @@ void LoadSettings()
 
         std::getline(settingsFile, line);
         Map::m_Legend->m_ShowLevel = (Legend::ShowLevel)std::stoi(line); // show level
-        Map::m_Legend->m_Buttons[0].back()->Click(Map::m_Legend, true, (int)Map::m_Legend->m_ShowLevel);
+        Map::m_Legend->m_Buttons[0].back()->Click(Map::m_Legend, true, (int)Map::m_Legend->m_ShowLevel); // Click the showCompleted button 
 
         std::getline(settingsFile, line);
         Map::m_Legend->m_Page = std::stoi(line); // Legend page
-        for (int j = 0; j < Map::m_Legend->m_Buttons.size(); j++)
+        for (int j = 0; j < (int)Map::m_Legend->m_Buttons.size(); j++)
         {
-            for (int i = 0; i < Map::m_Legend->m_Buttons[j].size(); i++)
+            for (int i = 0; i < (int)Map::m_Legend->m_Buttons[j].size(); i++)
             {
                 auto button = Map::m_Legend->m_Buttons[j][i];
                 if (button->m_Type == IconButton::ShowCompleted)
@@ -177,7 +185,6 @@ void LoadSettings()
         }
 
         Map::m_Legend->UpdateSelectedButton();
-
 
         if (Map::m_CameraPosition.x > 1000.0f)
             Map::m_CameraPosition.x = 1000.0f;
@@ -282,28 +289,27 @@ int main()
             // Override the checking from the savefile
             if (SavefileIO::Get().GameIsRunning)
             {
-                std::ifstream koroksFile("sdmc:/switch/totk-unexplored/koroks.txt");
-                if (koroksFile.is_open())
+                std::ifstream foundFile("sdmc:/switch/totk-unexplored/found.txt");
+                if (foundFile.is_open())
                 {
-                    for (auto& entry : Map::m_MapObjects[Data::ObjectType::HiddenKorok])
+                    for (int i = 0; i < (int)Data::ObjectType::Count; i++)
                     {
-                        std::string line;
-                        std::getline(koroksFile, line);
-                        entry.m_Found = (bool)std::stoi(line);
+                        Data::ObjectType type = Data::ObjectType(i);
+                        int objectCount = Data::m_Objects[type].size();
+                        for (int j = 0; j < objectCount; j++)
+                        {
+                            std::string line;
+                            std::getline(foundFile, line);
+                            Map::m_MapObjects[type][j].m_Found = (bool)std::stoi(line);
+                        }
                     }
-                    for (auto& entry : Map::m_MapObjects[Data::ObjectType::CarryKorok])
-                    {
-                        std::string line;
-                        std::getline(koroksFile, line);
-                        entry.m_Found = (bool)std::stoi(line);
-                    }
-
-                    Log("Loaded manually marked koroks");
+                   
+                    Log("Loaded manually marked collectibles");
                 }
                 else
-                    Log("Failed to open koroks file (init())");
+                    Log("Failed to open found file (init())");
 
-                koroksFile.close();
+                foundFile.close();
             }
         }
 

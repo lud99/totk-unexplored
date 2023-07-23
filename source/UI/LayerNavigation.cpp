@@ -85,6 +85,11 @@ LayerNavigation::LayerNavigation()
 void LayerNavigation::SetLayer(Layer layer)
 {
     m_CurrentLayer = layer;
+
+    // if (m_CurrentLayer != m_PreviousLayer)
+    //     Map::m_TargetCursorPosition = glm::vec2(0.0f, 0.0f);
+
+    m_PreviousLayer = m_CurrentLayer;
 }
 
 Layer LayerNavigation::GetLayer()
@@ -96,13 +101,20 @@ void LayerNavigation::Up()
 {
     int newLayer = (int)m_CurrentLayer + 1;
     if (newLayer <= (int)Layer::Sky)
-        m_CurrentLayer = (Layer)newLayer;
+    {
+        SetLayer((Layer)newLayer);
+        Map::m_TargetCursorPosition = glm::vec2(0.0f, 0.0f);
+    }
+        
 }
 void LayerNavigation::Down()
 {
     int newLayer = (int)m_CurrentLayer - 1;
     if (newLayer >= (int)Layer::Depths)
-        m_CurrentLayer = (Layer)newLayer;
+    {
+        SetLayer((Layer)newLayer);
+        Map::m_TargetCursorPosition = glm::vec2(0.0f, 0.0f);
+    }
 }
 
 void LayerNavigation::Update()
@@ -161,6 +173,8 @@ void LayerNavigation::Render()
         button.m_Shader.SetUniform("u_MultColor", glm::vec4(1.0f));
     }
 
+    if (Map::m_Legend->m_IsOpen) return;
+
     // Up
     m_UpIcon.m_Position.y = m_Buttons[2].m_Position.y + 50.0f;
     m_UpIcon.m_Scale = 1.0f;
@@ -193,6 +207,18 @@ bool LayerNavigation::ButtonIsClicked(TexturedQuad& button, glm::vec2 touchPosit
     {
         if (touchPosition.y > bottom && touchPosition.y < top)
            return true;
+    }
+
+    return false;
+}
+
+bool LayerNavigation::IsPositionOn(glm::vec2 position)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        auto& button = m_Buttons[i];
+        if (ButtonIsClicked(button, position))
+            return true;
     }
 
     return false;
