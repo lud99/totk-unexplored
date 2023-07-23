@@ -5,6 +5,7 @@
 
 #include "Map.h"
 #include "Legend.h"
+#include "UI/LayerNavigation.h"
 
 #include <glm/vec2.hpp>
 #include <iostream>
@@ -17,19 +18,6 @@ MapObject::MapObject()
 void MapObject::Init(const std::string& texturePath, Data::ObjectType type)
 {
     m_ObjectType = type;
-
-    if (m_ObjectType == Data::ObjectType::Location)
-    {
-        // Set the fonts matrices
-        //m_Font->m_ProjectionMatrix = &m_Map->m_ProjectionMatrix;
-        //m_Font->m_ViewMatrix = &m_Map->m_ViewMatrix;
-
-        // Set text font
-       // m_Text.m_Font = m_Font;
-
-        // Create text mesh
-        //m_Text.Create(m_LocationData->displayName);
-    }
 
     // Only load one texture
     if (!m_Textures[(int)m_ObjectType])
@@ -144,7 +132,7 @@ void MapObject::Update(bool clear)
         return;
     }
 
-    float minScale = 0.125f;
+    float minScale = 0.125f * 0.25f;
     if (m_Scale < minScale)
         m_Scale = minScale;
 
@@ -240,17 +228,29 @@ bool MapObject::IsVisible(bool culling)
     const float skyThreshold = 750.0f;
     const float groundThreshold = -50.0f; 
 
-    if (Map::m_CurrentLayer == Map::Layers::Depths && y > groundThreshold)
+    Layer currentLayer = Map::m_LayerNavigation->GetLayer();
+
+    if (currentLayer == Layer::Depths && y > groundThreshold)
         return false;
 
-    if (Map::m_CurrentLayer == Map::Layers::Surface && (y < groundThreshold || y > skyThreshold))
+    if (currentLayer == Layer::Surface && (y < groundThreshold || y > skyThreshold))
         return false;
 
-    if (Map::m_CurrentLayer == Map::Layers::Sky && y < skyThreshold)
+    if (currentLayer == Layer::Sky && y < skyThreshold)
         return false;
 
-    if (m_Found && !Map::m_Legend->m_Show[IconButton::ShowCompleted]) 
+    // Cases for show levels
+    // Only missing
+    if (Map::m_Legend->m_ShowLevel == Legend::ShowLevel::Missing && m_Found)
         return false;
+
+    // Only found
+    if (Map::m_Legend->m_ShowLevel == Legend::ShowLevel::Completed && !m_Found)
+        return false;
+
+    // Missing and found
+    if (Map::m_Legend->m_ShowLevel == Legend::ShowLevel::All)
+        return true;
 
     return true;
 }

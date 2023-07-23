@@ -20,8 +20,9 @@
 #include "Legend.h"
 #include "Log.h"
 #include "MapObject.h"
+#include "UI/LayerNavigation.h"
 
-#define SETTINGS_VERSION "2"
+#define SETTINGS_VERSION "2.1"
 
 bool openGLInitialized = false;
 bool nxLinkInitialized = false;
@@ -51,10 +52,11 @@ void cleanUp()
         file << Map::m_CameraPosition.y << "\n";
         file << Map::m_Zoom << "\n";
         file << (int)Map::m_Legend->m_IsOpen << "\n";
-        file << (int)Map::m_CurrentLayer << "\n";
+        file << (int)Map::m_LayerNavigation->GetLayer() << "\n";
 
         // Selected legend buttons
         file << Map::m_Legend->m_HighlightedButton << "\n";
+        file << (int)Map::m_Legend->m_ShowLevel << "\n";
         file << Map::m_Legend->m_Page << "\n"; // Legend page
         for (int j = 0; j < Map::m_Legend->m_Buttons.size(); j++)
         {
@@ -147,11 +149,16 @@ void LoadSettings()
         int layer = std::stoi(line);
         if (layer < 0) layer = 0;
         if (layer > 2) layer = 2;
-        Map::m_CurrentLayer = (Map::Layers)layer;
+
+        Map::m_LayerNavigation->SetLayer((Layer)layer);
 
         // Selected legend buttons
         std::getline(settingsFile, line);
-        Map::m_Legend->m_HighlightedButton = std::stoi(line); // highligted button
+        Map::m_Legend->m_HighlightedButton = std::stoi(line); // highlighted button
+
+        std::getline(settingsFile, line);
+        Map::m_Legend->m_ShowLevel = (Legend::ShowLevel)std::stoi(line); // show level
+        Map::m_Legend->m_Buttons[0].back()->Click(Map::m_Legend, true, (int)Map::m_Legend->m_ShowLevel);
 
         std::getline(settingsFile, line);
         Map::m_Legend->m_Page = std::stoi(line); // Legend page
@@ -159,9 +166,13 @@ void LoadSettings()
         {
             for (int i = 0; i < Map::m_Legend->m_Buttons[j].size(); i++)
             {
+                auto button = Map::m_Legend->m_Buttons[j][i];
+                if (button->m_Type == IconButton::ShowCompleted)
+                    continue;
+
                 std::getline(settingsFile, line);
                 bool clicked = std::stoi(line);
-                Map::m_Legend->m_Buttons[j][i]->Click(Map::m_Legend, clicked);
+                button->Click(Map::m_Legend, clicked);
             }
         }
 

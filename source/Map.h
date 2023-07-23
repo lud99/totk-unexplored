@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/Texture2D.h"
+#include "Graphics/Quad.h"
 #include "Graphics/Mesh.hpp"
 #include "Graphics/Shader.h" 
 #include "Graphics/Font.h"
@@ -20,6 +21,7 @@ class Legend;
 class Dialog;
 class LineRenderer;
 class KorokDialog;
+class LayerNavigation;
 
 namespace Map
 {
@@ -34,14 +36,9 @@ namespace Map
 
     void LoadLayerImage();
 
-    void Destory();
+    MapObject& GetObjectInCursor()
 
-    enum Layers 
-    {
-        Depths,
-        Surface,
-        Sky
-    };
+    void Destory();
 
     const float m_DefaultZoom = 0.125f * 2;
     const float m_CameraWidth = 1280.0f;
@@ -50,8 +47,6 @@ namespace Map
     const float m_ScreenRight = m_CameraWidth / 2.0f;
     const float m_ScreenTop = m_CameraHeight / 2.0f;
     const float m_ScreenBottom = -m_CameraHeight / 2.0f;
-
-    extern Layers m_CurrentLayer;
 
     extern TexturedQuad m_MapBackgrounds[3];
 
@@ -77,10 +72,13 @@ namespace Map
 
     extern std::unordered_map<Data::ObjectType, std::vector<MapObject>> m_MapObjects;
 
+    extern TexturedQuad m_Cursor;
+
     extern Legend* m_Legend;
     extern KorokDialog* m_KorokDialog;
     extern ObjectInfo* m_ObjectInfo;
     extern Dialog* m_NoSavefileDialog;
     extern Dialog* m_GameRunningDialog;
-    //extern Dialog* m_MasterModeDialog;
+    
+    extern LayerNavigation* m_LayerNavigation;
 };

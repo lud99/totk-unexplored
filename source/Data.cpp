@@ -116,7 +116,17 @@ void Data::LoadFromJSON(const std::string& filepath)
 
                 obj->m_Path = new KorokPath(obj->m_CompletionHash, { start, end });
             }
-            //if (entry["path"].contains("flowers"))
+            else if (entry["path"].contains("flowers"))
+            {
+                // Iterate flowers in order
+                std::vector<glm::vec3> points;
+                for (auto& flower : entry["path"]["flowers"])
+                {
+                    points.push_back(ParseJSONPosition(flower["position"]));
+                }
+
+                obj->m_Path = new KorokPath(obj->m_CompletionHash, points);
+            }
         }
 
         m_Objects[ObjectType::HiddenKorok].push_back((Object*)obj);
@@ -142,7 +152,6 @@ void Data::LoadFromJSON(const std::string& filepath)
 
                 obj->m_Path = new KorokPath(obj->m_CompletionHash, { start, end });
             }
-            //if (entry["path"].contains("flowers"))
         }
 
         m_Objects[ObjectType::CarryKorok].push_back((Object*)obj);

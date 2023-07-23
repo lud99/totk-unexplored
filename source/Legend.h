@@ -47,7 +47,7 @@ public:
     void Render();
 
     bool Click(Legend* legend);
-    bool Click(Legend* legend, bool toggled);
+    bool Click(Legend* legend, bool toggled, int state = -1);
 
     Data::ObjectType ButtonTypeToObjectType(ButtonTypes buttonType);
 
@@ -61,6 +61,8 @@ public:
 
     bool m_IsSelected = false;
     bool m_IsToggled = false;
+
+    int m_State = 0;
 
     ButtonTypes m_Type = ButtonTypes::Koroks;
 
@@ -100,12 +102,18 @@ public:
 
     int m_HighlightedButton = 0;
     int m_Page = 0;
+
+    enum ShowLevel {
+        Missing, 
+        Completed, 
+        All
+    };
+
+    ShowLevel m_ShowLevel = ShowLevel::Missing;
     
     const int m_ButtonsPerPage = 11;
     int m_NumberOfPages = 2;//(int)((IconButton::ButtonTypes::Count + 1) / m_ButtonsPerPage);
 
-    bool m_ShowAll = true;
-    bool m_ShowNone = false;
     bool m_IsOpen = true;
 
     bool m_Show[IconButton::ButtonTypes::Count];

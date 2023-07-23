@@ -88,9 +88,6 @@ void ObjectInfo::Render(glm::mat4 projMat, glm::mat4 viewMat)
     textPos.y -= textSize.y + 25;
 
     // The name of it
-    if (m_Type == Data::ObjectType::Bubbul)
-        name = "Bubbul in " + name; 
-
     if (name != "")
     {
         textSize = Map::m_Font.AddTextToBatch(name, textPos, 0.4f, glm::vec3(1.0f), ALIGN_LEFT, Width - m_Margin * 2 - padding);
@@ -110,26 +107,38 @@ void ObjectInfo::Render(glm::mat4 projMat, glm::mat4 viewMat)
     std::string otherInfo = "";
     if (m_Type == Data::ObjectType::Cave)
     {
-        otherInfo = "This cave has n entrances";
+
     } else if (m_Type == Data::ObjectType::HiddenKorok || m_Type == Data::ObjectType::CarryKorok)
     {
         Data::Korok* korok = (Data::Korok*) m_Object;
-        otherInfo = korok->m_KorokType;
+
+        // Korok type
+        textSize = Map::m_Font.AddTextToBatch("Korok Type", textPos, 0.5f, glm::vec3(1.0f), ALIGN_LEFT, Width - m_Margin * 2);
+        textPos.y -= textSize.y + 25;
+        textSize = Map::m_Font.AddTextToBatch(korok->m_KorokType, textPos, 0.4f, glm::vec3(1.0f), ALIGN_LEFT, Width - m_Margin * 2);
+        textPos.y -= textSize.y + 50;
+
+        // Path info
         if (korok->m_Path)
         {
-            textSize = Map::m_Font.AddTextToBatch("To find this korok, start at the empty part of the path", textPos, 0.5f, glm::vec3(1.0f), ALIGN_LEFT, Width - m_Margin * 2);
-            textPos.y -= textSize.y + 50;
+            if (korok->m_KorokType == "Flower Trail")
+            {
+                textSize = Map::m_Font.AddTextToBatch("To find it, start at the end of the trail and follow the flowers towards the korok", textPos, 0.5f, glm::vec3(1.0f), ALIGN_LEFT, Width - m_Margin * 2);
+                textPos.y -= textSize.y + 50;
+            }
+            else 
+            {
+                textSize = Map::m_Font.AddTextToBatch("To find it, start at the end of the line and follow it towards the korok", textPos, 0.5f, glm::vec3(1.0f), ALIGN_LEFT, Width - m_Margin * 2);
+                textPos.y -= textSize.y + 50;
+            }
         }
     }
-
-    textSize = Map::m_Font.AddTextToBatch(otherInfo, textPos, 0.5f, glm::vec3(1.0f), ALIGN_LEFT, Width - m_Margin * 2);
-    textPos.y -= textSize.y + 50;
 
     //Map::m_Font.AddTextToBatch(m_Text, textPos, 0.5f, glm::vec3(1.0f), ALIGN_LEFT, Width - m_Margin * 2);
     Map::m_Font.AddTextToBatch("X to close", glm::vec2(Map::m_ScreenLeft + Width - 20.0f, Map::m_ScreenTop - 35.0f), 0.45f, glm::vec3(1.0f), ALIGN_RIGHT);
     
-    if (m_Type == Data::ObjectType::HiddenKorok || m_Type == Data::ObjectType::CarryKorok)
-        Map::m_Font.AddTextToBatch("B to mark as found", glm::vec2(Map::m_ScreenLeft + 15, Map::m_ScreenTop - 35.0f), 0.45f, glm::vec3(1.0f), ALIGN_LEFT);
+    //if (m_Type == Data::ObjectType::HiddenKorok || m_Type == Data::ObjectType::CarryKorok)
+    Map::m_Font.AddTextToBatch("B to mark as found", glm::vec2(Map::m_ScreenLeft + 15, Map::m_ScreenTop - 35.0f), 0.45f, glm::vec3(1.0f), ALIGN_LEFT);
 }
 
 void ObjectInfo::SetOpen(bool open)

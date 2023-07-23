@@ -71,13 +71,14 @@ Legend::Legend()
         }
     }
 
-
     // Show koroks and shrines by default
     m_Buttons[0][0]->Click(this, true);
     m_Show[IconButton::Koroks] = true;
     m_Buttons[0][1]->Click(this, true);
     m_Show[IconButton::Shrines] = true;
     
+    m_Buttons[0].back()->Click(this, true, (int)ShowLevel::Missing);
+
     // Set first highlighted button
     UpdateSelectedButton();
 }
@@ -209,6 +210,13 @@ void Legend::Update()
             m_Buttons[m_Page][m_HighlightedButton]->Click(this);
     }
 
+    if (buttonsPressed & HidNpadButton_Y)
+    {
+        m_Buttons[m_Page].back()->Click(this);
+    }
+
+
+    // Position and flip arrow according to page
     float arrowPadding = 3.0f;
     if (m_Page == 0)
     {
@@ -328,7 +336,7 @@ IconButton::IconButton(ButtonTypes type, glm::vec2 position, float width, float 
         "romfs:/icons/addison_sign.png", 
         "romfs:/icons/schema_stone.png",
         "romfs:/icons/yiga_schematic.png",
-        ""
+        "romfs:/icons/Y.png"
     };
 
     std::string texts[] = 
@@ -397,6 +405,10 @@ void IconButton::Render()
 
     m_Icon.Render();
 
+    std::string showCompletedTexts[3] = { "Show missing", "Show completed", "Show all" };
+    if (m_Type == IconButton::ShowCompleted)
+        m_Text = showCompletedTexts[m_State];
+        
     float mainTextMargin = 25.0f;
     glm::vec2 mainTextPosition(
         m_Icon.m_Position.x + mainTextMargin, 
@@ -440,54 +452,48 @@ void IconButton::Render()
 
 bool IconButton::Click(Legend* legend)
 {
-    m_IsToggled = !m_IsToggled;
-
-    if (m_IsToggled)
-        m_Button.m_Color = IconButton::HighlightedColor;
-    else
-        m_Button.m_Color = IconButton::DefaultColor;
-
-    legend->m_Show[m_Type] = m_IsToggled;
-
-    // If this button is show completed (that button is always last at the list)
-    if (legend->m_Buttons[legend->m_Page].back() == this)
-    {
-        // Propegate that change to all the other show completed buttons
-        for (int i = 0; i < legend->m_NumberOfPages; i++)
-        {
-            auto showCompletedButton = legend->m_Buttons[i].back();
-
-            // If it states is different from this, then click it. That should prevent infinite recursion
-            if (showCompletedButton->m_IsToggled != m_IsToggled)
-                showCompletedButton->Click(legend, m_IsToggled);
-        }
-    }
-
-    return m_IsToggled;
+    return Click(legend, !m_IsToggled);
 }
 
-bool IconButton::Click(Legend* legend, bool toggled)
+bool IconButton::Click(Legend* legend, bool toggled, int state)
 {
-    m_IsToggled = toggled;
+    // Special case for Show Completed button for having multiple states
+    if (m_Type == IconButton::ShowCompleted)
+    {
+        m_IsToggled = true;
+
+        if (state == -1)
+            m_State++;
+        else
+            m_State = state;
+
+        m_State = m_State % 3;
+        legend->m_ShowLevel = (Legend::ShowLevel)m_State;
+    } else
+    {
+        m_IsToggled = toggled;
+
+        legend->m_Show[m_Type] = m_IsToggled;
+    }
 
     if (m_IsToggled)
         m_Button.m_Color = IconButton::HighlightedColor;
     else
         m_Button.m_Color = IconButton::DefaultColor;
 
-    legend->m_Show[m_Type] = m_IsToggled;
-
-    // If this button is show completed (that button is always last at the list)
-    if (legend->m_Buttons[legend->m_Page].back() == this)
+    // If this button is show completed
+    if (m_Type == IconButton::ShowCompleted)
     {
         // Propegate that change to all the other show completed buttons
         for (int i = 0; i < legend->m_NumberOfPages; i++)
         {
             auto showCompletedButton = legend->m_Buttons[i].back();
 
+            if (showCompletedButton == this) continue;
+
             // If it states is different from this, then click it. That should prevent infinite recursion
-            if (showCompletedButton->m_IsToggled != m_IsToggled)
-                showCompletedButton->Click(legend, m_IsToggled);
+            if (showCompletedButton->m_State != m_State)
+                showCompletedButton->Click(legend, m_IsToggled, m_State);
         }
     }
 

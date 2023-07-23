@@ -44,7 +44,7 @@ APP_VERSION :=  2.0.0
 
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source source/Graphics
+SOURCES		:=	source source/Graphics source/UI
 DATA		:=	data
 INCLUDES	:=	include
 ROMFS		:=	romfs

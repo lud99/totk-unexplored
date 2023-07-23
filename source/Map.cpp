@@ -11,6 +11,7 @@
 #include "MapObject.h"
 #include "KorokDialog.h"
 #include "ObjectInfo.h"
+#include "./UI/LayerNavigation.h"
 #include "Log.h"
 
 #include "SavefileIO.h" 
@@ -26,21 +27,10 @@ void Map::Init()
 {
     //Data::LoadPaths();
 
-Log("LoadFromJSON ");
+    Log("LoadFromJSON ");
     Data::LoadFromJSON("romfs:/map_data.json");
 
     m_ProjectionMatrix = glm::ortho(-m_CameraWidth / 2, m_CameraWidth / 2, -m_CameraHeight / 2, m_CameraHeight / 2, -1.0f, 1.0f);
-
-    // std::string mapImagePaths[3] = { "romfs:/map/depths-small.jpg", "romfs:/map/surface-small.jpg", "romfs:/map/sky-small.jpg" };
-    // for (int i = 0; i < 3; i++)
-    // {
-    //     m_MapBackgrounds[i].Create(mapImagePaths[i]);
-    //     m_MapBackgrounds[i].m_ProjectionMatrix = &m_ProjectionMatrix;
-    //     m_MapBackgrounds[i].m_ViewMatrix = &m_ViewMatrix; 
-    // }
-
-    LoadLayerImage();
-
 
     // Load font
     m_Font.Load("romfs:/Roboto-Regular.ttf"/*"romfs:/arial.ttf"*/); 
@@ -50,9 +40,6 @@ Log("LoadFromJSON ");
     m_LocationsFont.Load("romfs:/Roboto-Medium.ttf"); 
     m_LocationsFont.m_ProjectionMatrix = &m_ProjectionMatrix;
     m_LocationsFont.m_ViewMatrix = &m_ViewMatrix;
-    m_LocationsFont2.Load("romfs:/Roboto-Medium.ttf"); 
-    m_LocationsFont2.m_ProjectionMatrix = &m_ProjectionMatrix;
-    m_LocationsFont2.m_ViewMatrix = &m_ViewMatrix;
 
     m_LineRenderer = new LineRenderer();
 
@@ -63,14 +50,14 @@ Log("LoadFromJSON ");
     m_Legend = new Legend();
     m_NoSavefileDialog = new Dialog(glm::vec2(0.0f, 0.0f), 700.0f, 400.0f, Dialog::InvalidSavefile);
     m_GameRunningDialog = new Dialog(glm::vec2(0.0f, 0.0f), 700.0f, 400.0f, Dialog::GameIsRunning);
-    // m_MasterModeDialog = new Dialog(glm::vec2(0.0f, 0.0f), 700.0f, 400.0f, Dialog::MasterModeChoose);
 
-    // m_MasterModeIcon.Create("romfs:/mastermodeicon.png");
-    // m_MasterModeIcon.m_Position = glm::vec2(m_ScreenLeft + 45.0f, m_ScreenBottom + 40.0f);
-    // m_MasterModeIcon.m_Scale = 0.1f;
-    // m_MasterModeIcon.m_ProjectionMatrix = &m_ProjectionMatrix;
-    // m_MasterModeIcon.m_ViewMatrix = nullptr;
+    m_LayerNavigation = new LayerNavigation();
 
+    m_Cursor.Create("romfs:/icons/cursor.png");
+    m_Cursor.m_Position = glm::vec2(0 - m_Cursor.m_Texture->m_Width / 2, 0 - m_Cursor.m_Texture->m_Height / 2);
+    m_Cursor.m_ProjectionMatrix = &m_ProjectionMatrix;
+
+    LoadLayerImage();
 
     // Initialize all map objects
     for (int i = 0; i < (int)Data::ObjectType::Count; i++)
@@ -121,18 +108,6 @@ void Map::UpdateMapObjects()
         }
     }
 
-    // for (int i = 0; i < Data::LocationsCount; i++) // Locations
-    // {
-    //     m_Locations[i].m_Position = glm::vec2(Data::Locations[i].x, -Data::Locations[i].y) * MapScale;
-    //     m_Locations[i].m_LocationData = &Data::Locations[i];
-
-    //     // Check if the korok has been found (if the found vector contains it)
-    //     m_Locations[i].m_Found = std::find(
-    //         save.loadedData.visitedLocations.begin(), 
-    //         save.loadedData.visitedLocations.end(), 
-    //         &Data::Locations[i]) != save.loadedData.visitedLocations.end();
-    // }
-
     Log("Updated map objects");
 }
 
@@ -141,7 +116,7 @@ void Map::Update()
     if (m_Pad == nullptr) return;
 
     // Load map texture if it hasn't been loaded
-    if (!m_MapBackgrounds[(int)m_CurrentLayer].m_Texture)
+    if (!m_MapBackgrounds[(int)m_LayerNavigation->GetLayer()].m_Texture)
         LoadLayerImage();
 
     u64 buttonsPressed = padGetButtonsDown(m_Pad);
@@ -200,24 +175,6 @@ void Map::Update()
             m_ObjectInfo->SetOpen(false);
         else if (!m_NoSavefileDialog->m_IsOpen)
             m_Legend->m_IsOpen = !m_Legend->m_IsOpen;
-    }
-
-    // Toggle showing everything
-    // if (buttonsDown & HidNpadButton_B)
-    //     m_ShowAllObjects = true;
-    // if (buttonsUp & HidNpadButton_B)
-    //     m_ShowAllObjects = false;
-
-    // Toggle master mode
-    if (buttonsPressed & HidNpadButton_Y)
-    {
-        if (SavefileIO::Get().MostRecentMasterModeFile != -1)
-        {
-            m_LoadMasterMode = !m_LoadMasterMode;
-
-            SavefileIO::Get().LoadGamesave(m_LoadMasterMode);
-            UpdateMapObjects();
-        }
     }
 
     if (buttonsPressed & HidNpadButton_B)
@@ -333,31 +290,14 @@ void Map::Update()
     m_ViewMatrix = glm::translate(m_ViewMatrix, glm::vec3(-m_CameraPosition, 1.0));
 
     if (m_Legend->m_IsOpen)
-    {
         m_Legend->Update();
-    } else 
-    {
-        if (buttonsPressed & HidNpadButton_Up)
-        {
-            Layers newLayer = (Layers)(m_CurrentLayer + 1);
-            if (newLayer <= 2)
-                m_CurrentLayer = newLayer;
-        }
-        if (buttonsPressed & HidNpadButton_Down)
-        {
-            Layers newLayer = (Layers)(m_CurrentLayer - 1);
-            if (newLayer >= 0)
-                m_CurrentLayer = newLayer;
-        }
-    }
-
 
     if (m_NoSavefileDialog->m_IsOpen) 
         m_NoSavefileDialog->Update();
     if (m_GameRunningDialog->m_IsOpen)
         m_GameRunningDialog->Update();
-    // if (m_MasterModeDialog->m_IsOpen)
-    //     m_MasterModeDialog->Update();
+
+    m_LayerNavigation->Update(); 
 
     // Update objects
     if (SavefileIO::Get().LoadedSavefile)
@@ -382,7 +322,7 @@ void Map::Update()
 
 void Map::Render()
 {
-    m_MapBackgrounds[m_CurrentLayer].Render();
+    m_MapBackgrounds[(int)m_LayerNavigation->GetLayer()].Render();
 
     if (SavefileIO::Get().LoadedSavefile)
     {
@@ -403,7 +343,7 @@ void Map::Render()
                     auto& pointsOnPath = korokData->m_Path->m_Points;
 
                     // Don't render if found
-                    if (korokObject.m_Found && !korokObject.IsVisible())
+                    if (korokObject.m_Found || !korokObject.IsVisible())
                         continue;
 
                     // 0 -> 1
@@ -414,9 +354,9 @@ void Map::Render()
                         glm::vec2 start = TransformPositionTo2DMap(pointsOnPath[p - 1]);
                         glm::vec2 end = TransformPositionTo2DMap(pointsOnPath[p]);
 
-                        float width = (1.0f / m_Zoom) * 2.0f;
+                        float width = (1.0f / m_Zoom) * 1.0f;
                         if (m_Zoom >= 3.0f)
-                            width = 0.75f;
+                            width = 0.25f;
 
                         m_LineRenderer->AddLine(start, end, width);
                     }
@@ -485,6 +425,8 @@ void Map::Render()
         }
     }
 
+    m_Cursor.Render();
+
     m_Font.RenderBatch();
 
     // Draw behind legend
@@ -499,8 +441,8 @@ void Map::Render()
         m_NoSavefileDialog->Render();
     if (m_GameRunningDialog->m_IsOpen)
         m_GameRunningDialog->Render();
-    /*if (m_MasterModeDialog->m_IsOpen)
-        m_MasterModeDialog->Render();*/
+    
+    m_LayerNavigation->Render();
 
 
     if (!m_Legend->m_IsOpen && !m_KorokDialog->m_IsOpen && !m_ObjectInfo->m_IsOpen && SavefileIO::Get().LoadedSavefile)
@@ -516,11 +458,6 @@ void Map::Render()
 
         float bottomTextX = m_ScreenRight - 30;
 
-        /*if (SavefileIO::MasterModeFileExists && !m_LoadMasterMode)
-            m_Font.AddTextToBatch("Press Y to load master mode", glm::vec2(bottomTextX, m_ScreenBottom + 55), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);  
-        else if (m_LoadMasterMode)
-            m_Font.AddTextToBatch("Press Y to load normal mode", glm::vec2(bottomTextX, m_ScreenBottom + 55), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);  
-    */
         m_Font.AddTextToBatch("L and R to zoom, (-) to change user, (+) to exit", 
             glm::vec2(bottomTextX, m_ScreenBottom + 20), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);  
     }
@@ -559,9 +496,11 @@ void Map::LoadLayerImage()
 {
     std::string mapImagePaths[3] = { "romfs:/map/depths-small.png", "romfs:/map/surface-small.png", "romfs:/map/sky-small.png" };
 
-    m_MapBackgrounds[m_CurrentLayer].Create(mapImagePaths[m_CurrentLayer]);
-    m_MapBackgrounds[m_CurrentLayer].m_ProjectionMatrix = &m_ProjectionMatrix;
-    m_MapBackgrounds[m_CurrentLayer].m_ViewMatrix = &m_ViewMatrix; 
+    int currentLayer = (int)m_LayerNavigation->GetLayer();
+
+    m_MapBackgrounds[currentLayer].Create(mapImagePaths[currentLayer]);
+    m_MapBackgrounds[currentLayer].m_ProjectionMatrix = &m_ProjectionMatrix;
+    m_MapBackgrounds[currentLayer].m_ViewMatrix = &m_ViewMatrix; 
 }
 
 void Map::Destory()
@@ -571,12 +510,12 @@ void Map::Destory()
     delete m_Legend;
     delete m_NoSavefileDialog;
     delete m_GameRunningDialog;
-    //delete m_MasterModeDialog;
+
+    delete m_LayerNavigation;
+
     delete m_KorokDialog;
     delete m_ObjectInfo;
 }
-
-Map::Layers Map::m_CurrentLayer = Map::Layers::Surface;
 
 TexturedQuad Map::m_MapBackgrounds[3];
 Font Map::m_Font;
@@ -604,9 +543,11 @@ PadState* Map::m_Pad;
 
 std::unordered_map<Data::ObjectType, std::vector<MapObject>> Map::m_MapObjects;
 
+TexturedQuad Map::m_Cursor;
+
 Legend* Map::m_Legend;
 KorokDialog* Map::m_KorokDialog;
 ObjectInfo* Map::m_ObjectInfo;
 Dialog* Map::m_NoSavefileDialog;
 Dialog* Map::m_GameRunningDialog;
-//Dialog* Map::m_MasterModeDialog;
+LayerNavigation* Map::m_LayerNavigation;
