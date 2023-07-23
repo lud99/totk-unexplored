@@ -13,6 +13,7 @@
 
 #include "Data.h"
 
+class ObjectInfo;
 class MapObject;
 class MapLocation;
 class Legend;
@@ -54,10 +55,8 @@ namespace Map
 
     extern TexturedQuad m_MapBackgrounds[3];
 
-    extern Font m_Font;
+    extern Font m_Font, m_LocationsFont, m_LocationsFont2;
     extern LineRenderer* m_LineRenderer;
-
-    //extern TexturedQuad m_MasterModeIcon; 
 
     extern float m_Zoom;
 
@@ -78,26 +77,9 @@ namespace Map
 
     extern std::unordered_map<Data::ObjectType, std::vector<MapObject>> m_MapObjects;
 
-    // extern MapObject<Data::HiddenKorok>* m_HiddenKoroks;
-    // extern MapObject<Data::CarryKorok>* m_CarryKoroks;
-
-    // extern MapObject<Data::Shrine>* m_Shrines;
-    // extern MapObject<Data::Lightroot>* m_Lightroots;
-
-    // extern MapObject<Data::Cave>* m_Caves;
-    // extern MapObject<Data::Well>* m_Wells;
-
-    // extern MapObject<Data::Hinox>* m_Hinoxes;
-    // extern MapObject<Data::Talus>* m_Taluses;
-    // extern MapObject<Data::Molduga>* m_Moldugas;
-    // extern MapObject<Data::FluxConstruct>* m_FluxConstructs;
-    // extern MapObject<Data::Frox>* m_Froxes;
-    // extern MapObject<Data::Gleeok>* m_Gleeoks;
-
-    extern MapLocation* m_Locations;
-
     extern Legend* m_Legend;
     extern KorokDialog* m_KorokDialog;
+    extern ObjectInfo* m_ObjectInfo;
     extern Dialog* m_NoSavefileDialog;
     extern Dialog* m_GameRunningDialog;
     //extern Dialog* m_MasterModeDialog;

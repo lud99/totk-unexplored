@@ -180,6 +180,7 @@ void TexturedQuad::Create(const std::string& texturePath, glm::vec2 bottomLeft, 
 
     const glm::vec2* texCoords = BasicVertices::Quad::TextureCoordinates;
 
+    m_Mesh.Clear();
     m_Mesh.AddVertex(TextureVertex(bottomLeft, texCoords[0]));
     m_Mesh.AddVertex(TextureVertex(bottomRight, texCoords[1]));
     m_Mesh.AddVertex(TextureVertex(topRight, texCoords[2]));
@@ -191,6 +192,15 @@ void TexturedQuad::Create(const std::string& texturePath, glm::vec2 bottomLeft, 
     m_Mesh.m_Texture = m_Texture;
 
     m_Mesh.Update();
+}
+
+void TexturedQuad::UpdateTexture(const std::string& texturePath)
+{
+    if (m_Texture)
+        delete m_Texture;
+
+    m_Texture = new Texture2D(texturePath);
+    m_Mesh.m_Texture = m_Texture;
 }
 
 void TexturedQuad::Render()

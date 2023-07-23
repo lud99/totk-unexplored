@@ -44,6 +44,8 @@ public:
     void Create(const std::string& texturePath);
     void Create(const std::string& texturePath, glm::vec2 bottomLeft, glm::vec2 bottomRight, glm::vec2 topRight, glm::vec2 topLeft);
 
+    void UpdateTexture(const std::string& texturePath);
+
     void Render();
 
     ~TexturedQuad();

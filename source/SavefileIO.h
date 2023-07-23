@@ -14,7 +14,8 @@ public:
 
     bool LoadGamesave(bool loadMasterMode = false, bool chooseProfile = false);
 
-    uint32_t ReadU32(unsigned char* buffer, int offset);
+    uint32_t ReadU32(unsigned char* buffer, uint32_t offset);
+    uint64_t ReadU64(unsigned char* buffer, uint64_t offset);
 
     int MountSavefile(bool openProfilePicker = false);
     bool UnmountSavefile();

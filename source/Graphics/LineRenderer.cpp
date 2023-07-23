@@ -84,6 +84,11 @@ void LineRenderer::AddLine(glm::vec2 start, glm::vec2 end, float width, glm::vec
         m_Mesh.AddIndex(BasicVertices::Quad::Indices[i] + m_Mesh.GetVertices().size() - 4);
 }
 
+void LineRenderer::Clear()
+{
+    m_Mesh.Clear();
+}
+
 void LineRenderer::RenderLines(glm::mat4 projMat, glm::mat4 viewMat)
 {
     // Don't render if there are no lines
@@ -100,7 +105,7 @@ void LineRenderer::RenderLines(glm::mat4 projMat, glm::mat4 viewMat)
 
     m_Shader.Unbind();
 
-    m_Mesh.Clear();
+    Clear();
 }
 
 LineRenderer::~LineRenderer()

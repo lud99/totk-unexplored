@@ -1,0 +1,9 @@
+- Buttons for changing layer (with touch)
+- Koroks guides from zelda dungeon?
+- open info without touch
+- show only completed (y to toggle button)
+
+- draw korok paths
+- b to mark anything as found (and save it)
+
+- draw lines to connecting cave entrences (semi done)?

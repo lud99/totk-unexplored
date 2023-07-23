@@ -6,50 +6,58 @@
 #include "Graphics/BasicVertices.h"
 #include "Graphics/LineRenderer.h"
 #include "Graphics/Quad.h"
-#include "MapLocation.h"
 #include "Legend.h"
 #include "Dialog.h"
 #include "MapObject.h"
 #include "KorokDialog.h"
+#include "ObjectInfo.h"
 #include "Log.h"
 
 #include "SavefileIO.h" 
 
 constexpr float MapScale = 0.125;
 
-IconButton::ButtonTypes ObjectTypeToButtonType(Data::ObjectType objectType)
+glm::vec2 TransformPositionTo2DMap(glm::vec3 position) 
 {
-    if (objectType == Data::ObjectType::HiddenKorok || objectType == Data::ObjectType::CarryKorok) 
-        return IconButton::ButtonTypes::Koroks; 
-
-    return IconButton::ButtonTypes((int)objectType - 1);
+    return glm::vec2(position.x, -position.z) * MapScale;
 }
 
 void Map::Init()
 {
     //Data::LoadPaths();
 
+Log("LoadFromJSON ");
     Data::LoadFromJSON("romfs:/map_data.json");
 
     m_ProjectionMatrix = glm::ortho(-m_CameraWidth / 2, m_CameraWidth / 2, -m_CameraHeight / 2, m_CameraHeight / 2, -1.0f, 1.0f);
 
-    std::string mapImagePaths[3] = { "romfs:/map/depths-small.jpg", "romfs:/map/surface-small.jpg", "romfs:/map/sky-small.jpg" };
-    for (int i = 0; i < 3; i++)
-    {
-        m_MapBackgrounds[i].Create(mapImagePaths[i]);
-        m_MapBackgrounds[i].m_ProjectionMatrix = &m_ProjectionMatrix;
-        m_MapBackgrounds[i].m_ViewMatrix = &m_ViewMatrix; 
-    }
+    // std::string mapImagePaths[3] = { "romfs:/map/depths-small.jpg", "romfs:/map/surface-small.jpg", "romfs:/map/sky-small.jpg" };
+    // for (int i = 0; i < 3; i++)
+    // {
+    //     m_MapBackgrounds[i].Create(mapImagePaths[i]);
+    //     m_MapBackgrounds[i].m_ProjectionMatrix = &m_ProjectionMatrix;
+    //     m_MapBackgrounds[i].m_ViewMatrix = &m_ViewMatrix; 
+    // }
+
+    LoadLayerImage();
 
 
     // Load font
-    m_Font.Load("romfs:/arial.ttf"); 
+    m_Font.Load("romfs:/Roboto-Regular.ttf"/*"romfs:/arial.ttf"*/); 
     m_Font.m_ProjectionMatrix = &m_ProjectionMatrix;
     m_Font.m_ViewMatrix = &m_ViewMatrix;
+
+    m_LocationsFont.Load("romfs:/Roboto-Medium.ttf"); 
+    m_LocationsFont.m_ProjectionMatrix = &m_ProjectionMatrix;
+    m_LocationsFont.m_ViewMatrix = &m_ViewMatrix;
+    m_LocationsFont2.Load("romfs:/Roboto-Medium.ttf"); 
+    m_LocationsFont2.m_ProjectionMatrix = &m_ProjectionMatrix;
+    m_LocationsFont2.m_ViewMatrix = &m_ViewMatrix;
 
     m_LineRenderer = new LineRenderer();
 
     m_KorokDialog = new KorokDialog();
+    m_ObjectInfo = new ObjectInfo();
 
     // Create UI
     m_Legend = new Legend();
@@ -63,86 +71,38 @@ void Map::Init()
     // m_MasterModeIcon.m_ProjectionMatrix = &m_ProjectionMatrix;
     // m_MasterModeIcon.m_ViewMatrix = nullptr;
 
-    // Icons for map objects
-    std::string mapObjectIcons[] = 
-    {
-        "romfs:/icons/korok_hidden.png",
-        "romfs:/icons/korok_carry.png",
-        "romfs:/icons/shrine.png",
-        "romfs:/icons/lightroot.png",
-        "romfs:/icons/bubbul.png",
-
-        "romfs:/icons/cave.png",
-        "romfs:/icons/well.png",
-        "romfs:/icons/chasm.png",
-        "romfs:/icons/location.png",
-
-        "romfs:/icons/hinox.png",
-        "romfs:/icons/talus.png",
-        "romfs:/icons/molduga.png",
-        "romfs:/icons/flux_construct.png",
-        "romfs:/icons/frox.png",
-        "romfs:/icons/gleeok.png",
-
-        "romfs:/icons/sages_will.png",
-        "romfs:/icons/old_map.png",
-        "romfs:/icons/addison_sign.png", 
-        "romfs:/icons/schema_stone.png",
-        "romfs:/icons/yiga_schematic.png"
-    };
 
     // Initialize all map objects
     for (int i = 0; i < (int)Data::ObjectType::Count; i++)
     {
         Data::ObjectType type = (Data::ObjectType)i;
-        //std::cout << "a" << i << "\n";
-        int objectCount = Data::m_Objects[type].size();
-        //std::cout << "b" << objectCount << "\n";
 
+        int objectCount = Data::m_Objects[type].size();
         if (objectCount == 0) continue;
 
         m_MapObjects[type].resize(objectCount);
 
         for (int j = 0; j < objectCount; j++)
         {
-            //m_MapObjects[type].push_back(MapObject());
-            //std::cout << "c " << j << "\n";
-
-            m_MapObjects[type][j].Init(mapObjectIcons[i], type);
+            m_MapObjects[type][j].Init(MapObject::IconPaths[i], type);
         }
-
-        //std::cout << mapObjectIcons[i] << ", " << m_MapObjects[type].size() << "\n";
-
-        // Run once for each object type
-        
     }
 
-    // Create locations
-    //m_Locations = new MapLocation[Data::LocationsCount];
-
-    std::cout << "c\n";
     UpdateMapObjects();
 }
 
 void Map::UpdateMapObjects()
 {
-
     SavefileIO& save = SavefileIO::Get();
 
     if (!save.LoadedSavefile)
         return;
-
-    auto TransformPosition = [](Data::Object* o) {
-        return glm::vec2(o->m_Position.x, -o->m_Position.z) * MapScale;
-    };
 
     // Iterate all object types
     for (int i = 0; i < (int)Data::ObjectType::Count; i++)
     {
         Data::ObjectType type = (Data::ObjectType)i;
         int objectCount = Data::m_Objects[type].size();
-
-        std::cout << "update objs " << objectCount << "\n";
         
         // Iterate all map objects for that type
         for (int j = 0; j < objectCount; j++)
@@ -150,7 +110,7 @@ void Map::UpdateMapObjects()
             auto& mapObject = m_MapObjects[type][j];
             auto dataObject = Data::m_Objects[type][j];
 
-            mapObject.m_Position = TransformPosition(dataObject);
+            mapObject.m_Position = TransformPositionTo2DMap(dataObject->m_Position);
             mapObject.m_ObjectData = dataObject;
 
             // Check if the object has been found
@@ -180,10 +140,14 @@ void Map::Update()
 {
     if (m_Pad == nullptr) return;
 
+    // Load map texture if it hasn't been loaded
+    if (!m_MapBackgrounds[(int)m_CurrentLayer].m_Texture)
+        LoadLayerImage();
+
     u64 buttonsPressed = padGetButtonsDown(m_Pad);
     u64 buttonsDown = padGetButtons(m_Pad);
 
-    float zoomAmount = 0.015f;
+    float zoomAmount = 0.02f;
     float dragAmont = 0.85f;
     float analogStickMovementSpeed = 10.0f;
     float minZoom = 0.1f;
@@ -194,7 +158,7 @@ void Map::Update()
     // Get the stick position between -1.0f and 1.0f, instead of -32767 and 32767
     glm::vec2 stickRPosition = glm::vec2((float)analog_stick_r.x / (float)JOYSTICK_MAX, (float)analog_stick_r.y / (float)JOYSTICK_MAX);
    
-    float deadzone = 0.1f;
+    float deadzone = 0.3f;
     if (fabs(stickRPosition.y) >= deadzone)
         m_Zoom *= 1.0f + zoomAmount * stickRPosition.y;
 
@@ -232,6 +196,8 @@ void Map::Update()
         // Close the korok dialog first, then if it's not open close the legend
         if (m_KorokDialog->m_IsOpen)
             m_KorokDialog->SetOpen(false);
+        else if (m_ObjectInfo->m_IsOpen)
+            m_ObjectInfo->SetOpen(false);
         else if (!m_NoSavefileDialog->m_IsOpen)
             m_Legend->m_IsOpen = !m_Legend->m_IsOpen;
     }
@@ -306,45 +272,37 @@ void Map::Update()
                     // Check if clicked korok
                     bool clicked = false;
 
-                    // Hidden koroks
-                    // auto& hiddenKoroks = Data::m_Objects[Data::ObjectType::HiddenKorok];
-                    // for (int i = 0; i < hiddenKoroks.size(); i++)
-                    // {
-                    //     if ((!hiddenKoroks[i]->m_Found || m_Legend->m_Show[IconButton::ShowCompleted]) && hiddenKoroks[i]->IsClicked(touchPosition))
-                    //     {
-                    //         // Set the korok dialog
-                    //         m_KorokDialog->SetSeed(hiddenKoroks[i]->m_ObjectData->m_ZeldaDungeonId, i);
-                    //         m_KorokDialog->SetOpen(true);
+                    // Objects
+                    for (int i = 0; i < (int)Data::ObjectType::Count; i++)
+                    {
+                        Data::ObjectType type = Data::ObjectType(i);
 
-                    //         m_Legend->m_IsOpen = false;
+                        if (type == Data::ObjectType::Location) //if (type == Data::ObjectType::HiddenKorok || type == Data::ObjectType::CarryKorok)
+                            continue;
 
-                    //         clicked = true;
-                    //     }
-                    // }     
+                        int objectCount = Data::m_Objects[type].size();                        
+                        for (int j = 0; j < objectCount; j++)
+                        {
+                            MapObject& mapObject = m_MapObjects[type][j];
+                            if (mapObject.IsClicked(touchPosition))
+                            {
+                                m_ObjectInfo->SetObject(type, mapObject.m_ObjectData);
+                                m_ObjectInfo->SetOpen(true);
 
-                    // // Carry koroks    
-                    // auto& carryKoroks = Data::m_Objects[Data::ObjectType::CarryKorok];           
-                    // for (int i = 0; i < carryKoroks.size(); i++)
-                    // {
-                    //     if ((!carryKoroks[i].m_Found || m_Legend->m_Show[IconButton::ShowCompleted]) && carryKoroks[i].IsClicked(touchPosition))
-                    //     {
-                    //         // Set the korok dialog
-                    //         m_KorokDialog->SetSeed(carryKoroks[i].m_ObjectData->m_ZeldaDungeonId, i);
-                    //         m_KorokDialog->SetOpen(true);
+                                m_Legend->m_IsOpen = false;
 
-                    //         m_Legend->m_IsOpen = false;
+                                clicked = true;
+                            }
+                        }
+                    }
 
-                    //         clicked = true;
-                    //     }
-                    // }
-
-                    // Hide the korok info if no korok was clicked on
+                    // Hide the object info if no object was clicked on
                     if (!clicked)
                     {
-                        //m_KorokDialog->SetOpen(false);
+                        //m_ObjectInfo->SetOpen(false);
                     }
                     
-                    // Only drag if not clicking on korok
+                    // Only drag if not clicking on object
                     m_IsDragging = true;
                     m_PrevTouchPosition = touchPosition; // The origin of the drag
                 }
@@ -391,9 +349,6 @@ void Map::Update()
             if (newLayer >= 0)
                 m_CurrentLayer = newLayer;
         }
-
-        //if ((buttonsPressed & HidNpadButton_Up) || (buttonsPressed & HidNpadButton_Down))
-            //LoadLayerImage();
     }
 
 
@@ -420,11 +375,6 @@ void Map::Update()
                 m_MapObjects[type][j].Update(j == 0);
             }
         }
-    
-        //for (int i = 0; i < Data::LocationsCount; i++)
-            //m_Locations[i].Update();
-
-        MapLocation::m_ShowAnyway = m_Legend->m_Show[IconButton::ShowCompleted];
     }
 
     m_PrevCameraPosition = m_CameraPosition;
@@ -434,50 +384,94 @@ void Map::Render()
 {
     m_MapBackgrounds[m_CurrentLayer].Render();
 
-    Map::m_Font.BeginBatch();
-
     if (SavefileIO::Get().LoadedSavefile)
     {
         if (m_Legend->m_Show[IconButton::ButtonTypes::Koroks]) 
         {   
             // Render korok paths
-            // for (int k = 0; k < Data::KorokCount; k++)
-            // {
-            //     // This korok has no paths
-            //     if (m_Koroks[k].m_ObjectData->path == nullptr)
-            //         continue;
+            m_LineRenderer->Clear();
+            for (int i = (int)Data::ObjectType::HiddenKorok; i < (int)Data::ObjectType::CarryKorok + 1; i++)
+            {
+                Data::ObjectType type = (Data::ObjectType)i;
+                for (int k = 0; k < m_MapObjects[type].size(); k++)
+                {
+                    MapObject& korokObject = m_MapObjects[type][k];
+                    Data::Korok* korokData = (Data::Korok*)m_MapObjects[type][k].m_ObjectData;
+                    if (!korokData->m_Path)
+                        continue;
 
-            //     // Don't render if found
-            //     if (m_Koroks[k].m_Found && !m_Legend->m_Show[IconButton::ShowCompleted])
-            //         continue;
+                    auto& pointsOnPath = korokData->m_Path->m_Points;
 
-            //     Data::KorokPath* path = m_Koroks[k].m_ObjectData->path;
+                    // Don't render if found
+                    if (korokObject.m_Found && !korokObject.IsVisible())
+                        continue;
 
-            //     // 0 -> 1
-            //     // 1 -> 2
-            //     // 2 -> 3
-            //     for (unsigned int p = 1; p < path->points.size(); p++)
-            //     {
-            //         glm::vec2 start = path->points[p - 1] * MapScale;
-            //         start.y *= -1; // Flip the y coord
-            //         glm::vec2 end = path->points[p] * MapScale;
-            //         end.y *= -1;
+                    // 0 -> 1
+                    // 1 -> 2
+                    // 2 -> 3
+                    for (unsigned int p = 1; p < pointsOnPath.size(); p++)
+                    {
+                        glm::vec2 start = TransformPositionTo2DMap(pointsOnPath[p - 1]);
+                        glm::vec2 end = TransformPositionTo2DMap(pointsOnPath[p]);
 
-            //         float width = (1.0f / m_Zoom) * 2.0f;
-            //         if (m_Zoom >= 3.0f)
-            //             width = 0.75f;
+                        float width = (1.0f / m_Zoom) * 2.0f;
+                        if (m_Zoom >= 3.0f)
+                            width = 0.75f;
 
-            //         m_LineRenderer->AddLine(start, end, width);
-            //     }
-            // }
+                        m_LineRenderer->AddLine(start, end, width);
+                    }
+                }   
+            }
 
-            // m_LineRenderer->RenderLines(m_ProjectionMatrix, m_ViewMatrix);
+            m_LineRenderer->RenderLines(m_ProjectionMatrix, m_ViewMatrix);
+        } 
+ 
 
-            //MapObject<Data::HiddenKorok>::Render();
-            //MapObject<Data::CarryKorok>::Render();
+        // Render line connecting cave entrances
+        std::map<std::string, int> caveCounts;
+        std::map<std::string, std::vector<MapObject*>> cavesByName;
+        if (m_Legend->m_Show[IconButton::Caves])
+        {
+            m_LineRenderer->Clear();
+            for (int i = 0; i < m_MapObjects[Data::ObjectType::Cave].size(); i++)
+            {
+                std::string name = m_MapObjects[Data::ObjectType::Cave][i].m_ObjectData->m_DisplayName;
+
+                if (m_MapObjects[Data::ObjectType::Cave][i].m_Found || !m_MapObjects[Data::ObjectType::Cave][i].IsVisible()) 
+                    continue;
+
+                if (caveCounts.count(name) == 0) caveCounts[name] = 0;
+                caveCounts[name]++;
+
+                cavesByName[name].push_back(&m_MapObjects[Data::ObjectType::Cave][i]);
+            }
+
+            for (auto& entry : caveCounts)
+            {
+                std::string name = entry.first;
+                int count = entry.second;
+
+                float lineWidth = (1.0f / m_Zoom) * 1.5f;
+                if (m_Zoom >= 3.0f)
+                    lineWidth = 0.75f;
+
+                // Multiple entrances to the same cave
+                if (count > 1)
+                {
+                    glm::vec3 color = glm::vec3(40.0f, 27.0f, 4.0f) / glm::vec3(255.0f);
+
+                    auto& caves = cavesByName[name];
+                    if (count == 2)
+                    {
+                        // Draw line straight between the two entrances
+                        m_LineRenderer->AddLine(caves[0]->m_Position, caves[1]->m_Position, lineWidth, glm::vec4(color, 1.0f));
+                    }
+                }
+            }
+
+            //m_LineRenderer->AddLine(start, end, width);
+            m_LineRenderer->RenderLines(m_ProjectionMatrix, m_ViewMatrix);  
         }
-
-        
 
         for (int i = 0; i < (int)Data::ObjectType::Count; i++)
         {
@@ -486,15 +480,9 @@ void Map::Render()
             if (Data::m_Objects[type].size() == 0) continue;
 
             // Run once for each object type if it is selected in the legend
-            if (m_Legend->m_Show[ObjectTypeToButtonType(type)])
+            if (m_Legend->m_Show[IconButton::ObjectTypeToButtonType(type)])
                 m_MapObjects[type][0].Render();
         }
-
-        /*if (m_Legend->m_Show[IconButton::ButtonTypes::Locations])
-        {
-            for (int i = 0; i < Data::LocationsCount; i++)
-                m_Locations[i].Render();
-        }*/
     }
 
     m_Font.RenderBatch();
@@ -515,7 +503,7 @@ void Map::Render()
         m_MasterModeDialog->Render();*/
 
 
-    if (!m_Legend->m_IsOpen && !m_KorokDialog->m_IsOpen && SavefileIO::Get().LoadedSavefile)
+    if (!m_Legend->m_IsOpen && !m_KorokDialog->m_IsOpen && !m_ObjectInfo->m_IsOpen && SavefileIO::Get().LoadedSavefile)
         m_Font.AddTextToBatch("Press X to open legend", glm::vec2(m_ScreenLeft + 20, m_ScreenTop - 30), 0.5f);  
 
     if (SavefileIO::Get().LoadedSavefile)
@@ -538,6 +526,7 @@ void Map::Render()
     }
 
     m_KorokDialog->Render(m_ProjectionMatrix, m_ViewMatrix);
+    m_ObjectInfo->Render(m_ProjectionMatrix, m_ViewMatrix);
 
     glm::mat4 emptyViewMatrix(1.0);
     m_Font.m_ViewMatrix = &emptyViewMatrix; // Don't draw the text relative to the camera 
@@ -568,9 +557,11 @@ bool Map::IsInView(glm::vec2 position, float margin = 100.0f)
 
 void Map::LoadLayerImage()
 {
-    // std::string mapImagePaths[3] = { "romfs:/map/depths-small.jpg", "romfs:/map/surface-small.jpg", "romfs:/map/sky-small.jpg" };
+    std::string mapImagePaths[3] = { "romfs:/map/depths-small.png", "romfs:/map/surface-small.png", "romfs:/map/sky-small.png" };
 
-    // m_MapBackground.Create(mapImagePaths[m_CurrentLayer]);
+    m_MapBackgrounds[m_CurrentLayer].Create(mapImagePaths[m_CurrentLayer]);
+    m_MapBackgrounds[m_CurrentLayer].m_ProjectionMatrix = &m_ProjectionMatrix;
+    m_MapBackgrounds[m_CurrentLayer].m_ViewMatrix = &m_ViewMatrix; 
 }
 
 void Map::Destory()
@@ -582,12 +573,15 @@ void Map::Destory()
     delete m_GameRunningDialog;
     //delete m_MasterModeDialog;
     delete m_KorokDialog;
+    delete m_ObjectInfo;
 }
 
 Map::Layers Map::m_CurrentLayer = Map::Layers::Surface;
 
 TexturedQuad Map::m_MapBackgrounds[3];
 Font Map::m_Font;
+Font Map::m_LocationsFont;
+Font Map::m_LocationsFont2;
 LineRenderer* Map::m_LineRenderer;
 //TexturedQuad Map::m_MasterModeIcon;
 
@@ -608,27 +602,11 @@ bool Map::m_LoadMasterMode = false;
 
 PadState* Map::m_Pad;
 
-// MapObject<Data::HiddenKorok>* Map::m_HiddenKoroks;
-// MapObject<Data::CarryKorok>* Map::m_CarryKoroks;
-// MapObject<Data::Shrine>* Map::m_Shrines;
-// MapObject<Data::Lightroot>* Map::m_Lightroots;
-
-// MapObject<Data::Cave>* Map::m_Caves;
-// MapObject<Data::Well>* Map::m_Wells;
-
-// MapObject<Data::Hinox>* Map::m_Hinoxes;
-// MapObject<Data::Talus>* Map::m_Taluses;
-// MapObject<Data::Molduga>* Map::m_Moldugas;
-// MapObject<Data::FluxConstruct>* Map::m_FluxConstructs;
-// MapObject<Data::Frox>* Map::m_Froxes;
-// MapObject<Data::Gleeok>* Map::m_Gleeoks;
-
 std::unordered_map<Data::ObjectType, std::vector<MapObject>> Map::m_MapObjects;
-
-MapLocation* Map::m_Locations;
 
 Legend* Map::m_Legend;
 KorokDialog* Map::m_KorokDialog;
+ObjectInfo* Map::m_ObjectInfo;
 Dialog* Map::m_NoSavefileDialog;
 Dialog* Map::m_GameRunningDialog;
 //Dialog* Map::m_MasterModeDialog;

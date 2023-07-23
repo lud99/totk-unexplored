@@ -283,6 +283,12 @@ glm::vec2 Font::AddTextToBatch(const std::string& text, glm::vec2 position, floa
             if (c == word.length())
                 ch = m_Characters[' '];
 
+            // if (c == '\n')
+            // {   
+            //     itPosition.x = startPosition.x;
+            //     itPosition.y -= 50.0f * scale; 
+            // }
+
             // Do word wrap
             if (maxWidth > 0.0f)
             {

@@ -13,84 +13,40 @@ namespace Data
     struct Object
     {
         uint32_t m_CompletionHash;
+        uint64_t m_CompletionGuid;
 
         glm::vec3 m_Position;
 
-        Object();
-        Object(uint32_t completionHash, glm::vec3 position);
-    };
-
-    struct ObjectWithName : public Object
-    {
         std::string m_DisplayName;
 
-        ObjectWithName();
-        ObjectWithName(uint32_t completionHash, glm::vec3 position, std::string displayName);
+        Object();
+        Object(uint32_t completionHash, glm::vec3 position, std::string displayName = "");
     };
 
     struct KorokPath
     {
-        std::string internalName;
-        std::vector<glm::vec2> points;
+        uint32_t m_BelongsToCompletionHash;
+        std::vector<glm::vec3> m_Points;
 
-        KorokPath(const std::string& internalName, std::vector<glm::vec2>& points) :
-            internalName(internalName), points(points) {}
+        KorokPath(uint32_t belongsToCompletionHash, std::vector<glm::vec3> points);
 
         KorokPath() {};
     };
 
     struct Korok : public Object
     {
-        int m_ZeldaDungeonId;
-
         bool m_IsPair = false;
 
-        //Data::KorokPath* path = nullptr;
+        Data::KorokPath* m_Path = nullptr;
+
+        std::string m_KorokType;
+        //std::string m_internalHash;
 
         Korok() {};
 
-        Korok(uint32_t completionHash, glm::vec3 position, int zeldaDungeonId, bool isPair);/* :
+        Korok(uint32_t completionHash, glm::vec3 position, bool isPair, std::string korokType);/* :
             completionHash(hash), internalName(internalName), x(x), y(y), zeldaDungeonId(zeldaDungeonId) {};*/
     };
-
-    struct Cave : public ObjectWithName
-    {
-        uint32_t m_BubbulDefeatedHash;
-
-        Cave() {};
-
-        Cave(uint32_t completionHash, glm::vec3 position, const std::string& displayName, uint32_t bubbulDefeatedHash);/* :
-            hash(hash), x(x), y(y) {};*/
-    };
-
-    // From https://github.com/MrCheeze/botw-tools/blob/master/gamedata/s32_data_0.xml
-    // and https://objmap.zeldamods.org/#/map/z3,0,0
-
-    // struct DLCShrine
-    // {
-    //     uint32_t hash;
-
-    //     float x = 0;
-    //     float y = 0;
-
-    //     DLCShrine(uint32_t hash, float x, float y) : hash(hash), x(x), y(y) {};
-    // };
-
-    // For location names and their positions, https://github.com/MrCheeze/botw-waypoint-map/blob/gh-pages/map_locations.js
-    // For the location hashes, https://github.com/marcrobledo/savegame-editors/blob/master/zelda-botw/zelda-botw.locations.js
-
-    // struct Location
-    // {
-    //     uint32_t hash;
-
-    //     std::string displayName;
-
-    //     float x = 0;
-    //     float y = 0;
-
-    //     Location(uint32_t hash, const std::string& displayName, float x, float y) :
-    //         hash(hash), displayName(displayName), x(x), y(y) {};
-    // };
 
     struct KorokInfo
     {
@@ -101,31 +57,18 @@ namespace Data
             text(text), image(image) {};
     };
 
-    struct HiddenKorok : public Korok { public: using Korok::Korok; };
-    struct CarryKorok : public Korok { public: using Korok::Korok; };
-    struct Shrine : public ObjectWithName { public: using ObjectWithName::ObjectWithName; };
-    struct Lightroot : public ObjectWithName { public: using ObjectWithName::ObjectWithName; };
-    struct Well : public ObjectWithName { public: using ObjectWithName::ObjectWithName; };
-
-    struct Hinox : public Object { public: using Object::Object; };
-    struct Talus : public Object { public: using Object::Object; };
-    struct Molduga : public Object { public: using Object::Object; };
-    struct FluxConstruct : public Object { public: using Object::Object; };
-    struct Frox : public Object { public: using Object::Object; };
-    struct Gleeok : public Object { public: using Object::Object; };
-
     enum class ObjectType
     {
         HiddenKorok,
         CarryKorok,
         Shrine,
         Lightroot,
-        Bubbul,
         
         Cave,
+        Bubbul,
         Well,
-        Chasms,
-        Locations,
+        Chasm,
+        Location,
         
         Hinox,
         Talus,
@@ -147,6 +90,9 @@ namespace Data
 
     Object* GetObjectByHash(ObjectType type, uint32_t hash);
     bool ObjectExists(ObjectType type, uint32_t hash);
+
+    Object* GetObjectByGuid(ObjectType type, uint64_t guid);
+    bool ObjectExistsByGuid(ObjectType type, uint64_t guid);
 
     // Create koroks
 

@@ -14,14 +14,7 @@ using namespace Data;
 namespace Data
 {
     Object::Object() {};
-    Object::Object(uint32_t completionHash, glm::vec3 position)
-    {
-        m_CompletionHash = completionHash;
-        m_Position = position;
-    }
-
-    ObjectWithName::ObjectWithName() {};
-    ObjectWithName::ObjectWithName(uint32_t completionHash, glm::vec3 position, std::string displayName)
+    Object::Object(uint32_t completionHash, glm::vec3 position, std::string displayName)
     {
         m_CompletionHash = completionHash;
         m_Position = position;
@@ -29,16 +22,22 @@ namespace Data
         m_DisplayName = displayName;
     }
 
-    Korok::Korok(uint32_t completionHash, glm::vec3 position, int zeldaDungeonId, bool isPair)
+    KorokPath::KorokPath(uint32_t belongsToCompletionHash, std::vector<glm::vec3> points)
+    {
+        m_BelongsToCompletionHash = m_BelongsToCompletionHash;
+        m_Points = points; 
+    }
+
+    Korok::Korok(uint32_t completionHash, glm::vec3 position, bool isPair, std::string korokType)
     {
         m_CompletionHash = completionHash;
         m_Position = position;
 
-        m_ZeldaDungeonId = zeldaDungeonId;
         m_IsPair = isPair;
+        m_KorokType = korokType;
     }
 
-    Cave::Cave(uint32_t completionHash, glm::vec3 position, const std::string& displayName, uint32_t bubbulDefeatedHash)
+    /*Cave::Cave(uint32_t completionHash, glm::vec3 position, const std::string& displayName, uint32_t bubbulDefeatedHash)
     {
         m_CompletionHash = completionHash;
         m_Position = position;
@@ -46,1036 +45,12 @@ namespace Data
         m_DisplayName = displayName;
 
         m_BubbulDefeatedHash = bubbulDefeatedHash;
-    }
-    
-    // Data::KorokPath KorokPaths[Data::KorokPathsCount];
-
-    // void LoadPaths()
-    // {
-    //     std::map<std::string, std::vector<glm::vec2>> points = {
-    //         {"MainField_Npc_HiddenKorokFly_4105883532", {glm::vec2(1915.68f, -2382.1f), glm::vec2(1867.95f, -2400.7f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2879961570", {glm::vec2(-2018.28f, 3437.19f), glm::vec2(-1996.6f, 3619.67f)}},
-    //         {"MainField_Npc_HiddenKorokFly_642507168", {glm::vec2(-2603.74f, 2126.61f), glm::vec2(-2697.26f, 2105.06f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3755199878", {glm::vec2(3735.97f, 1686.96f), glm::vec2(3525.98f, 1710.62f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2046521464", {glm::vec2(-2458.83f, -276.05f), glm::vec2(-2547.83f, -306.3f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1465600658", {glm::vec2(3170.78f, -3317.52f), glm::vec2(3152.59f, -3328.35f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3408673367", {glm::vec2(-3757.1f, 2445.96f), glm::vec2(-3751.84f, 2531.62f)}},
-    //         {"MainField_Npc_HiddenKorokFly_4022716825", {glm::vec2(-4251.77f, -3590.21f), glm::vec2(-4167.16f, -3615.94f)}},
-    //         {"MainField_Npc_HiddenKorokFly_377746506", {glm::vec2(-3647.12f, -436.34f), glm::vec2(-3675.04f, -393.32f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3488513756", {glm::vec2(-1984.92f, -624.09f), glm::vec2(-1964.68f, -584.16f)}},
-    //         {"MainField_Npc_HiddenKorokFly_707729943", {glm::vec2(546.27f, 3580.35f), glm::vec2(271.72f, 3289.59f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3540012681", {glm::vec2(-3018.71f, -585.07f), glm::vec2(-3212.86f, -574.01f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2832530704", {glm::vec2(3439.15f, 1100.78f), glm::vec2(3432.94f, 1150.31f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3901382303", {glm::vec2(-2591.2f, 3543.36f), glm::vec2(-2448.41f, 3751.94f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2690380187", {glm::vec2(-1173.58f, 1166.04f), glm::vec2(-1190.02f, 1116.74f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2263906631", {glm::vec2(1776.99f, 3057.73f), glm::vec2(1785.54f, 3009.1f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2408228336", {glm::vec2(-3822.16f, -170.91f), glm::vec2(-3828.84f, -118.42f)}},
-    //         {"MainField_Npc_HiddenKorokFly_4164980717", {glm::vec2(-2772.74f, -1472.73f), glm::vec2(-2826.25f, -1580.08f)}},
-    //         {"MainField_Npc_HiddenKorokFly_219442737", {glm::vec2(-597.87f, 3845.34f), glm::vec2(-657.77f, 3851.84f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1677622965", {glm::vec2(1559.28f, 2896.84f), glm::vec2(1562.56f, 2898.32f)}},
-    //         {"MainField_Npc_HiddenKorokFly_112511260", {glm::vec2(-989.87f, -541.01f), glm::vec2(-1115.56f, -528.59f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1193735031", {glm::vec2(4069.f, -2462.26f), glm::vec2(4181.04f, -2540.41f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1636091100", {glm::vec2(-3692.07f, -792.07f), glm::vec2(-3661.36f, -828.8f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1151365424", {glm::vec2(-1892.06f, -1235.05f), glm::vec2(-1855.99f, -1192.54f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2981673548", {glm::vec2(-1787.71f, -377.97f), glm::vec2(-1631.54f, -515.19f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2251374971", {glm::vec2(1585.26f, -719.34f), glm::vec2(1398.04f, -856.35f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2651170340", {glm::vec2(2374.46f, -807.5f), glm::vec2(2275.01f, -720.15f)}},
-    //         {"MainField_Npc_HiddenKorokFly_425273904", {glm::vec2(4349.08f, -1496.86f), glm::vec2(4356.78f, -1528.1f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3160306273", {glm::vec2(4079.84f, 1716.65f), glm::vec2(4282.69f, 1655.67f)}},
-    //         {"MainField_Npc_HiddenKorokFly_959088135", {glm::vec2(-3782.46f, -1798.64f), glm::vec2(-3696.67f, -1684.11f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3700933592", {glm::vec2(894.81f, 3476.66f), glm::vec2(963.3f, 3371.1f)}},
-    //         {"MainField_Npc_HiddenKorokFly_993744813", {glm::vec2(-4207.97f, 266.73f), glm::vec2(-4183.68f, 291.07f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1090454606", {glm::vec2(-4384.57f, 2575.82f), glm::vec2(-4373.9f, 2587.06f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3190071149", {glm::vec2(1527.35f, -1887.45f), glm::vec2(1544.33f, -1837.21f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2057390424", {glm::vec2(-4276.29f, 610.64f), glm::vec2(-4325.41f, 698.29f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3225537006", {glm::vec2(4252.4f, -3134.47f), glm::vec2(4344.06f, -3178.37f)}},
-    //         {"MainField_Npc_HiddenKorokFly_4111462616", {glm::vec2(-668.85f, 2392.43f), glm::vec2(-609.81f, 2390.65f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2515119845", {glm::vec2(-2395.78f, 1915.51f), glm::vec2(-2429.14f, 1921.34f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2546320076", {glm::vec2(-254.f, -1044.5f), glm::vec2(-254.f, -994.61f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3182217296", {glm::vec2(-2187.6f, 573.36f), glm::vec2(-2175.13f, 463.35f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1469044075", {glm::vec2(4016.93f, 2971.36f), glm::vec2(4083.59f, 2973.26f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3796948896", {glm::vec2(-2941.33f, -2483.43f), glm::vec2(-2883.83f, -2398.01f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1474527610", {glm::vec2(-4388.92f, 1218.42f), glm::vec2(-4210.02f, 1133.51f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2640143091", {glm::vec2(1131.8f, 2327.59f), glm::vec2(1188.64f, 2476.71f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3090117635", {glm::vec2(-2103.93f, 2297.19f), glm::vec2(-2066.65f, 2397.05f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1840487990", {glm::vec2(1610.18f, -2544.72f), glm::vec2(1725.35f, -2553.94f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2490721015", {glm::vec2(2089.33f, -327.27f), glm::vec2(1832.71f, -535.64f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3748954375", {glm::vec2(-296.75f, -261.92f), glm::vec2(-253.83f, -425.73f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2946306338", {glm::vec2(-276.76f, 3316.47f), glm::vec2(-387.59f, 3151.55f)}},
-    //         {"MainField_Npc_HiddenKorokFly_3859942761", {glm::vec2(2330.11f, -1486.41f), glm::vec2(2407.27f, -1613.6f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2875183771", {glm::vec2(-4495.71f, -2510.34f), glm::vec2(-4396.84f, -2049.89f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3577973525", {glm::vec2(-2288.86f, 413.65f), glm::vec2(-2281.03f, 430.56f), glm::vec2(-2263.9f, 440.5f), glm::vec2(-2257.35f, 452.47f), glm::vec2(-2248.36f, 463.14f)}},
-    //         {"MainField_Npc_HiddenKorokGround_1022760820", {glm::vec2(-1094.6f, 196.73f), glm::vec2(-1105.74f, 216.9f), glm::vec2(-1101.07f, 233.77f), glm::vec2(-1125.37f, 238.33f), glm::vec2(-1154.53f, 244.98f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2646642296", {glm::vec2(4126.2f, 2542.35f), glm::vec2(4116.05f, 2561.58f), glm::vec2(4132.32f, 2563.09f), glm::vec2(4137.84f, 2575.74f), glm::vec2(4111.49f, 2586.74f)}},
-    //         {"MainField_Npc_HiddenKorokGround_66646874", {glm::vec2(2043.58f, 2660.78f), glm::vec2(2054.12f, 2705.84f), glm::vec2(2092.84f, 2692.7f), glm::vec2(2112.5f, 2710.14f), glm::vec2(2105.21f, 2723.79f)}},
-    //         {"MainField_Npc_HiddenKorokGround_1841374467", {glm::vec2(-3466.84f, 2956.78f), glm::vec2(-3498.91f, 2952.55f), glm::vec2(-3480.76f, 2986.11f), glm::vec2(-3469.87f, 2926.08f), glm::vec2(-3437.03f, 2979.05f)}},
-    //         {"MainField_Npc_HiddenKorokGround_1410368125", {glm::vec2(-257.07f, -589.49f), glm::vec2(-250.14f, -583.87f), glm::vec2(-246.7f, -579.26f), glm::vec2(-243.03f, -585.36f), glm::vec2(-237.45f, -584.97f), glm::vec2(-237.7f, -590.68f), glm::vec2(-237.48f, -597.91f), glm::vec2(-237.52f, -610.94f), glm::vec2(-233.49f, -624.32f), glm::vec2(-230.73f, -630.73f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3440400112", {glm::vec2(316.09f, 2161.86f), glm::vec2(334.36f, 2161.11f), glm::vec2(358.6f, 2164.08f), glm::vec2(376.94f, 2150.91f), glm::vec2(399.02f, 2151.04f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2885083477", {glm::vec2(4483.81f, 637.03f), glm::vec2(4497.5f, 637.89f), glm::vec2(4517.59f, 630.68f), glm::vec2(4544.74f, 640.39f), glm::vec2(4568.1f, 646.32f)}},
-    //         {"MainField_Npc_HiddenKorokGround_805441109", {glm::vec2(4083.13f, -424.81f), glm::vec2(4114.89f, -438.15f), glm::vec2(4153.29f, -436.52f), glm::vec2(4151.59f, -415.25f), glm::vec2(4139.2f, -409.91f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2206451776", {glm::vec2(-2052.12f, -507.62f), glm::vec2(-2052.09f, -495.07f), glm::vec2(-2055.43f, -483.19f), glm::vec2(-2031.36f, -506.91f), glm::vec2(-2030.22f, -545.77f)}},
-    //         {"MainField_Npc_HiddenKorokGround_810709137", {glm::vec2(-4084.91f, -3717.65f), glm::vec2(-4056.62f, -3726.4f), glm::vec2(-4020.83f, -3712.15f), glm::vec2(-4003.97f, -3693.82f), glm::vec2(-3961.39f, -3720.91f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3780330715", {glm::vec2(-4201.37f, -3117.92f), glm::vec2(-4205.57f, -3121.48f), glm::vec2(-4230.32f, -3126.51f), glm::vec2(-4228.86f, -3132.67f), glm::vec2(-4227.86f, -3135.04f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3433640415", {glm::vec2(-2376.8f, -1790.9f), glm::vec2(-2370.25f, -1778.33f), glm::vec2(-2370.82f, -1764.25f), glm::vec2(-2359.08f, -1757.9f), glm::vec2(-2338.22f, -1728.2f)}},
-    //         {"MainField_Npc_HiddenKorokGround_4128059100", {glm::vec2(3079.72f, 3643.24f), glm::vec2(3093.29f, 3659.51f), glm::vec2(3082.66f, 3705.24f), glm::vec2(3061.24f, 3658.99f), glm::vec2(3027.25f, 3653.85f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2229769454", {glm::vec2(-4349.5f, 1828.01f), glm::vec2(-4345.34f, 1832.49f), glm::vec2(-4353.39f, 1834.54f), glm::vec2(-4352.04f, 1826.04f), glm::vec2(-4353.39f, 1837.03f)}},
-    //         {"MainField_Npc_HiddenKorokGround_884157545", {glm::vec2(1737.64f, 3204.04f), glm::vec2(1754.08f, 3198.55f), glm::vec2(1766.46f, 3195.1f), glm::vec2(1788.81f, 3210.6f), glm::vec2(1803.67f, 3220.17f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3336956392", {glm::vec2(2947.57f, 3003.18f), glm::vec2(2952.04f, 2989.74f), glm::vec2(2962.11f, 2982.25f), glm::vec2(2955.57f, 2973.68f), glm::vec2(2950.32f, 2965.55f), glm::vec2(2967.16f, 2948.4f), glm::vec2(2968.22f, 2965.22f), glm::vec2(2972.14f, 2975.83f), glm::vec2(2974.78f, 2989.42f), glm::vec2(2951.52f, 3003.33f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3143270869", {glm::vec2(-4171.26f, 3058.97f), glm::vec2(-4174.61f, 3065.55f), glm::vec2(-4186.84f, 3064.5f), glm::vec2(-4190.1f, 3083.78f), glm::vec2(-4195.16f, 3090.17f)}},
-    //         {"MainField_Npc_HiddenKorokGround_1845056285", {glm::vec2(4594.88f, 2520.45f), glm::vec2(4622.89f, 2470.21f), glm::vec2(4632.42f, 2436.13f), glm::vec2(4651.31f, 2412.54f), glm::vec2(4658.92f, 2379.92f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3288214517", {glm::vec2(981.38f, 1837.23f), glm::vec2(995.8f, 1836.55f), glm::vec2(1006.34f, 1828.51f), glm::vec2(1033.92f, 1807.87f), glm::vec2(1047.49f, 1786.98f)}},
-    //         {"MainField_Npc_HiddenKorokGround_4221382154", {glm::vec2(-209.34f, 3444.94f), glm::vec2(-210.17f, 3399.51f), glm::vec2(-205.12f, 3370.46f), glm::vec2(-217.37f, 3353.34f), glm::vec2(-227.5f, 3344.2f)}},
-    //         {"MainField_Npc_HiddenKorokGround_1528393793", {glm::vec2(3509.61f, 519.34f), glm::vec2(3488.92f, 536.12f), glm::vec2(3492.29f, 560.71f), glm::vec2(3471.08f, 547.4f), glm::vec2(3455.12f, 550.52f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2250578196", {glm::vec2(-4381.95f, 782.54f), glm::vec2(-4372.32f, 783.49f), glm::vec2(-4369.9f, 783.49f), glm::vec2(-4364.1f, 783.49f), glm::vec2(-4361.97f, 783.49f), glm::vec2(-4359.14f, 783.49f), glm::vec2(-4357.24f, 783.49f), glm::vec2(-4353.39f, 783.49f), glm::vec2(-4346.97f, 783.49f), glm::vec2(-4343.21f, 780.59f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3779803099", {glm::vec2(-3973.11f, -1695.f), glm::vec2(-3968.9f, -1671.42f), glm::vec2(-4015.77f, -1684.29f), glm::vec2(-4044.05f, -1686.62f), glm::vec2(-4064.37f, -1678.98f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3113887708", {glm::vec2(1378.68f, 2767.8f), glm::vec2(1361.44f, 2758.8f), glm::vec2(1371.11f, 2743.77f), glm::vec2(1370.41f, 2742.94f), glm::vec2(1372.88f, 2747.96f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3747962265", {glm::vec2(1012.99f, 3212.9f), glm::vec2(1012.9f, 3222.67f), glm::vec2(999.86f, 3234.49f), glm::vec2(1007.53f, 3247.78f), glm::vec2(1012.07f, 3255.07f)}},
-    //         {"MainField_Npc_HiddenKorokGround_4030967171", {glm::vec2(468.27f, 1717.43f), glm::vec2(475.17f, 1749.54f), glm::vec2(499.28f, 1783.29f), glm::vec2(506.46f, 1803.81f), glm::vec2(514.52f, 1791.f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2267408466", {glm::vec2(2947.3f, 3436.f), glm::vec2(2948.65f, 3435.43f), glm::vec2(2950.21f, 3434.97f), glm::vec2(2942.35f, 3435.77f), glm::vec2(2941.7f, 3430.52f)}},
-    //         {"MainField_Npc_HiddenKorokGround_771357632", {glm::vec2(-587.14f, 875.57f), glm::vec2(-601.66f, 860.79f), glm::vec2(-616.98f, 861.43f), glm::vec2(-632.29f, 873.98f), glm::vec2(-643.29f, 876.87f)}},
-    //         {"MainField_Npc_HiddenKorokGround_577144012", {glm::vec2(-1234.31f, -1094.26f), glm::vec2(-1265.71f, -1047.65f), glm::vec2(-1272.4f, -1035.54f), glm::vec2(-1235.62f, -1004.94f), glm::vec2(-1226.6f, -1001.78f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2760820393", {glm::vec2(-4063.42f, -2285.92f), glm::vec2(-4048.41f, -2299.71f), glm::vec2(-4043.07f, -2307.4f), glm::vec2(-4031.27f, -2322.24f), glm::vec2(-4022.05f, -2349.86f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3637762495", {glm::vec2(3372.41f, 2301.17f), glm::vec2(3391.55f, 2305.14f), glm::vec2(3420.12f, 2319.36f), glm::vec2(3444.12f, 2342.22f), glm::vec2(3459.52f, 2344.f), glm::vec2(3470.77f, 2347.6f), glm::vec2(3468.32f, 2364.61f), glm::vec2(3453.78f, 2384.8f), glm::vec2(3440.93f, 2392.3f), glm::vec2(3425.15f, 2390.67f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2926065930", {glm::vec2(2308.26f, 750.53f), glm::vec2(2308.8f, 731.38f), glm::vec2(2306.25f, 715.55f), glm::vec2(2292.73f, 701.58f), glm::vec2(2288.5f, 702.21f)}},
-    //         {"MainField_Npc_HiddenKorokGround_1955626705", {glm::vec2(2984.44f, -177.12f), glm::vec2(3014.53f, -182.23f), glm::vec2(3031.13f, -168.81f), glm::vec2(3048.19f, -165.46f), glm::vec2(3059.07f, -158.3f), glm::vec2(3068.42f, -157.76f), glm::vec2(3081.95f, -160.38f), glm::vec2(3088.52f, -162.44f), glm::vec2(3090.17f, -160.65f), glm::vec2(3084.77f, -166.86f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1992448098", {glm::vec2(693.88f, 3059.2f), glm::vec2(678.99f, 3061.2f), glm::vec2(678.7f, 3088.63f), glm::vec2(698.36f, 3081.73f), glm::vec2(694.38f, 3072.41f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3121333541", {glm::vec2(4668.77f, -1290.65f), glm::vec2(4661.62f, -1313.48f), glm::vec2(4667.06f, -1330.71f), glm::vec2(4683.88f, -1340.37f), glm::vec2(4704.77f, -1352.87f)}},
-    //         {"MainField_Npc_HiddenKorokGround_2092993004", {glm::vec2(-4204.78f, -2782.24f), glm::vec2(-4216.36f, -2769.8f), glm::vec2(-4216.6f, -2766.18f), glm::vec2(-4211.13f, -2755.22f), glm::vec2(-4209.61f, -2735.39f), glm::vec2(-4201.12f, -2719.52f), glm::vec2(-4197.85f, -2709.39f), glm::vec2(-4196.75f, -2699.01f), glm::vec2(-4197.7f, -2689.47f), glm::vec2(-4193.41f, -2681.f)}},
-    //         {"MainField_Npc_HiddenKorokFly_1339515579", {glm::vec2(-1181.31f, -237.17f), glm::vec2(-1195.48f, -233.79f), glm::vec2(-1194.82f, -236.62f), glm::vec2(-1172.15f, -232.36f), glm::vec2(-1148.42f, -223.14f)}},
-    //         {"MainField_Npc_HiddenKorokGround_449189269", {glm::vec2(-3063.65f, 2905.87f), glm::vec2(-3073.02f, 2902.19f), glm::vec2(-3079.64f, 2897.47f), glm::vec2(-3093.85f, 2889.26f), glm::vec2(-3105.95f, 2881.95f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3115869048", {glm::vec2(4131.11f, 2001.99f), glm::vec2(4142.23f, 2008.3f), glm::vec2(4151.47f, 1992.49f), glm::vec2(4173.42f, 1980.35f), glm::vec2(4190.38f, 1984.68f), glm::vec2(4200.09f, 1979.95f), glm::vec2(4213.94f, 1979.82f), glm::vec2(4229.49f, 1983.12f), glm::vec2(4246.43f, 1983.63f), glm::vec2(4271.46f, 1980.52f)}},
-    //         {"MainField_Npc_HiddenKorokGround_196795324", {glm::vec2(4385.6f, -1548.02f), glm::vec2(4433.26f, -1577.73f), glm::vec2(4493.91f, -1609.91f), glm::vec2(4502.12f, -1654.62f), glm::vec2(4526.4f, -1695.15f), glm::vec2(4553.33f, -1724.99f), glm::vec2(4577.97f, -1756.76f), glm::vec2(4601.99f, -1791.67f), glm::vec2(4617.25f, -1812.53f), glm::vec2(4635.92f, -1836.44f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3872040196", {glm::vec2(-2723.18f, -2263.21f), glm::vec2(-2729.82f, -2264.78f), glm::vec2(-2737.84f, -2263.83f), glm::vec2(-2742.96f, -2258.24f), glm::vec2(-2750.28f, -2254.98f)}},
-    //         {"MainField_Npc_HiddenKorokGround_3712478777", {glm::vec2(4512.28f, 980.84f), glm::vec2(4526.36f, 1009.01f), glm::vec2(4502.82f, 1016.54f), glm::vec2(4473.22f, 1010.4f), glm::vec2(4497.55f, 1016.65f)}},
-    //         {"MainField_Npc_HiddenKorokGround_44975391", {glm::vec2(-997.5f, 1660.79f), glm::vec2(-988.46f, 1650.88f), glm::vec2(-979.8f, 1646.63f), glm::vec2(-978.5f, 1633.33f), glm::vec2(-966.47f, 1626.78f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2413762907", {glm::vec2(-5.81f, 2580.12f), glm::vec2(-11.36f, 2577.65f), glm::vec2(-10.7f, 2581.5f), glm::vec2(-5.38f, 2584.1f), glm::vec2(-11.96f, 2582.16f)}},
-    //         {"MainField_Npc_HiddenKorokFly_2329548229", {glm::vec2(4112.67f, -1634.03f), glm::vec2(4101.66f, -1635.66f), glm::vec2(4096.97f, -1637.62f), glm::vec2(4093.97f, -1634.61f), glm::vec2(4095.89f, -1630.73f)}},
-    //     };
-
-    //     int i = 0;
-    //     for (auto &point : points)
-    //     {
-    //         KorokPaths[i] = KorokPath(point.first, point.second);
-
-    //         i++;
-    //     }
-
-    //     for (int k = 0; k < Data::KoroksCount; k++)
-    //     {
-    //         for (int p = 0; p < Data::KorokPathsCount; p++)
-    //         {
-    //             if (Data::Koroks[k].internalName == Data::KorokPaths[p].internalName)
-    //                 Data::Koroks[k].path = &Data::KorokPaths[p];
-    //         }
-    //     }
-    // }
-
-    // std::map<int, KorokInfo> KorokInfos = {
-    //     {1, {"Jump from the promontory into the circle of lilies.", "thumb/a/ae/Korok001.png/200px-Korok001.png"}},
-    //     {2, {"Lift the rock on this small island.", "thumb/f/f3/Korok002.png/200px-Korok002.png"}},
-    //     {3, {"Complete the block puzzle.", "thumb/0/04/Korok003.png/200px-Korok003.png"}},
-    //     {4, {"Start at the south side of the river, and follow the flowers.", "thumb/8/8b/Korok004.png/200px-Korok004.png"}},
-    //     {5, {"Stand near the pinwheel and shoot the balloons.", "thumb/a/a5/Korok005.png/200px-Korok005.png"}},
-    //     {6, {"Push the boulder into the nearby large hole.", "thumb/d/db/Korok006.png/200px-Korok006.png"}},
-    //     {7, {"Follow the flower trail which starts at the bottom of the hollow log pieces.", "thumb/0/04/Korok007.png/200px-Korok007.png"}},
-    //     {8, {"Stand near the pinwheel and shoot the balloons.", "thumb/b/b8/Korok008.png/200px-Korok008.png"}},
-    //     {9, {"Pick up the rock at the top of the rock structure.", "thumb/6/65/Korok009.png/200px-Korok009.png"}},
-    //     {10, {"Interact with the fairy lights under the bridge. Use Magnesis to make a safe platform.", "thumb/3/30/Korok010.png/200px-Korok010.png"}},
-    //     {11, {"Pick up the solitary rock at the peak of the shorter Dueling Peak.", "thumb/b/b6/Korok011.png/200px-Korok011.png"}},
-    //     {12, {"Melt the block of ice, then examine the fairy lights.", "thumb/d/d6/Korok012.png/200px-Korok012.png"}},
-    //     {13, {"Use the nearby rock to complete the circle.", "thumb/6/6a/Korok013.png/200px-Korok013.png"}},
-    //     {14, {"Use Magnesis to place the metal block to match the nearby set.", "thumb/c/cd/Korok014.png/200px-Korok014.png"}},
-    //     {15, {"Interact with the fairy lights. You must have left the Great Plateau to obtain this seed. This is above the pool you awaken from within the Shrine of Resurrection.", "thumb/5/5f/Korok015.png/200px-Korok015.png"}},
-    //     {16, {"Pick up this rock.", "thumb/9/9d/Korok016.png/200px-Korok016.png"}},
-    //     {17, {"Go to the edge of the cliff (behind the wall) to find the large slab. Move it using Stasis, then pick up the smaller rock under it.", "thumb/b/be/Korok017.png/200px-Korok017.png"}},
-    //     {18, {"Examine the fairy lights at the top of the Temple of Time.", "thumb/4/4b/Korok018.png/200px-Korok018.png"}},
-    //     {19, {"Examine the fairy lights on the top of the Woodcutter's Cabin.", "thumb/2/2f/Korok019.png/200px-Korok019.png"}},
-    //     {20, {"Use Magnesis to lift the metal door, then lift the rock hidden underneath. This seed is found at the very base of the Great Plateau, so it won't be available until the Paraglider is obtained.", "thumb/c/c0/Korok020.png/200px-Korok020.png"}},
-    //     {21, {"Use Magnesis to lift the metal door, then lift the rock hidden underneath.", "thumb/a/a2/Korok021.png/200px-Korok021.png"}},
-    //     {22, {"Clear the leaves, then pick up the rock.", "thumb/8/86/Korok022.png/200px-Korok022.png"}},
-    //     {23, {"Follow the flower trail through the giant hollow log.", "thumb/2/25/Korok023.png/200px-Korok023.png"}},
-    //     {24, {"Use Magnesis to lift the ball on the chain into the hole of the tree trunk.", "thumb/3/36/Korok024.png/200px-Korok024.png"}},
-    //     {25, {"Lift the rock found underneath two larger rocks.", "thumb/3/3a/Korok025.png/200px-Korok025.png"}},
-    //     {26, {"Use Magnesis to put the block in the correct place. Located on a cliff ledge.", "thumb/e/e9/Korok026.png/200px-Korok026.png"}},
-    //     {27, {"Place a palm fruit in the empty basket.", "thumb/8/85/Korok027.png/200px-Korok027.png"}},
-    //     {28, {"Place an apple in the empty basket.", "thumb/5/59/Korok028.png/200px-Korok028.png"}},
-    //     {29, {"Blow up the boulders and pick up the rock underneath.", "thumb/c/c1/Korok029.png/200px-Korok029.png"}},
-    //     {30, {"Climb to the top of the hill and lift up the solitary rock. Level 1 cold resistance recommended.", "thumb/4/41/Korok030.png/200px-Korok030.png"}},
-    //     {31, {"Grab a rock from the plateau to the northeast, and get it up to and complete the rock circle. You can jump up onto the platform from the southwestern edge.", "thumb/b/b0/Korok031.png/200px-Korok031.png"}},
-    //     {32, {"Use Magnesis to lift the ball-and-chain and put it into the hollow stump.", "thumb/a/ae/Korok032.png/200px-Korok032.png"}},
-    //     {33, {"Melt the ice and examine the fairy lights.", "thumb/3/3f/Korok033.png/200px-Korok033.png"}},
-    //     {34, {"Climb to the top of the hill and lift the small rock.", "thumb/8/8f/Korok034.png/200px-Korok034.png"}},
-    //     {35, {"Shoot the balloons.", "thumb/5/52/Korok035.png/200px-Korok035.png"}},
-    //     {36, {"Lift the rock in the tree.", "thumb/9/98/Korok036.png/200px-Korok036.png"}},
-    //     {37, {"Stand on the stump, and shoot the flying acorns.", "thumb/a/a6/Korok037.png/200px-Korok037.png"}},
-    //     {38, {"Pick up the rock.", "thumb/a/a8/Korok038.png/200px-Korok038.png"}},
-    //     {39, {"Solve the Magnesis block puzzle.", "thumb/3/31/Korok039.png/200px-Korok039.png"}},
-    //     {40, {"Climb to the top of the flag pole, then examine the fairy lights.", "thumb/8/84/Korok040.png/200px-Korok040.png"}},
-    //     {41, {"Lift the rock.", "thumb/1/12/Korok041.png/200px-Korok041.png"}},
-    //     {42, {"Start between the three large cliffs to the northwest, and follow the flowers.", "thumb/e/ea/Korok042.png/200px-Korok042.png"}},
-    //     {43, {"Throw a rock into the circle of rocks. This seed belongs to the Great Plateau Tower Region, but won't be available until the Paraglider is obtained.", "thumb/a/a0/Korok043.png/200px-Korok043.png"}},
-    //     {44, {"In the 'spout' of the fish statue on top of Zora's Domain, examine the fairy lights.", "thumb/c/c4/Korok044.png/200px-Korok044.png"}},
-    //     {45, {"Place an apple in the empty offering bowl.", "thumb/6/65/Korok045.png/200px-Korok045.png"}},
-    //     {46, {"Start on top of the rock bridge and chase the flower trail by climbing down and around under the bridge.", "thumb/9/94/Korok046.png/200px-Korok046.png"}},
-    //     {47, {"Burn or cut away the dead leaves and then lift up the small rock.", "thumb/e/ee/Korok047.png/200px-Korok047.png"}},
-    //     {48, {"Place apple.", "thumb/e/e7/Korok048.png/200px-Korok048.png"}},
-    //     {49, {"Burn the leaves and pick up the revealed rock.", "thumb/3/39/Korok049.png/200px-Korok049.png"}},
-    //     {50, {"Place an apple in the empty basket.", "thumb/6/67/Korok050.png/200px-Korok050.png"}},
-    //     {51, {"Push the boulder off the small tower into the indented hole below.", "thumb/7/7a/Korok051.png/200px-Korok051.png"}},
-    //     {52, {"Lift the rock up.", "thumb/c/c8/Korok052.png/200px-Korok052.png"}},
-    //     {53, {"Examine the swirling leaves at the top of the Tech Lab.", "thumb/1/17/Korok053.png/200px-Korok053.png"}},
-    //     {54, {"Stand near the pinwheel and shoot the balloons. The third balloon is behind you, hidden in the log.", "thumb/6/6c/Korok054.png/200px-Korok054.png"}},
-    //     {55, {"Pick up the rock in the stump.", "thumb/a/ac/Korok055.png/200px-Korok055.png"}},
-    //     {56, {"Climb atop the guardian found at the top of the Hateno Ancient Tech Lab. The easiest place to climb up is the broken guardian's leg.", "thumb/c/cd/Korok056.png/200px-Korok056.png"}},
-    //     {57, {"Stand near the pinwheel and shoot all five balloon targets.", "thumb/a/af/Korok057.png/200px-Korok057.png"}},
-    //     {58, {"Pick up the metal cube and place it back into its correct spot.", "thumb/f/f9/Korok058.png/200px-Korok058.png"}},
-    //     {59, {"Follow the long yellow flower trail to the top of the hill. The start of the trail is pictured here and begins a bit north west of the location on the ground around the hill.", "thumb/6/61/Korok059.png/200px-Korok059.png"}},
-    //     {60, {"Stand next to the pinwheel and shoot the three balloon targets.", "thumb/c/c2/Korok060.png/200px-Korok060.png"}},
-    //     {61, {"Climb on top of the stone wall and stand next to the pinwheel. Two acorns will fly above the treetops. Carefully aim and destroy them with arrows. You can use Stasis on the acorns to help you.", "thumb/0/07/Korok061.png/200px-Korok061.png"}},
-    //     {62, {"Jump or dive into the ring of flowers in the water below the cliff.", "thumb/5/5f/Korok062.png/200px-Korok062.png"}},
-    //     {63, {"From the bridge above, put a Cryonis pillar just in front of the circle of rocks, then toss a rock onto the pillar so it bounces into the circle.", "thumb/2/2f/Korok063.png/200px-Korok063.png"}},
-    //     {64, {"Light the two torches up here.", "thumb/2/27/Korok064.png/200px-Korok064.png"}},
-    //     {65, {"Jump or dive into the ring of flowers. You can glide from the top of the Hylia bridge or use a cryonis pillar.", "thumb/c/cb/Korok065.png/200px-Korok065.png"}},
-    //     {66, {"Move the metal block to match both sets identically.", "thumb/b/b2/Korok066.png/200px-Korok066.png"}},
-    //     {67, {"Throw a boulder into the ring of rocks in the river.", "thumb/a/a5/Korok067.png/200px-Korok067.png"}},
-    //     {68, {"Lift the rock found at the top of Mount Floria.", "thumb/d/df/Korok068.png/200px-Korok068.png"}},
-    //     {69, {"Drop an apple into the empty offering bowl.", "thumb/e/e0/Korok069.png/200px-Korok069.png"}},
-    //     {70, {"Swim to the small island in the lake and lift the small rock on top.", "thumb/8/89/Korok070.png/200px-Korok070.png"}},
-    //     {71, {"Pick up this rock.", "thumb/f/fa/Korok071.png/200px-Korok071.png"}},
-    //     {72, {"Investigate behind the two statues.", "thumb/0/02/Korok072.png/200px-Korok072.png"}},
-    //     {73, {"Examine the fairy lights at the top of the fountain.", "thumb/e/e8/Korok073.png/200px-Korok073.png"}},
-    //     {74, {"Examine the fairy lights at the top of the spire.", "thumb/a/a2/Korok074.png/225px-Korok074.png"}},
-    //     {75, {"Climb to the very top of the waterfall pillar and examine the fairy lights.", "thumb/9/98/Korok075.png/200px-Korok075.png"}},
-    //     {76, {"Solve the Magnesis block puzzle. The block is above the pavilion.", "thumb/c/ca/Korok076.png/200px-Korok076.png"}},
-    //     {77, {"Solve the Magnesis block puzzle. The block is on the wooden platform above.", "thumb/0/0c/Korok077.png/200px-Korok077.png"}},
-    //     {78, {"There are two fairy lights dancing around here. Catch them both for two seeds.", "thumb/b/b7/Korok078.png/200px-Korok078.png"}},
-    //     {79, {"Melt the block of ice. Cold Resistance Level 2 recommended.", "thumb/d/d7/Korok079.png/200px-Korok079.png"}},
-    //     {80, {"Melt the block of ice. Cold Resistance Level 2 recommended.", "thumb/3/31/Korok080.png/200px-Korok080.png"}},
-    //     {81, {"Stand next to the pinwheel, shoot the three acorns. You can use stasis to make it easier.", "thumb/b/b2/Korok081.png/200px-Korok081.png"}},
-    //     {82, {"Catch the fairy lights circling the area.", "thumb/3/32/Korok082.png/200px-Korok082.png"}},
-    //     {83, {"On the cliffside there are some metal cubes. Put the missing cube back into the correct spot to make everything match.", "thumb/6/6e/Korok083.png/200px-Korok083.png"}},
-    //     {84, {"The flower trail to this seed starts to the south, on the eastern cliff face. Follow the flowers to the seed.", "thumb/9/9b/Korok084.png/200px-Korok084.png"}},
-    //     {85, {"This race platform starts far to the southeast, on the peak above the Ka'o Makagh Shrine. Race to the ring for the seed.", "thumb/0/0a/Korok085.png/200px-Korok085.png"}},
-    //     {86, {"Stand near the pinwheel and shoot the five balloons circling overhead.", "thumb/9/9b/Korok086.png/200px-Korok086.png"}},
-    //     {87, {"There are two ruins side by side. The one to the north has an extra rock, the one to the south is missing a rock. Carry the extra to the missing spot for the seed.", "thumb/7/74/Korok087.png/200px-Korok087.png"}},
-    //     {88, {"Use the rock to complete the circle.", "thumb/f/ff/Korok088.png/200px-Korok088.png"}},
-    //     {89, {"The flower trail for this begins as you reach the island.", "thumb/1/1f/Korok089.png/200px-Korok089.png"}},
-    //     {90, {"Stand on the seed platform at the nearby shrine. Within the timer, reach the tiny island east of there.", "thumb/c/cb/Korok090.png/200px-Korok090.png"}},
-    //     {91, {"Throw a small rock into the ring of rocks found in the water. Cryonis can make it easier to reach.", "thumb/6/6c/Korok091.png/200px-Korok091.png"}},
-    //     {92, {"Lift up the small rock found at the edge of the creek.", "thumb/c/c4/Korok092.png/200px-Korok092.png"}},
-    //     {93, {"In a cave in this hill, count to 5 using the flowers.", "thumb/0/08/Korok093.png/200px-Korok093.png"}},
-    //     {94, {"Complete the circle of rocks using three nearby rocks.", "thumb/9/97/Korok094.png/200px-Korok094.png"}},
-    //     {95, {"Push the boulder so it rolls into the hole.", "thumb/c/c4/Korok095.png/200px-Korok095.png"}},
-    //     {96, {"Pick up this rock.", "thumb/4/43/Korok096.png/200px-Korok096.png"}},
-    //     {97, {"Catch the fairy lights that run around the ruins.", "thumb/6/6f/Korok097.png/200px-Korok097.png"}},
-    //     {98, {"Look under the bridge, and pick up the rock.", "thumb/a/aa/Korok098.png/200px-Korok098.png"}},
-    //     {99, {"Under a rock.", "thumb/d/d1/Korok099.png/200px-Korok099.png"}},
-    //     {100, {"Climb the flag pole, then examine the fairy lights.", "thumb/4/44/Korok100.png/200px-Korok100.png"}},
-    //     {101, {"Climb to the top of the stone pillar northwest of here to find the seed platform. Glide to the ring before the time runs out.", "thumb/a/af/Korok101.png/200px-Korok101.png"}},
-    //     {102, {"Remove the big boulder and then lift the smaller rock.", "thumb/1/1f/Korok102.png/200px-Korok102.png"}},
-    //     {103, {"Under the bridge, shoot the hanging acorn.", "thumb/b/b8/Korok103.png/200px-Korok103.png"}},
-    //     {104, {"Put the magnetic rock in the well.", "thumb/d/df/Korok104.png/200px-Korok104.png"}},
-    //     {105, {"Stand on the stump and look at the large tree behind it. You will see two targets being tossed up behind the tree. Aim carefully and you can hit them with arrows.", "thumb/8/84/Korok105.png/200px-Korok105.png"}},
-    //     {106, {"At the top of the hill to the west, roll the boulder down into the hole.", "thumb/e/e6/Korok106.png/200px-Korok106.png"}},
-    //     {107, {"Blow up the boulders and pick up the rock under them.", "thumb/c/c3/Korok107.png/200px-Korok107.png"}},
-    //     {108, {"Jump all three fences in a row. This can also be done with the Master Cycle Zero using the Zero Jump.", "thumb/a/ad/Korok108.png/200px-Korok108.png"}},
-    //     {109, {"Follow the flower trail in a little circle around the area.", "thumb/3/34/Korok109.png/200px-Korok109.png"}},
-    //     {110, {"Stand on the stump and shoot the three balloons.", "thumb/e/ea/Korok110.png/200px-Korok110.png"}},
-    //     {111, {"Lift the rock on top of the rock formation.", "thumb/d/d1/Korok111.png/200px-Korok111.png"}},
-    //     {112, {"Jump into lilies.", "thumb/4/47/Korok112.png/200px-Korok112.png"}},
-    //     {113, {"Pick up the rock.", "thumb/6/69/Korok113.png/200px-Korok113.png"}},
-    //     {114, {"Shoot the acorn in the log.", "thumb/d/d7/Korok114.png/200px-Korok114.png"}},
-    //     {115, {"Pick up the rock.", "thumb/a/af/Korok115.png/200px-Korok115.png"}},
-    //     {116, {"Pick up the rock on the top floor of the Coliseum.", "thumb/7/74/Korok116.png/200px-Korok116.png"}},
-    //     {117, {"Chase the fairy lights and examine them.", "thumb/5/5b/Korok117.png/200px-Korok117.png"}},
-    //     {118, {"Race from the tree surrounded by Malice goo and climb up to the rock point.", "thumb/3/3a/Korok118.png/200px-Korok118.png"}},
-    //     {119, {"Shoot the acorn hanging under the bridge.", "thumb/3/33/Korok119.png/200px-Korok119.png"}},
-    //     {120, {"Hidden underneath the small rock near the palm tree.", "thumb/4/4a/Korok120.png/200px-Korok120.png"}},
-    //     {121, {"Halfway down the cliff there is a tiny ledge with a rock. Pick it up.", "thumb/c/cb/Korok121.png/200px-Korok121.png"}},
-    //     {122, {"Solve the cube puzzle.", "thumb/1/1b/Korok122.png/200px-Korok122.png"}},
-    //     {123, {"Complete the rock circle.", "thumb/6/69/Korok123.png/200px-Korok123.png"}},
-    //     {124, {"Throw a rock into the circle. You may have to slide the rock over a cryonis block.", "thumb/9/95/Korok124.png/200px-Korok124.png"}},
-    //     {125, {"Throw a rock into the circle of rocks. Use Cryonis to help cover the distance.", "thumb/5/5d/Korok125.png/200px-Korok125.png"}},
-    //     {126, {"Put the ball into the stump.", "thumb/7/7c/Korok126.png/200px-Korok126.png"}},
-    //     {127, {"Shoot the acorn.", "thumb/7/7b/Korok127.png/200px-Korok127.png"}},
-    //     {128, {"Pick up the rock in the dried up well.", "thumb/c/c3/Korok128.png/200px-Korok128.png"}},
-    //     {129, {"Dive into the circle of lilies.", "thumb/b/b2/Korok129.png/200px-Korok129.png"}},
-    //     {130, {"Solve the cube puzzle. The cube is in the water.", "thumb/4/4c/Korok130.png/200px-Korok130.png"}},
-    //     {131, {"Pick up the rock on a standalone wall.", "thumb/3/35/Korok131.png/200px-Korok131.png"}},
-    //     {132, {"Follow the flower trail that starts on a stump to the northeast.", "thumb/f/f5/Korok132.png/200px-Korok132.png"}},
-    //     {133, {"Put the metal rock in the hole in the stump.", "thumb/4/4e/Korok133.png/200px-Korok133.png"}},
-    //     {134, {"Climb the thick tree, and pick up the rock on top.", "thumb/b/bd/Korok134.png/200px-Korok134.png"}},
-    //     {135, {"Climb the tree, lift the rock.", "thumb/c/c2/Korok135.png/200px-Korok135.png"}},
-    //     {136, {"Drop an apple into the empty offering bowl.", "thumb/8/8f/Korok136.png/200px-Korok136.png"}},
-    //     {137, {"Pick up the rock.", "thumb/5/54/Korok137.png/200px-Korok137.png"}},
-    //     {138, {"Lift the stone.", "thumb/7/7b/Korok138.png/200px-Korok138.png"}},
-    //     {139, {"Move the large slab, then lift the small rock underneath.", "thumb/f/f4/Korok139.png/200px-Korok139.png"}},
-    //     {140, {"Complete the circle with a rock found on the same cliffside.", "thumb/0/02/Korok140.png/200px-Korok140.png"}},
-    //     {141, {"Inside of a cave behind a bombable wall, lift the rock.", "thumb/a/ac/Korok141.png/200px-Korok141.png"}},
-    //     {142, {"Climb to the top of this mountain and lift up the small rock.", "thumb/f/f3/Korok142.png/200px-Korok142.png"}},
-    //     {143, {"Remove apples from the tree on the left until it looks like the two on the right.", "thumb/3/3a/Korok143.png/200px-Korok143.png"}},
-    //     {144, {"Lift the small rock at the top of the peak. Cold Resistance Level 1 recommended.", "thumb/0/06/Korok144.png/200px-Korok144.png"}},
-    //     {145, {"Solve the block puzzle.", "thumb/a/af/Korok145.png/200px-Korok145.png"}},
-    //     {146, {"Lift the rock on the small island at the center of the poisonous bog.", "thumb/e/e3/Korok146.png/200px-Korok146.png"}},
-    //     {147, {"Offer a Hearty Durian.", "thumb/6/6c/Korok147.png/200px-Korok147.png"}},
-    //     {148, {"Throw a rock into the center of the protruding rocks.", "thumb/f/f7/Korok148.png/200px-Korok148.png"}},
-    //     {149, {"Shoot the balloon that's underneath the bridge.", "thumb/f/f8/Korok149.png/200px-Korok149.png"}},
-    //     {150, {"Blow up the rock pile and pick up the rock underneath.", "thumb/8/8e/Korok150.png/200px-Korok150.png"}},
-    //     {151, {"Use Magnesis to grab the iron cube from the block puzzle on the east hand of the statue and take it to the west hand.", "thumb/a/ae/Korok151.png/200px-Korok151.png"}},
-    //     {152, {"Visit each group of flowers in order, 1 through 5.", "thumb/4/4b/Korok152.png/200px-Korok152.png"}},
-    //     {153, {"Shoot the balloon.", "thumb/8/82/Korok153.png/200px-Korok153.png"}},
-    //     {154, {"Pick up the rock.", "thumb/e/e6/Korok154.png/200px-Korok154.png"}},
-    //     {155, {"Pick up the rock.", "thumb/e/ee/Korok155.png/200px-Korok155.png"}},
-    //     {156, {"Complete the rock spiral.", "thumb/f/f0/Korok156.png/200px-Korok156.png"}},
-    //     {157, {"Bomb the wall and pick up the rock.", "thumb/7/7e/Korok157.png/200px-Korok157.png"}},
-    //     {158, {"Complete the rock circle. The rock is in the direction of the gap in the circle, to the north.", "thumb/6/60/Korok158.png/200px-Korok158.png"}},
-    //     {159, {"Grab the boulder at the center of the rock ring west of here, and place it in the empty spot.", "thumb/0/01/Korok159.png/200px-Korok159.png"}},
-    //     {160, {"Stand on the edge of the bridge at the north end. Toss a boulder down into the ring of rocks in the water below.", "thumb/3/30/Korok160.png/200px-Korok160.png"}},
-    //     {161, {"Stand on the seed platform at the base of the waterfall, then swim up the waterfall using Zora Armor.", "thumb/e/ed/Korok161.png/200px-Korok161.png"}},
-    //     {162, {"Catch the fairy lights.", "thumb/f/fd/Korok162.png/200px-Korok162.png"}},
-    //     {163, {"Put a boulder on each of the three islands here. The boulders are magnetic, but two of them are chained together. Use Stasis to hold one of the chained boulders in place while you place the other.", "thumb/b/b7/Korok163.png/200px-Korok163.png"}},
-    //     {164, {"Remove fruit from the tree with too many to make it match.", "thumb/c/c2/Korok164.png/200px-Korok164.png"}},
-    //     {165, {"Toss a boulder into the circle of rocks found in the lake.", "thumb/1/17/Korok165.png/200px-Korok165.png"}},
-    //     {166, {"Pick up the rock.", "thumb/b/bb/Korok166.png/200px-Korok166.png"}},
-    //     {167, {"Use Magnesis to solve the block puzzle.", "thumb/f/fc/Korok167.png/200px-Korok167.png"}},
-    //     {168, {"Grab fruit from the cactus with extra until they match.", "thumb/a/ac/Korok168.png/200px-Korok168.png"}},
-    //     {169, {"Fairy lights are dancing around this tiny pool. Catch them.", "a/a2/Korok169.png"}},
-    //     {170, {"Climb to the highest point on the skeleton.", "thumb/c/ce/Korok170.png/200px-Korok170.png"}},
-    //     {171, {"Pick up the rock on top of the pillar.", "thumb/7/74/Korok171.png/200px-Korok171.png"}},
-    //     {172, {"The seed platform for this race is on the arch to the northwest.", "thumb/8/8e/Korok172.png/200px-Korok172.png"}},
-    //     {173, {"Complete the rock circle.", "thumb/4/42/Korok173.png/200px-Korok173.png"}},
-    //     {174, {"Remove fruit from the cactus with extra until it matches.", "thumb/f/fd/Korok174.png/200px-Korok174.png"}},
-    //     {175, {"Solve the Magnesis block puzzle inside the skull rock. The cube to use is on the ceiling.", "thumb/b/bc/Korok175.png/200px-Korok175.png"}},
-    //     {176, {"Solve the Magnesis block puzzle. If you're having trouble putting the block in, try lining a corner up with the hole in the puzzle.", "thumb/0/07/Korok176.png/200px-Korok176.png"}},
-    //     {177, {"At the very top of the statue.", "thumb/8/83/Korok177.png/200px-Korok177.png"}},
-    //     {178, {"Shoot the balloon in between the statue's wrists.", "thumb/d/d0/Korok178.png/200px-Korok178.png"}},
-    //     {179, {"Pick up the rock on top of the pillar.", "thumb/f/f6/Korok179.png/200px-Korok179.png"}},
-    //     {180, {"Pick up the rock.", "thumb/0/01/Korok180.png/200px-Korok180.png"}},
-    //     {181, {"Shoot the balloons while standing near the pinwheel.", "thumb/4/4e/Korok181.png/200px-Korok181.png"}},
-    //     {182, {"Solve the large Magnesis Block puzzle.", "thumb/3/3f/Korok182.png/200px-Korok182.png"}},
-    //     {183, {"Not counting the rock in the middle, two of these lines have only 8 rocks in them. Put the 2 extra rocks at the east and southwest arms to finish the pattern.", "thumb/e/ee/Korok183.png/200px-Korok183.png"}},
-    //     {184, {"Pick up the rock.", "thumb/d/d5/Korok184.png/200px-Korok184.png"}},
-    //     {185, {"Bomb the rocks and pick up the one underneath.", "thumb/f/f0/Korok185.png/200px-Korok185.png"}},
-    //     {186, {"Complete the rock pattern.", "thumb/3/3d/Korok186.png/200px-Korok186.png"}},
-    //     {187, {"Solve the Magnesis block puzzle.", "thumb/1/1f/Korok187.png/200px-Korok187.png"}},
-    //     {188, {"Climb the pillar and pick up the rock.", "thumb/9/98/Korok188.png/200px-Korok188.png"}},
-    //     {189, {"Lift the rock at the center of the promenade.", "thumb/d/d6/Korok189.png/200px-Korok189.png"}},
-    //     {190, {"Jump or dive into the ring of flowers.", "thumb/1/10/Korok190.png/200px-Korok190.png"}},
-    //     {191, {"Jump or dive into the ring of flowers.", "thumb/3/3c/Korok191.png/200px-Korok191.png"}},
-    //     {192, {"Roll a large boulder into the hole. The Stasis rune may help if the boulder misses the mark.", "thumb/9/93/Korok192.png/200px-Korok192.png"}},
-    //     {193, {"Lift the big rock (using Stasis or an Octo Balloon), and then pick up the small rock under it.", "thumb/7/75/Korok193.png/200px-Korok193.png"}},
-    //     {194, {"Stand near the pinwheel and shoot down all three balloon targets.", "thumb/c/c8/Korok194.png/200px-Korok194.png"}},
-    //     {195, {"Pick up the rock found underneath the bridge.", "thumb/3/3e/Korok195.png/200px-Korok195.png"}},
-    //     {196, {"Fill in all three missing spots in the ring of rocks.", "thumb/a/a6/Korok196.png/200px-Korok196.png"}},
-    //     {197, {"At water level, in the cave, drop an apple into the offering bowl.", "thumb/e/e5/Korok197.png/200px-Korok197.png"}},
-    //     {198, {"Follow the yellow flower trail up the hill.", "thumb/c/cb/Korok198.png/200px-Korok198.png"}},
-    //     {199, {"Jump into the circle of lilies.", "thumb/5/53/Korok199.png/200px-Korok199.png"}},
-    //     {200, {"Climb up to this ledge, and lift the rock.", "thumb/2/22/Korok200.png/200px-Korok200.png"}},
-    //     {201, {"Shoot this emblem.", "thumb/5/50/Korok201.png/200px-Korok201.png"}},
-    //     {202, {"Shoot this emblem.", "thumb/1/1b/Korok202.png/200px-Korok202.png"}},
-    //     {203, {"On the upper ledge, lift this rock.", "thumb/0/04/Korok203.png/200px-Korok203.png"}},
-    //     {204, {"Climb up into the hollow top of the stone pillar and place an apple in the empty basket by the statue.", "thumb/2/25/Korok204.png/200px-Korok204.png"}},
-    //     {205, {"Shoot the balloon in the heart shaped opening next to vah medoh.", "thumb/e/e7/Korok205.png/200px-Korok205.png"}},
-    //     {206, {"Climb to the top of the tallest tree here.", "thumb/e/ec/Korok206.png/200px-Korok206.png"}},
-    //     {207, {"Climb to the top, and lift up the rock.", "thumb/5/56/Korok207.png/200px-Korok207.png"}},
-    //     {208, {"Climb to the top, and lift up the rock.", "thumb/1/1b/Korok208.png/200px-Korok208.png"}},
-    //     {209, {"Two of these trees have only one apple, make the third look like them.", "thumb/8/84/Korok209.png/200px-Korok209.png"}},
-    //     {210, {"Geronimo.", "thumb/2/22/Korok210.png/200px-Korok210.png"}},
-    //     {211, {"Climb up to the seed platform on the wood platform high above the chasm to the east, then race to the seed. The ring disappears quickly, so save before you attempt it. Speed boosts help, run off the platform, paraglide very little (gliding spends the most time while covering the least distance and height), then sprint to the circle.", "thumb/1/14/Korok211.png/200px-Korok211.png"}},
-    //     {212, {"Roll the boulder into the hole.", "thumb/c/c9/Korok212.png/200px-Korok212.png"}},
-    //     {213, {"Climb to the top of Dueling Peaks Stable, then examine the fairy lights.", "thumb/8/86/Korok213.png/200px-Korok213.png"}},
-    //     {214, {"Climb the tree, lift the rock.", "thumb/8/85/Korok214.png/200px-Korok214.png"}},
-    //     {215, {"Solve the simple block puzzle for the seed.", "thumb/9/96/Korok215.png/200px-Korok215.png"}},
-    //     {216, {"Stand near the pinwheel and shoot acorns that get thrown up above the nearby tree to the north.", "thumb/e/e0/Korok216.png/200px-Korok216.png"}},
-    //     {217, {"Pick up the rock here.", "thumb/0/04/Korok217.png/200px-Korok217.png"}},
-    //     {218, {"Climb up to this ledge, and lift this rock.", "thumb/1/15/Korok218.png/200px-Korok218.png"}},
-    //     {219, {"Climb up the tree, lift the rock.", "thumb/5/56/Korok219.png/200px-Korok219.png"}},
-    //     {220, {"Roll a boulder through the two trees. Some boulders can be found uphill to the west.", "thumb/6/62/Korok220.png/200px-Korok220.png"}},
-    //     {221, {"Use Magnesis to move the iron cube into the correct spot.", "thumb/7/78/Korok221.png/200px-Korok221.png"}},
-    //     {222, {"Throw one of the many available rocks into the center of the circle. Use Cryonis Rune to help.", "thumb/4/42/Korok222.png/200px-Korok222.png"}},
-    //     {223, {"Find the acorn in a hole in a tree and shoot it.", "thumb/f/f1/Korok223.png/200px-Korok223.png"}},
-    //     {224, {"Complete the star-shaped stone pattern with a nearby rock.", "thumb/b/b6/Korok224.png/200px-Korok224.png"}},
-    //     {225, {"Roll this boulder away and then lift the uncovered rock.", "thumb/e/e2/Korok225.png/200px-Korok225.png"}},
-    //     {226, {"Catch the fairy lights below the overhang.", "thumb/d/d6/Korok226.png/200px-Korok226.png"}},
-    //     {227, {"Half this block puzzle is underwater. Solve it.", "thumb/a/aa/Korok227.png/200px-Korok227.png"}},
-    //     {228, {"Complete the block puzzle.", "thumb/f/f9/Korok228.png/200px-Korok228.png"}},
-    //     {229, {"Stand next to the pinwheel to trigger a balloon. A well timed bomb will make this balloon much easier than attempting to shoot it with arrows.", "thumb/5/5a/Korok229.png/200px-Korok229.png"}},
-    //     {230, {"The seed platform is on a ledge to the southeast. Race to the ring at the top of the enemy encampment.", "thumb/6/61/Korok230.png/200px-Korok230.png"}},
-    //     {231, {"Offer an apple to the offering bowl that's missing one.", "thumb/d/df/Korok231.png/200px-Korok231.png"}},
-    //     {232, {"The rock needed to complete this x-shaped puzzle is hidden in a nearby bush to the east. If you have a weapon that cuts grass/bushes, this will make it much easier to find.", "thumb/7/70/Korok232.png/200px-Korok232.png"}},
-    //     {233, {"Roll the boulder into the hole.", "thumb/c/cf/Korok233.png/200px-Korok233.png"}},
-    //     {234, {"Catch the fairy lights.", "thumb/e/eb/Korok234.png/200px-Korok234.png"}},
-    //     {235, {"Surrounding this rock are a square pattern of large metal cubes in the water . One is out of place. Use Cryonis to reach it, and Magnesis to move it into place.", "thumb/4/43/Korok235.png/200px-Korok235.png"}},
-    //     {236, {"Pick up the rock at the ruins of the broken pillar.", "thumb/c/c2/Korok236.png/200px-Korok236.png"}},
-    //     {237, {"Uphill to the southeast is a shield vendor who talks about shield surfing. This should be a hint. In the tree above him is the seed platform to start the race. Shield surf down to the marker for your seed.", "thumb/d/de/Korok237.png/200px-Korok237.png"}},
-    //     {238, {"Follow the flower trail down the side of the broken pillar.", "thumb/a/ae/Korok238.png/200px-Korok238.png"}},
-    //     {239, {"The seed platform is to the southwest next to a dead guardian. Race to the ring.", "thumb/f/f7/Korok239.png/200px-Korok239.png"}},
-    //     {240, {"Shoot the acorn tucked inside this hollow log.", "thumb/3/3a/Korok240.jpg/200px-Korok240.jpg"}},
-    //     {241, {"Follow the yellow flower trail. It begins on the hill just northwest of the end mark. Note that the final yellow flower before the end hides on the edge of the cliff.", "thumb/5/5e/Korok241.png/200px-Korok241.png"}},
-    //     {242, {"Follow the flower trail that starts on the pillar to the west.", "thumb/6/6a/Korok242.png/200px-Korok242.png"}},
-    //     {243, {"There are three very large rock circles, with smaller circles of rocks within them. Take the stray rock from between the 3 large boulders in the southern huge circle, and put it in the middle of the smallest circle of rocks in the northern huge circle.", "thumb/7/7b/Korok243.png/200px-Korok243.png"}},
-    //     {244, {"Lift the stone hidden behind the bombable rocks.", "thumb/1/10/Korok244.png/200px-Korok244.png"}},
-    //     {245, {"Lift up the iron ball and put it into the well.", "thumb/0/0f/Korok245.png/200px-Korok245.png"}},
-    //     {246, {"Chase and catch the fairy lights circling the pond.", "thumb/e/ee/Korok246.png/200px-Korok246.png"}},
-    //     {247, {"Solve the block puzzle. The block is downhill to the west.", "thumb/6/6a/Korok247.png/200px-Korok247.png"}},
-    //     {248, {"Solve the Magnesis block puzzle.", "thumb/8/8a/Korok248.png/200px-Korok248.png"}},
-    //     {249, {"The seed platform for this race is on the larger plateau to the north.", "thumb/a/ad/Korok249.png/200px-Korok249.png"}},
-    //     {250, {"Pick up the rock.", "thumb/e/eb/Korok250.png/200px-Korok250.png"}},
-    //     {251, {"Melt the ice.", "thumb/c/c4/Korok251.png/200px-Korok251.png"}},
-    //     {252, {"Follow the flower trail across the ribs.", "thumb/2/2b/Korok252.png/200px-Korok252.png"}},
-    //     {253, {"This flower trail goes back and forth to the various rocks in the area.", "thumb/1/14/Korok253.png/200px-Korok253.png"}},
-    //     {254, {"One cactus has too many voltfruit. Make it look like the other two.", "thumb/6/64/Korok254.png/200px-Korok254.png"}},
-    //     {255, {"Follow the flower trail across the ribs.", "thumb/5/59/Korok255.png/200px-Korok255.png"}},
-    //     {256, {"Pick up the rock.", "thumb/c/cb/Korok256.png/200px-Korok256.png"}},
-    //     {257, {"Remove fruit from the cactus with extra until it matches.", "thumb/e/ed/Korok257.png/200px-Korok257.png"}},
-    //     {258, {"Lift the metal door with Magnesis, then the little rock with your bulging muscles.", "thumb/d/d0/Korok258.png/200px-Korok258.png"}},
-    //     {259, {"Blow up the cracked boulders on top of the temple entrance and lift up the small rock hidden underneath.", "thumb/f/f9/Korok259.png/200px-Korok259.png"}},
-    //     {260, {"Use Magnesis to move the metal door away, then lift up the small rock hidden underneath.", "thumb/a/ab/Korok260.png/200px-Korok260.png"}},
-    //     {261, {"Under a rock on top of the pillar.", "thumb/5/54/Korok261.png/200px-Korok261.png"}},
-    //     {262, {"Catch the fairy lights.", "thumb/2/28/Korok262.png/200px-Korok262.png"}},
-    //     {263, {"Stand near the pinwheel and shoot all three balloon targets.", "thumb/8/87/Korok263.png/200px-Korok263.png"}},
-    //     {264, {"Jump or dive into the ring of flowers in the water.", "thumb/c/cb/Korok264.png/200px-Korok264.png"}},
-    //     {265, {"Lift the rock.", "thumb/b/b8/Korok265.png/200px-Korok265.png"}},
-    //     {266, {"Run through the yellow flower patches in order from 1 to 5. Patch 5 is in the tree behind patch 4.", "thumb/9/9e/Korok266.png/200px-Korok266.png"}},
-    //     {267, {"Remove apples from the tree with too many until it looks like the other two.", "thumb/a/a5/Korok267.png/200px-Korok267.png"}},
-    //     {268, {"Use Magnesis to lift the chained metal boulder into the center of the stone pillars.", "thumb/1/17/Korok268.png/200px-Korok268.png"}},
-    //     {269, {"Halfway down the northern waterfall there's a ledge with a rock. Pick up the rock.", "thumb/2/29/Korok269.png/200px-Korok269.png"}},
-    //     {270, {"Melt the ice.", "thumb/9/98/Korok270.png/200px-Korok270.png"}},
-    //     {271, {"Climb the pillar, pick up the rock.", "thumb/e/ef/Korok271.png/200px-Korok271.png"}},
-    //     {272, {"Catch the fairy lights.", "thumb/a/ac/Korok272.png/200px-Korok272.png"}},
-    //     {273, {"The seed platform is on the tree just to the east. Race to the ring.", "thumb/a/ab/Korok273.png/200px-Korok273.png"}},
-    //     {274, {"Climb up to the seed platform a short bit to the north, then race to the ring.", "thumb/6/6d/Korok274.png/200px-Korok274.png"}},
-    //     {275, {"Put an apple in the empty basket near the statue so that both baskets match.", "thumb/e/ef/Korok275.png/200px-Korok275.png"}},
-    //     {276, {"Solve the Magnesis block puzzle. The block you need is in the lake.", "thumb/e/e7/Korok276.png/200px-Korok276.png"}},
-    //     {277, {"Jump/dive into the ring of water lilies.", "thumb/1/1e/Korok277.png/200px-Korok277.png"}},
-    //     {278, {"The flower trail starts in the stump to the west.", "thumb/a/a2/Korok278.png/200px-Korok278.png"}},
-    //     {279, {"Catch the fairy lights.", "thumb/f/fb/Korok279.png/200px-Korok279.png"}},
-    //     {280, {"The first flower in this trail is southeast of the Voo Lota Shrine location, just past the tree.", "thumb/f/f9/Korok280.png/200px-Korok280.png"}},
-    //     {281, {"Under a rock under a pile of leaves.", "thumb/c/ca/Korok281.png/200px-Korok281.png"}},
-    //     {282, {"Complete the stone circle.", "thumb/e/e5/Korok282.png/200px-Korok282.png"}},
-    //     {283, {"Dive or jump into the circle of water lilies.", "thumb/b/b6/Korok283.png/200px-Korok283.png"}},
-    //     {284, {"Stand on the seed platform found on the large cliff southwest of here (jutting out from the eastern cliff face), and then race to the ring before the time runs out.", "thumb/b/b4/Korok284.png/200px-Korok284.png"}},
-    //     {285, {"Catch the fairy lights that run around in the area.", "thumb/8/85/Korok285.png/200px-Korok285.png"}},
-    //     {286, {"Solve the block-puzzle by using Magnesis.", "thumb/4/4d/Korok286.png/200px-Korok286.png"}},
-    //     {287, {"Throw a rock into the circle of rocks in the pond.", "thumb/1/16/Korok287.png/200px-Korok287.png"}},
-    //     {288, {"Put two magnetic rocks into two hollowed out tree stumps.", "thumb/6/68/Korok288.png/200px-Korok288.png"}},
-    //     {289, {"Run through each of the flower bunches in order from least to most. To reach the fourth flower bunch inside the hollow tree surrounded by thorns you can burn away the thorns, or glide down from a nearby tree.", "thumb/e/e6/Korok289.png/200px-Korok289.png"}},
-    //     {290, {"Blow up the boulders, pick up the rock.", "thumb/c/c3/Korok290.png/200px-Korok290.png"}},
-    //     {291, {"Complete the circle of rocks.", "thumb/7/77/Korok291.png/200px-Korok291.png"}},
-    //     {292, {"Climb up the dead tree in in the hollow stump next to the shrine. Examine the fairy lights at the top.", "thumb/6/69/Korok292.png/200px-Korok292.png"}},
-    //     {293, {"Roll a boulder into the pond below.", "thumb/6/68/Korok293.png/200px-Korok293.png"}},
-    //     {294, {"Use a rock to complete the circle.", "2/2b/Korok294.png"}},
-    //     {295, {"Find a nearby small rock just to the west underneath a Bokoblin camp. Bring it over to the stone circle and drop it in place to reveal the Korok.", "thumb/e/ee/Korok295.png/200px-Korok295.png"}},
-    //     {296, {"The seed platform is to the southwest, at the top of the tall rock pillar arching over the road. Race to the ring.", "thumb/5/52/Korok296.png/200px-Korok296.png"}},
-    //     {297, {"Dive into the circle below.", "thumb/5/50/Korok297.png/200px-Korok297.png"}},
-    //     {298, {"Use Magnesis on the metal cube that's in the nearby broken down house. Match the box puzzle, making the patterns identical.", "thumb/4/4e/Korok298.png/200px-Korok298.png"}},
-    //     {299, {"Under a rock behind corrupted area. Shoot the eye to clear the Malice.", "thumb/5/54/Korok299.png/200px-Korok299.png"}},
-    //     {300, {"Solve the cube puzzle. The cube is in the water.", "thumb/e/ef/Korok300.png/200px-Korok300.png"}},
-    //     {301, {"Solve the Magnesis block puzzle.", "thumb/1/11/Korok301.png/200px-Korok301.png"}},
-    //     {302, {"Solve the Magnesis block puzzle.", "thumb/b/b7/Korok302.png/200px-Korok302.png"}},
-    //     {303, {"Climb the thin rock pillar next to Gerudo Stables, and lift the rock.", "thumb/b/b3/Korok303.png/200px-Korok303.png"}},
-    //     {304, {"Lift up the small rock.", "thumb/8/8f/Korok304.png/200px-Korok304.png"}},
-    //     {305, {"Shoot the hanging acorn.", "thumb/2/28/Korok305.png/200px-Korok305.png"}},
-    //     {306, {"Put a rock in the middle of the stone rings.", "thumb/7/79/Korok306.png/200px-Korok306.png"}},
-    //     {307, {"Use Magnesis to put the iron ball in the treestump.", "thumb/2/2a/Korok307.png/200px-Korok307.png"}},
-    //     {308, {"Put apples in all offering bowls that are missing one.", "thumb/e/ee/Korok308.png/200px-Korok308.png"}},
-    //     {309, {"Under a rock on top of a stone pillar.", "thumb/2/2c/Korok309.png/200px-Korok309.png"}},
-    //     {310, {"Run through the patches of flowers 1-5.", "thumb/5/51/Korok310.png/200px-Korok310.png"}},
-    //     {311, {"Complete the circle of rocks.", "thumb/2/21/Korok311.png/200px-Korok311.png"}},
-    //     {312, {"Under the rock.", "thumb/c/c8/Korok312.png/200px-Korok312.png"}},
-    //     {313, {"Dive/jump into the circle of water lilies.", "thumb/4/46/Korok313.png/200px-Korok313.png"}},
-    //     {314, {"Stand next to the pinwheel and shoot down all five balloon targets.", "thumb/3/36/Korok314.png/200px-Korok314.png"}},
-    //     {315, {"Under the overhang in the cave, fill the remaining bowls with an apple.", "thumb/5/5e/Korok315.png/200px-Korok315.png"}},
-    //     {316, {"Complete the rock circle. The rock is in the direction of the open gap (west).", "thumb/b/be/Korok316.png/200px-Korok316.png"}},
-    //     {317, {"Pick up the rock.", "thumb/c/cf/Korok317.png/200px-Korok317.png"}},
-    //     {321, {"Follow the trail of flowers across the stone crossing.", "thumb/9/9d/Korok321.png/200px-Korok321.png"}},
-    //     {335, {"This seed starts at a seed platform next to the tree on the peak to the east of this location. Start the race, then quickly glide and climb over to the closer tree. Climb to the very top of this tree, and then glide to the ring to get the seed. Cold Resistance Level 2 recommended.", "thumb/0/05/Korok335.png/200px-Korok335.png"}},
-    //     {339, {"Stand on the leaf stump (located north and slightly east), and then race to the circle before time runs out. Cold Resistance Level 2 recommended.", "thumb/2/27/Korok339.png/200px-Korok339.png"}},
-    //     {350, {"The flower trail starts on the southwest side of the hill. Follow it to the peak.", "thumb/5/55/Korok350.png/200px-Korok350.png"}},
-    //     {351, {"This long distance flower trail starts all the way at the top of the hill to the southwest. Specifically beginning at the end of the broken staircase in the ruins on top of the hill.", "thumb/4/48/Korok351.png/200px-Korok351.png"}},
-    //     {353, {"Activate the timer by standing on the seed platform, then quickly race to the top of the two angled pillars and jump off before the time runs out.", "thumb/4/4a/Korok353.png/200px-Korok353.png"}},
-    //     {355, {"The seed platform is on the Sanctum balcony. Reach the spire before time runs out.", "thumb/6/68/Korok355.png/200px-Korok355.png"}},
-    //     {367, {"The race starts west of the seed's location. You can face the nearby shrine and climb the snow path to the right up a ways to find the seed platform which starts the race.", "thumb/f/f6/Korok367.png/200px-Korok367.png"}},
-    //     {375, {"The flower trail to this seed starts at the top of the hill directly to the west. Cold Resistance Level 2 recommended.", "thumb/5/56/Korok375.png/200px-Korok375.png"}},
-    //     {377, {"This short flower trail begins on the coast on the way to the seed.", "thumb/a/a3/Korok377.png/200px-Korok377.png"}},
-    //     {402, {"Follow the flowers up the bridge support and to the left.", "thumb/d/d2/Korok402.png/200px-Korok402.png"}},
-    //     {403, {"Look to the southeast of the marker, one ledge down, to find the seed platform. Race up the cliff to the circle.", "thumb/8/82/Korok403.png/200px-Korok403.png"}},
-    //     {404, {"Follow the yellow flower trail. It begins east of the mark in the middle of a group of trees, and zigzags a little, going out of the circle of trees then returning nearby.", "thumb/8/8d/Korok404.png/200px-Korok404.png"}},
-    //     {420, {"Follow the yellow flower trail in a loop around the little pond area.", "thumb/1/1e/Korok420.png/200px-Korok420.png"}},
-    //     {442, {"The seed platform for this race is along the line of the ridge to the southeast. It's the peak just uphill to the west of the Soh Kofi Shrine. Once you reach the seed platform, glide and sprint to the end for your seed.", "thumb/7/7c/Korok442.png/200px-Korok442.png"}},
-    //     {452, {"The seed platform is at the bottom of the cliff. Climb up to the ring.", "thumb/4/4a/Korok452.png/200px-Korok452.png"}},
-    //     {463, {"Follow the trail of flowers starting from slightly south.", "thumb/f/ff/Korok463.png/200px-Korok463.png"}},
-    //     {465, {"The flower trail starts downhill to the west, and will involve some climbing to reach the seed.", "thumb/b/be/Korok465.png/200px-Korok465.png"}},
-    //     {474, {"Follow the flower trail up the hill.", "thumb/3/36/Korok474.png/200px-Korok474.png"}},
-    //     {482, {"The flower trail starts to the east, follow it through the tunnel to the west.", "thumb/b/bc/Korok482.png/200px-Korok482.png"}},
-    //     {491, {"The flower trail for this starts up the cliffs to the west, in the grove.", "thumb/a/a2/Korok491.png/200px-Korok491.png"}},
-    //     {492, {"Start the race on the seed platform to the south and slightly west. Race up to the cliff edge before the time runs out.", "thumb/6/64/Korok492.png/200px-Korok492.png"}},
-    //     {507, {"Stand on the nearby seed platform and then race to the ring.", "thumb/1/16/Korok507.png/200px-Korok507.png"}},
-    //     {509, {"The seed platform for this race is at the top of the cliff to the northeast. Race to the ring.", "thumb/b/ba/Korok509.png/200px-Korok509.png"}},
-    //     {510, {"This flower trail starts directly west, at the bottom of the cliff, and requires you to climb straight up. Bring lots of stamina 3 full bars isn't enough will need to replenish.", "thumb/f/f8/Korok510.png/200px-Korok510.png"}},
-    //     {512, {"The seed platform is on the ledge to the northwest. Race to the ring.", "thumb/3/35/Korok512.png/200px-Korok512.png"}},
-    //     {514, {"The flower trail starts inside the tunnel, then works its way up the northern cave entrance.", "thumb/a/ab/Korok514.png/200px-Korok514.png"}},
-    //     {516, {"On top of the inn, there are 3 palm tree trunks. Climb around these chasing the yellow flower trail.", "thumb/4/4b/Korok516.png/200px-Korok516.png"}},
-    //     {524, {"This race begins at the even taller pillar to the southwest.", "thumb/6/6a/Korok524.png/200px-Korok524.png"}},
-    //     {527, {"Follow the yellow flower trail that starts just on the opposite side of the bridge.", "thumb/8/81/Korok527.png/200px-Korok527.png"}},
-    //     {553, {"Step on the seed platform on the coast to the west and then race to the ring.", "thumb/c/ce/Korok553.png/200px-Korok553.png"}},
-    //     {570, {"The seed platform is visible to the north-northwest. Race to the ring for the seed.", "thumb/4/45/Korok570.png/200px-Korok570.png"}},
-    //     {584, {"Just to the north is a seed platform on a wooden platform. Race to the ring for the seed.", "thumb/a/aa/Korok584.png/200px-Korok584.png"}},
-    //     {590, {"Climb up to the seed platform, and then get to the ring, quick.", "thumb/9/90/Korok590.png/200px-Korok590.png"}},
-    //     {594, {"Follow the flower trail up the wall to the cliff above.", "thumb/2/21/Korok594.png/200px-Korok594.png"}},
-    //     {633, {"Race from the top of the mountain to the northwest.", "thumb/5/5b/Korok633.png/200px-Korok633.png"}},
-    //     {640, {"The seed platform is to the southwest, across the chasm. Race to the ring.", "thumb/7/76/Korok640.png/200px-Korok640.png"}},
-    //     {652, {"Follow a trail of flowers that starts slightly to the east.", "thumb/9/9d/Korok652.png/200px-Korok652.png"}},
-    //     {664, {"Climb the hill to the west of the marker to find this seed platform. You'll need to shield surf down the hill to reach the circle in time, as it expires very quickly. Cold Resistance Level 2 recommended", "thumb/a/a8/Korok664.png/200px-Korok664.png"}},
-    //     {676, {"Race from a lower pillar just to the north-northeast to this high pillar.", "thumb/b/bb/Korok676.png/200px-Korok676.png"}},
-    //     {691, {"Inside the cave, there's a yellow flower at the bottom of the Leviathan's spine directly behind the Shrine. Follow it to get the Korok Seed. Cold Resistance Level 2 recommended.", "thumb/c/c8/Korok691.png/200px-Korok691.png"}},
-    //     {702, {"Climb to the top of the rock sculpture of Daruk's head to find the seed platform. Race east towards the ring before the time runs out.", "thumb/9/9c/Korok702.png/200px-Korok702.png"}},
-    //     {731, {"To the east of the seed marker there's a ledge with the seed platform on it. Race to the ring.", "thumb/3/3a/Korok731.png/200px-Korok731.png"}},
-    //     {744, {"Follow the flower trail that starts in the north section of the ruins.", "thumb/5/50/Korok744.png/200px-Korok744.png"}},
-    //     {745, {"Race that starts from the under the east end of the bridge to finish under the west end of the bridge.", "thumb/0/09/Korok745.png/200px-Korok745.png"}},
-    //     {746, {"Race from a cliff to the north to the finish to the south.", "thumb/0/05/Korok746.png/200px-Korok746.png"}},
-    //     {749, {"Race from a cliff to the south to the finish to the north.", "thumb/5/50/Korok749.png/200px-Korok749.png"}},
-    //     {756, {"Follow the trail of flowers that start on top of the large mushroom tree to the southwest. Note, the final flower is on the floor, not a mushroom.", "thumb/3/3a/Korok756.png/200px-Korok756.png"}},
-    //     {757, {"Race from ground level just north up to the small mushroom.", "thumb/5/5a/Korok757.png/200px-Korok757.png"}},
-    //     {762, {"Race from a large mushroom tree to the southeast, finish on topside of another large mushroom tree.", "thumb/e/e5/Korok762.png/200px-Korok762.png"}},
-    //     {765, {"Race from the beach to the east of the seed location to the yellow ring on the rock.", "thumb/f/f5/Korok765.png/200px-Korok765.png"}},
-    //     {768, {"Reach the circle before the time limit. The seed platform is on the curved ledge to the southwest.", "thumb/1/14/Korok768.png/200px-Korok768.png"}},
-    //     {777, {"Follow the trail of flowers starting uphill to the southwest.", "thumb/4/4e/Korok777.png/200px-Korok777.png"}},
-    //     {778, {"The seed platform is way to the north, at the southwest corner of the plateau the Hebra West Summit is on, next to a large flag. Shield surf or paraglide to the end location.", "thumb/6/65/Korok778.png/200px-Korok778.png"}},
-    //     {780, {"There is a Korok platform on top of the wall to the south of the fountain, west of the gate. Glide from there to the fountain.", "thumb/4/46/Korok780.png/200px-Korok780.png"}},
-    //     {790, {"Follow the flower trail starting under the bridge on the southern side of the moat.", "thumb/0/06/Korok790.png/200px-Korok790.png"}},
-    //     {805, {"The seed platform is to the north, just west of where the water begins, at the highest point overlooking the falls. Race to the ring.", "thumb/2/2a/Korok805.png/200px-Korok805.png"}},
-    //     {819, {"The seed platform is on the skull. Race to the ring.", "thumb/7/77/Korok819.png/200px-Korok819.png"}},
-    //     {821, {"Find the seed platform up hill. Race in time to the target to reveal the Korok.", "thumb/c/c0/Korok821.png/200px-Korok821.png"}},
-    //     {837, {"Follow the flower trail. It starts west-northwest of Sturnida Secret Hot Spring, halfway up the cliff. The trail leads south along the cliff face.", "thumb/7/79/Korok837.png/200px-Korok837.png"}},
-    //     {838, {"The flower trail starts a short distance southeast and down the cliff. Follow it up the cliff.", "thumb/b/b2/Korok838.png/200px-Korok838.png"}},
-    //     {854, {"Follow the trail of flowers that starts next to the road to the north.", "thumb/9/9f/Korok854.png/200px-Korok854.png"}},
-    //     {878, {"Race to the finish from the platform to the west-southwest. Use the updraft and your paraglider to gain height quickly.", "thumb/a/ac/Korok878.png/200px-Korok878.png"}},
-    //     {318, {"Pick up the rock on the balcony outside Princess Zelda's Room.", "c/c1/BotW_Map_Icon_Korok_Seed.png"}},
-    //     {319, {"From on top of the well, shoot the balloons as they fly behind the trees.", "thumb/4/47/Korok319.png/200px-Korok319.png"}},
-    //     {320, {"Box Puzzle. Make the two patterns identical using Magnesis on the metal box.", "thumb/4/48/Korok320.png/200px-Korok320.png"}},
-    //     {322, {"Directly to the north, wedged between two cliffs are some boulders. Roll one of them down the small ravine and into the hole.", "thumb/3/3b/Korok322.png/200px-Korok322.png"}},
-    //     {323, {"Climb the tree, pick up the rock.", "thumb/b/b3/Korok323.png/200px-Korok323.png"}},
-    //     {324, {"Throw a rock into the circle of rocks.", "thumb/7/76/Korok324.png/200px-Korok324.png"}},
-    //     {325, {"Climb the tree, lift the rock.", "thumb/9/96/Korok325.png/200px-Korok325.png"}},
-    //     {326, {"Stand near the pinwheel, shoot the nearby flying acorns.", "thumb/d/d3/Korok326.png/200px-Korok326.png"}},
-    //     {327, {"Climb the tree, lift the rock.", "thumb/b/b3/Korok327.png/200px-Korok327.png"}},
-    //     {328, {"Climb the tallest tree and examine the fairy lights at the top.", "thumb/f/f5/Korok328.png/200px-Korok328.png"}},
-    //     {329, {"One tree has too many apples. Make it look like the others.", "thumb/5/51/Korok329.png/200px-Korok329.png"}},
-    //     {330, {"Under a rock under a pile of leaves.", "thumb/3/34/Korok330.png/200px-Korok330.png"}},
-    //     {331, {"Drop an apple in the offering bowl.", "thumb/0/0f/Korok331.png/200px-Korok331.png"}},
-    //     {332, {"Bowl the boulder into the hole. The boulder is uphill to the southeast.", "thumb/b/b7/Korok332.png/200px-Korok332.png"}},
-    //     {333, {"Melt the block of ice. Cold Resistance Level 2 recommended.", "thumb/b/bd/Korok333.png/200px-Korok333.png"}},
-    //     {334, {"Push the center boulder to where it belongs.", "thumb/5/5a/Korok334.png/200px-Korok334.png"}},
-    //     {336, {"Put a rock in the gap to finish the circle. The rock you need is to the northwest.", "thumb/9/92/Korok336.png/200px-Korok336.png"}},
-    //     {337, {"Fairy lights on top of the hut.", "thumb/e/e1/Korok337.png/200px-Korok337.png"}},
-    //     {338, {"Climb to the top of the tree in the middle of the lake, and pick up the rock.", "thumb/8/8b/Korok338.png/200px-Korok338.png"}},
-    //     {340, {"Jump or dive into the circle of water lilies.", "thumb/e/ed/Korok340.png/200px-Korok340.png"}},
-    //     {341, {"Place a rock to finish the circle. The rock you need is to the east.", "thumb/9/92/Korok341.png/200px-Korok341.png"}},
-    //     {342, {"Place a Hearty Durian in the leaf at the base of the easternmost statue.", "thumb/4/43/Korok342.png/200px-Korok342.png"}},
-    //     {343, {"Pick up the rock near the pile of dead guardians.", "thumb/4/46/Korok343.png/200px-Korok343.png"}},
-    //     {344, {"Jump or dive into the circle of water lilies.", "thumb/5/50/Korok344.png/200px-Korok344.png"}},
-    //     {345, {"Blast the boulders then pick up the small rock.", "thumb/f/f7/Korok345.png/200px-Korok345.png"}},
-    //     {346, {"Fairy Lights are circling the location. Catch them. Cold Resistance Level 2 recommended.", "thumb/c/c3/Korok346.png/200px-Korok346.png"}},
-    //     {347, {"Jump into the ring of water lilies.", "thumb/a/a2/Korok347.png/200px-Korok347.png"}},
-    //     {348, {"Climb the small pillar, pick up the small rock.", "thumb/4/4d/Korok348.png/200px-Korok348.png"}},
-    //     {349, {"Pick up the rock on the wooden platform just down the cliff.", "thumb/2/28/Korok349.png/200px-Korok349.png"}},
-    //     {352, {"Solve the block puzzle. The cube is located on top of the ruins to the west.", "thumb/f/f4/Korok352.png/200px-Korok352.png"}},
-    //     {354, {"Find the pinwheel on the far end of the castle wall. Shoot five balloons to reveal the Korok.", "thumb/2/24/Korok354.png/200px-Korok354.png"}},
-    //     {356, {"In the tower at the top of the castle, shoot the balloon hiding above the bell.", "thumb/3/3e/Korok356.png/200px-Korok356.png"}},
-    //     {357, {"Climb the castle to the very top of the spire and examine the fairy lights.", "thumb/a/a0/Korok357.png/200px-Korok357.png"}},
-    //     {358, {"Climb to the top of the spire on the roof of the Second Gatehouse.", "thumb/7/7c/Korok358.png/200px-Korok358.png"}},
-    //     {359, {"From outside, head through the Dining Hall and into the corridor on the other side. From there, follow the left wall to find a bombable wall in a corridor before the next room. Break it and shoot the acorn hanging above the statue holding the Rusty Claymore, to reveal a Korok.", "thumb/9/9a/Korok359.png/200px-Korok359.png"}},
-    //     {360, {"Blow up the wall to reveal the rock.", "thumb/c/c6/Korok360.png/200px-Korok360.png"}},
-    //     {361, {"Follow the order of the flowers. The first flower is on the dead guardian next to the group of two flowers.", "thumb/3/3e/Korok361.png/200px-Korok361.png"}},
-    //     {362, {"Finish the magnetic block puzzle with the block submerged to the east.", "thumb/b/ba/Korok362.png/200px-Korok362.png"}},
-    //     {363, {"Place a rock to complete the circle. The rock you need is to the east by some bare trees; use Stasis to help you find it. Cold Resistance Level 2 recommended.", "thumb/5/5b/Korok363.png/200px-Korok363.png"}},
-    //     {364, {"A balloon is next to some of the supports for the rock bridge. Shoot it to get the seed.", "thumb/9/98/Korok364.png/200px-Korok364.png"}},
-    //     {365, {"Run through the flowers in order.", "thumb/0/0b/Korok365.png/200px-Korok365.png"}},
-    //     {366, {"Use the nearby rock to complete the circle.", "thumb/3/3c/Korok366.png/200px-Korok366.png"}},
-    //     {368, {"Climb the tree, lift the rock.", "thumb/a/a0/Korok368.png/200px-Korok368.png"}},
-    //     {369, {"Jump into the ring of water lilies.", "thumb/0/00/Korok369.png/200px-Korok369.png"}},
-    //     {370, {"Use Magnesis to move the iron boulder into the dug out tree stump.", "thumb/4/4d/Korok370.png/200px-Korok370.png"}},
-    //     {371, {"Jump, dive, or fall into the ring of water lilies.", "thumb/1/18/Korok371.png/200px-Korok371.png"}},
-    //     {372, {"Under the rock.", "thumb/3/3e/Korok372.png/200px-Korok372.png"}},
-    //     {373, {"Use Magnesis to move the chained rock into the stump.", "thumb/3/36/Korok373.png/200px-Korok373.png"}},
-    //     {374, {"Seed is under a metal door in the middle of some ruins.", "thumb/1/1e/Korok374.png/200px-Korok374.png"}},
-    //     {376, {"Jump or dive into the circle of lilies in the water.", "thumb/2/2b/Korok376.png/200px-Korok376.png"}},
-    //     {378, {"Dive into the circle of floating seaweed.", "thumb/4/46/Korok378.png/200px-Korok378.png"}},
-    //     {379, {"Drop a rock to complete the circle. The rock is downhill in the direction of the open spot (southwest).", "thumb/7/74/Korok379.png/200px-Korok379.png"}},
-    //     {380, {"Just below the top of the cliff is a small ledge with a rock. Pick it up.", "thumb/b/b8/Korok380.png/200px-Korok380.png"}},
-    //     {381, {"Catch the fairy lights.", "thumb/9/91/Korok381.png/200px-Korok381.png"}},
-    //     {382, {"Under a rock behind some destructible rocks.", "thumb/7/76/Korok382.png/200px-Korok382.png"}},
-    //     {383, {"Roll a giant boulder from uphill to the south down into the dug out pit.", "thumb/c/ce/Korok383.png/200px-Korok383.png"}},
-    //     {384, {"Remove apples from the tree with many to have it match the other two.", "thumb/e/e0/Korok384.png/200px-Korok384.png"}},
-    //     {385, {"Complete the spiral rock pattern.", "thumb/c/ce/Korok385.png/200px-Korok385.png"}},
-    //     {386, {"Shoot the acorn hidden in the tree trunk.", "thumb/9/91/Korok386.png/200px-Korok386.png"}},
-    //     {387, {"Pick up this rock.", "thumb/2/2f/Korok387.png/200px-Korok387.png"}},
-    //     {388, {"Under the rock.", "thumb/5/59/Korok388.png/200px-Korok388.png"}},
-    //     {389, {"Jump or fall into the ring of water lilies.", "thumb/c/cf/Korok389.png/200px-Korok389.png"}},
-    //     {390, {"Stand next to the pinwheel and shoot the three balloons. Cold Resistance Level 2 recommended", "thumb/f/ff/Korok390.png/200px-Korok390.png"}},
-    //     {391, {"One of the trees has too many apples. Remove them until it matches the other two.", "thumb/4/45/Korok391.png/200px-Korok391.png"}},
-    //     {392, {"Shoot the acorn in the tree.", "thumb/3/34/Korok392.png/200px-Korok392.png"}},
-    //     {393, {"The nearby dirt road makes a loop; along that loop are 10 signs with bullseye targets. Shoot them all. Back at the cabin, a balloon will appear, shoot it too for the seed.", "thumb/e/e4/Korok393.png/200px-Korok393.png"}},
-    //     {394, {"Under a rock. Cold Resistance Level 2 recommended", "thumb/5/59/Korok394.png/200px-Korok394.png"}},
-    //     {395, {"Under a rock hidden beneath the snowy hill formation. Cold Resistance Level 2 recommended", "thumb/f/fa/Korok395.png/200px-Korok395.png"}},
-    //     {396, {"Roll the boulder into the hole. Boulders are uphill to the east.", "thumb/0/0b/Korok396.png/200px-Korok396.png"}},
-    //     {397, {"Use Magnesis to move the chained rock into the well.", "thumb/7/79/Korok397.png/200px-Korok397.png"}},
-    //     {398, {"Pick up the rock to the east of here and place it in the missing spot in the ring of boulders.", "thumb/5/59/Korok398.png/200px-Korok398.png"}},
-    //     {399, {"Blow up the rocks here, then pick up the one under them.", "thumb/b/ba/Korok399.png/200px-Korok399.png"}},
-    //     {400, {"Shoot the acorn in the tree.", "thumb/f/ff/Korok400.png/200px-Korok400.png"}},
-    //     {401, {"Catch the fairy lights.", "thumb/c/cf/Korok401.png/200px-Korok401.png"}},
-    //     {405, {"Complete the heart shaped rock formation.", "thumb/8/8d/Korok405.png/200px-Korok405.png"}},
-    //     {406, {"Pick up the rock on top of the large tree.", "thumb/4/4e/Korok406.png/200px-Korok406.png"}},
-    //     {407, {"Complete the stone circle with a rock by the nearby Bokoblin camp to the north. It will be next to one of the wooden pillars.", "thumb/6/66/Korok407.png/200px-Korok407.png"}},
-    //     {408, {"Complete the rock pattern. The rock you need is just downhill.", "thumb/9/9f/Korok408.png/200px-Korok408.png"}},
-    //     {409, {"Put three rocks in the big circular stone formation from the smaller rock formations around it.", "thumb/8/82/Korok409.png/200px-Korok409.png"}},
-    //     {410, {"Pick up the stone on the small ledge.", "thumb/9/9e/Korok410.jpg/200px-Korok410.jpg"}},
-    //     {411, {"Pick up this rock, almost at the top of the cliff.", "thumb/f/f9/Korok411.png/200px-Korok411.png"}},
-    //     {412, {"Complete the rock pattern.", "thumb/e/ed/Korok412.png/200px-Korok412.png"}},
-    //     {413, {"The rock needed to complete this stone circle is on the cliff above.", "thumb/c/cb/Korok413.png/200px-Korok413.png"}},
-    //     {414, {"On the beach is a ring of rocks with one spot missing. Find the nearby boulder (close to the palm tree), pick it up and drop it into the missing spot.", "thumb/d/db/Korok414.png/200px-Korok414.png"}},
-    //     {415, {"Stand next to the pinwheel, shoot the balloon. Cold Resistance Level 2 recommended.", "thumb/4/4b/Korok415.png/200px-Korok415.png"}},
-    //     {416, {"Melt the left piece of ice to reveal leaves to examine. Cold Resistance Level 2 recommended.", "thumb/8/80/Korok416.png/200px-Korok416.png"}},
-    //     {417, {"Pick up the rock from the center of the circle and put it in the missing spot on the outer circle.", "thumb/1/1b/Korok417.png/200px-Korok417.png"}},
-    //     {418, {"Stand near the pinwheel and shoot the balloons.", "thumb/9/97/Korok418.png/200px-Korok418.png"}},
-    //     {419, {"Bomb the large pile of rocks, then lift up the small rock that was hidden underneath.", "thumb/e/e1/Korok419.png/200px-Korok419.png"}},
-    //     {421, {"Remove the large rock (use Stasis and hit it), then pick up the smaller.", "thumb/4/40/Korok421.png/200px-Korok421.png"}},
-    //     {422, {"Stand next to the pinwheel and then shoot down all three balloon targets.", "thumb/8/81/Korok422.png/200px-Korok422.png"}},
-    //     {423, {"Fairy lights circle the area. Catch them.", "thumb/0/06/Korok423.png/200px-Korok423.png"}},
-    //     {424, {"Above the Spring of Power on an upper rock layer, a rock sits on top a small hill. Lift it and a Korok will appear to give you a seed.", "thumb/7/7f/Korok424.png/200px-Korok424.png"}},
-    //     {425, {"Remove apples from the tree with too many to match the other two.", "thumb/d/d6/Korok425.png/200px-Korok425.png"}},
-    //     {426, {"Solve the block puzzle. The block is on top of a pillar to the west. You'll need Level 1 cold resistance where the puzzle is.", "thumb/0/03/Korok426.png/200px-Korok426.png"}},
-    //     {427, {"Use magnesis to put the rock in the well.", "thumb/8/81/Korok427.png/200px-Korok427.png"}},
-    //     {428, {"Burn away the brambles or float over them, and pick up the rock.", "thumb/b/bc/Korok428.png/200px-Korok428.png"}},
-    //     {429, {"Fairy lights circle the area. Catch them.", "thumb/2/2f/Korok429.png/200px-Korok429.png"}},
-    //     {430, {"Complete the rock triangle.", "thumb/e/ec/Korok430.png/200px-Korok430.png"}},
-    //     {431, {"Use the nearby rock to complete the circle.", "thumb/7/77/Korok431.png/200px-Korok431.png"}},
-    //     {432, {"Melt the large chunk of ice.", "thumb/5/51/Korok432.png/200px-Korok432.png"}},
-    //     {433, {"Use the nearby rock to complete the circle.", "thumb/9/93/Korok433.png/200px-Korok433.png"}},
-    //     {434, {"Use the rock to complete the circle.", "thumb/a/a2/Korok434.png/200px-Korok434.png"}},
-    //     {435, {"Make both rock patterns match.", "thumb/e/e0/Korok435.png/200px-Korok435.png"}},
-    //     {436, {"Shoot the balloon hiding in the tree.", "thumb/c/c5/Korok436.png/200px-Korok436.png"}},
-    //     {437, {"Use Magnesis to lift the block out of the water and complete the puzzle.", "thumb/f/fd/Korok437.png/200px-Korok437.png"}},
-    //     {438, {"Move the slab to reveal the rock to pick up.", "thumb/4/4e/Korok438.png/200px-Korok438.png"}},
-    //     {439, {"Hit the leaves, then pick up the rock.", "thumb/3/38/Korok439.png/200px-Korok439.png"}},
-    //     {440, {"Create a cryonis pillar next to the circle of water lilies and then dive into it.", "thumb/a/a1/Korok440.png/200px-Korok440.png"}},
-    //     {441, {"Dive into the circle of lilies.", "thumb/6/65/Korok441.png/200px-Korok441.png"}},
-    //     {443, {"Throw a rock into the circle of rocks in the water.", "thumb/4/4b/Korok443.png/200px-Korok443.png"}},
-    //     {444, {"Climb to the top of the tree and examine the fairy lights.", "thumb/5/57/Korok444.png/200px-Korok444.png"}},
-    //     {445, {"Jump into the circle of seaweed/plants.", "thumb/6/6b/Korok445.png/200px-Korok445.png"}},
-    //     {446, {"Get a rock to the roof, and complete the rock triangle. This can be difficult and there are multiple methods.", "thumb/2/23/Korok446.png/200px-Korok446.png"}},
-    //     {447, {"Clear away the leaves and then lift up the small rock.", "thumb/a/ae/Korok447.png/200px-Korok447.png"}},
-    //     {448, {"Jump or dive into the ring of flower lilies in the water.", "thumb/6/6e/Korok448.png/200px-Korok448.png"}},
-    //     {449, {"Climb to the top of the peak here and lift the small rock.", "thumb/8/8a/Korok449.png/200px-Korok449.png"}},
-    //     {450, {"Lift the small rock next to this tree, right next to the opening that leads into the tunnel beneath the hill.", "thumb/1/18/Korok450.png/200px-Korok450.png"}},
-    //     {451, {"At the top of this plateau are 3 durian trees. Pluck 2 Hearty Durians to make the west-most tree identical to the other 2 trees.", "thumb/2/2e/Korok451.png/200px-Korok451.png"}},
-    //     {453, {"Halfway up the waterfall are two ledges to the left and the right. On one of them is a Magnesis puzzle; the other ledge contains the missing block. Refrain from using Cryonis on the waterfall, since the blocks will come out tilted and will make the cube fall; the range of Magnesis is long enough for the cube to reach the puzzle ledge.", "thumb/f/f5/Korok453.png/200px-Korok453.png"}},
-    //     {454, {"Climb to the top of the tree and stand near the pinwheel. Three balloons will appear. Shoot them all to make the Korok appear. These Balloons are well hidden, including one hanging just below the edge of the tree platform, so look around carefully.", "thumb/e/ea/Korok454.png/200px-Korok454.png"}},
-    //     {455, {"Lift the rock.", "thumb/1/15/Korok455.png/200px-Korok455.png"}},
-    //     {456, {"Solve the block puzzle.", "thumb/e/ee/Korok456.png/200px-Korok456.png"}},
-    //     {457, {"Throw a rock in the circle of rocks. Getting some height from the ledge to the left and using Cryonis makes it easier.", "thumb/f/ff/Korok457.png/200px-Korok457.png"}},
-    //     {458, {"A balloon is floating above the river. Shoot it. Gliding close and using a mid-air shot might help, or just drop a bomb on it like you can for every other balloon", "thumb/4/45/Korok458.png/200px-Korok458.png"}},
-    //     {459, {"Destroy the acorn. Shooting it with an arrow is easiest.", "thumb/6/62/Korok459.png/200px-Korok459.png"}},
-    //     {460, {"Match the apple pattern on the tree.", "thumb/2/2f/Korok460.png/200px-Korok460.png"}},
-    //     {461, {"Catch the Fairy Lights.", "thumb/7/70/Korok461.png/200px-Korok461.png"}},
-    //     {462, {"Look for a small ledge jutting out of the rock face with a rock on it approximately halfway up the wall.", "thumb/b/bf/Korok462.png/200px-Korok462.png"}},
-    //     {464, {"Under a rock.", "thumb/0/01/Korok464.png/200px-Korok464.png"}},
-    //     {466, {"In the tail fin of the fish statue on top of Zora's Domain, almost the very highest point, examine the fairy lights.", "thumb/5/59/Korok466.png/200px-Korok466.png"}},
-    //     {467, {"Move the large, flat rock with Stasis or an Octo Balloon, then pick up the rock underneath it.", "thumb/3/36/Korok467.png/200px-Korok467.png"}},
-    //     {468, {"Solve the Magnesis puzzle on the cliff wall (at the lowest level of the quarry). The metal block is on top of the nearby rising to the south.", "thumb/7/7e/Korok468.png/200px-Korok468.png"}},
-    //     {469, {"Solve the block puzzle.", "thumb/9/92/Korok469.png/200px-Korok469.png"}},
-    //     {470, {"From the ground below, look up into the overhanging rock and shoot the lone balloon.", "thumb/0/04/Korok470.png/200px-Korok470.png"}},
-    //     {471, {"Climb up here and pick up the rock.", "thumb/f/f4/Korok471.png/200px-Korok471.png"}},
-    //     {472, {"On top of a flagpole.", "thumb/6/61/Korok472.png/200px-Korok472.png"}},
-    //     {473, {"Look across the river for a boulder. Use Magnesis to carry the large metal boulder to the hole.", "thumb/a/ae/Korok473.png/200px-Korok473.png"}},
-    //     {475, {"Pick up the rock.", "thumb/e/e6/Korok475.png/200px-Korok475.png"}},
-    //     {476, {"Stand on the tree stump by the paper windmill and shoot the acorn that is being thrown between two trees to southwest.", "thumb/2/27/Korok476.png/200px-Korok476.png"}},
-    //     {477, {"Solve the block puzzle.", "thumb/2/24/Korok477.png/200px-Korok477.png"}},
-    //     {478, {"This one left a clue for you. Bomb the boulders and pick up the rock under them.", "thumb/1/15/Korok478.png/200px-Korok478.png"}},
-    //     {479, {"Bomb the rock pile and pick up the rock underneath.", "thumb/e/e8/Korok479.png/200px-Korok479.png"}},
-    //     {480, {"Solve the block puzzle.", "thumb/c/c0/Korok480.png/200px-Korok480.png"}},
-    //     {481, {"Catch the fairy lights.", "thumb/5/54/Korok481.png/200px-Korok481.png"}},
-    //     {483, {"Clear the leaves, pick up the rock beneath.", "thumb/2/20/Korok483.png/200px-Korok483.png"}},
-    //     {484, {"Complete the rock circle using the rock at the other end of the beach.", "thumb/4/48/Korok484.png/200px-Korok484.png"}},
-    //     {485, {"Blow up the boulders, pick up the rock underneath.", "thumb/a/aa/Korok485.png/200px-Korok485.png"}},
-    //     {486, {"Under a rock on top of a tree.", "thumb/a/a4/Korok486.png/200px-Korok486.png"}},
-    //     {487, {"Pick up this rock.", "thumb/b/b0/Korok487.png/200px-Korok487.png"}},
-    //     {488, {"Make the three trees identical by picking apples.", "thumb/3/3d/Korok488.png/200px-Korok488.png"}},
-    //     {489, {"Lift the big rock with an Octo Balloon, then pick up the small rock yourself.", "thumb/4/4f/Korok489.png/200px-Korok489.png"}},
-    //     {490, {"Shoot the balloon inside the big stone arch.", "thumb/d/d1/Korok490.png/200px-Korok490.png"}},
-    //     {493, {"Get the large boulder out of the way and then lift up the small rock hidden underneath it.", "thumb/6/6c/Korok493.png/200px-Korok493.png"}},
-    //     {494, {"Pick up the rock in the hollow stump.", "thumb/d/dd/Korok494.png/200px-Korok494.png"}},
-    //     {495, {"Stand on the patch of grass near the pinwheel, and shoot the three balloons.", "thumb/c/cf/Korok495.png/200px-Korok495.png"}},
-    //     {496, {"Move the door, pick up the rock.", "thumb/9/9d/Korok496.png/200px-Korok496.png"}},
-    //     {497, {"Pick up a nearby rock on the eastern bank and throw it into the stone circle in the river.", "thumb/4/49/Korok497.png/200px-Korok497.png"}},
-    //     {498, {"Catch the fairy lights.", "thumb/d/d6/Korok498.png/200px-Korok498.png"}},
-    //     {499, {"Use the magnesis block behind the waterfall to complete the cliffside puzzle. Cryonis will be required to reach the puzzle.", "thumb/1/17/Korok499.png/200px-Korok499.png"}},
-    //     {500, {"Catch the fairy lights as they circle around the area.", "thumb/0/0a/Korok500.png/200px-Korok500.png"}},
-    //     {501, {"Climb on top of the destroyed building and examine the fairy lights.", "thumb/8/8c/Korok501.png/200px-Korok501.png"}},
-    //     {502, {"Move the leaves to uncover a rock. Pick up the rock.", "thumb/d/d8/Korok502.png/200px-Korok502.png"}},
-    //     {503, {"Dive into the circle of lilies.", "thumb/3/34/Korok503.png/200px-Korok503.png"}},
-    //     {504, {"Climb up the rib to the pinwheel and examine the fairy lights.", "thumb/7/7f/Korok504.png/200px-Korok504.png"}},
-    //     {505, {"Complete the stone circle using nearby rocks.", "thumb/8/88/Korok505.png/200px-Korok505.png"}},
-    //     {506, {"Shoot the balloon in the rock bridge cleft.", "thumb/0/03/Korok506.png/200px-Korok506.png"}},
-    //     {508, {"Examine the fairy lights in the cleft in the rock bridge.", "thumb/9/9d/Korok508.png/200px-Korok508.png"}},
-    //     {511, {"Push the boulders at the top of the cliff into the hole at the bottom.", "thumb/f/f1/Korok511.png/200px-Korok511.png"}},
-    //     {513, {"Stand near the pinwheel and shoot the balloons.", "thumb/0/06/Korok513.png/200px-Korok513.png"}},
-    //     {515, {"Put the rock in the well using Magnesis.", "thumb/d/d7/Korok515.png/200px-Korok515.png"}},
-    //     {517, {"Remove the apple from between the palm fruits, such as by shooting it.", "thumb/f/f8/Korok517.png/200px-Korok517.png"}},
-    //     {518, {"Remove two Hearty Durian from the western tree so that all three trees match.", "thumb/7/70/Korok518.png/200px-Korok518.png"}},
-    //     {519, {"Place Mighty Bananas on the leaf below the statue.", "thumb/f/f5/Korok519.png/200px-Korok519.png"}},
-    //     {520, {"Burn the goatee made out of leaves of the Horse structure above the stables.", "thumb/7/7f/Korok520.png/200px-Korok520.png"}},
-    //     {521, {"Remove the Luminous Stone from the eye of the statue.", "thumb/1/14/Korok521.png/200px-Korok521.png"}},
-    //     {522, {"Lift up the small rock found on top of the ledge here.", "thumb/2/26/Korok522.png/200px-Korok522.png"}},
-    //     {523, {"This Korok's rock pattern is in the shape of a large spiral. On the second line from the outside is a missing rock, simply complete the pattern with the rock found nearby.", "thumb/1/1d/Korok523.png/200px-Korok523.png"}},
-    //     {525, {"Remove the slab using Stasis or an Octo Balloon since there's several octoroks in the area, then pick up the rock.", "thumb/0/0c/Korok525.png/200px-Korok525.png"}},
-    //     {526, {"Throw a nearby rock into the ring of stones in the pond. Cryonis might help.", "thumb/b/bd/Korok526.png/200px-Korok526.png"}},
-    //     {528, {"Shoot the balloon hidden in the top of the palm tree. It is easiest to spot if you climb up the ledge to the east.", "thumb/8/8d/Korok528.png/200px-Korok528.png"}},
-    //     {529, {"Dive into the ring of lilies.", "thumb/3/3f/Korok529.png/200px-Korok529.png"}},
-    //     {530, {"High on the cliff above this hole are three boulders. Push one of them off the cliff and into the hole.", "thumb/7/7c/Korok530.png/200px-Korok530.png"}},
-    //     {531, {"Pick up a rock to the north just up the ledge and move it to complete the stone circle.", "thumb/7/7c/Korok531.png/200px-Korok531.png"}},
-    //     {532, {"Dive into the ring of flower lilies in the water.", "thumb/1/17/Korok532.png/200px-Korok532.png"}},
-    //     {533, {"Lift up the small rock at the top of this mountain.", "thumb/8/83/Korok533.png/200px-Korok533.png"}},
-    //     {534, {"Solve the block puzzle.", "thumb/4/4a/Korok534.png/200px-Korok534.png"}},
-    //     {535, {"Jump into the ring of seaweed to reveal a Korok.", "thumb/1/1c/Korok535.png/200px-Korok535.png"}},
-    //     {536, {"Climb to the top of the mushroom shaped pillar and pick up the rock at the top.", "thumb/7/70/Korok536.png/200px-Korok536.png"}},
-    //     {537, {"Bomb the wall and lift the hidden rock.", "thumb/a/a5/Korok537.png/200px-Korok537.png"}},
-    //     {538, {"Catch the fairy lights.", "thumb/c/c1/Korok538.png/200px-Korok538.png"}},
-    //     {539, {"Climb the palm tree and examine the fairy lights.", "thumb/6/6f/Korok539.png/200px-Korok539.png"}},
-    //     {540, {"Drop one cliff level down from the top of the cliff to find a rock to pick up.", "thumb/1/13/Korok540.png/200px-Korok540.png"}},
-    //     {541, {"This one is very hard to see. The metal cube is underwater next to the islands, but can only be seen from certain angles (look down where the arrow is in the picture). Then take it to the block puzzle on the cliff, which can be hard to spot. It's on the north side of the cliff.", "thumb/d/d0/Korok541.png/200px-Korok541.png"}},
-    //     {542, {"Bomb the wall in the corner of the hillside then lift the revealed rock.", "thumb/b/bb/Korok542.png/200px-Korok542.png"}},
-    //     {543, {"Pick up the rock.", "thumb/3/3d/Korok543.png/200px-Korok543.png"}},
-    //     {544, {"Roll the boulder into the hole.", "thumb/c/c7/Korok544.png/200px-Korok544.png"}},
-    //     {545, {"Shoot the acorn.", "thumb/2/28/Korok545.png/200px-Korok545.png"}},
-    //     {546, {"Pick up the rock.", "thumb/b/b9/Korok546.png/200px-Korok546.png"}},
-    //     {547, {"Shoot the balloon.", "thumb/5/56/Korok547.png/200px-Korok547.png"}},
-    //     {548, {"Move the slab, and pick up the rock under it.", "thumb/b/bd/Korok548.png/200px-Korok548.png"}},
-    //     {549, {"Climb down the bridge to the first set of windows. Pick up the tree branch on the narrow ledge.", "thumb/0/0d/Korok549.png/200px-Korok549.png"}},
-    //     {550, {"Examine the fairy lights at the top of the tree. Refrain from attempting it during a thunderstorm, since lightning will strike and take the tree down.", "thumb/e/eb/Korok550.png/200px-Korok550.png"}},
-    //     {551, {"Solve the Magnesis block puzzle. The block is in the water nearby.", "thumb/6/66/Korok551.png/200px-Korok551.png"}},
-    //     {552, {"Pick up the rock.", "thumb/d/da/Korok552.png/200px-Korok552.png"}},
-    //     {554, {"Use Magnesis on the metal cube and bring it to the other side of the waterfall. Use Cryonis on the waterfall to reach the box puzzle above.", "thumb/b/bf/Korok554.png/200px-Korok554.png"}},
-    //     {555, {"Use Magnesis to move the chained rock into the stump.", "thumb/5/51/Korok555.png/200px-Korok555.png"}},
-    //     {556, {"Lift the rock.", "thumb/1/1e/Korok556.png/200px-Korok556.png"}},
-    //     {557, {"Solve the block puzzle. The block is in the nearby tree.", "thumb/c/c2/Korok557.jpg/200px-Korok557.jpg"}},
-    //     {558, {"There are two fairy lights dancing around here. Catch them both for two seeds.", "thumb/8/8c/Korok558.png/200px-Korok558.png"}},
-    //     {559, {"Lift stone at the top of the hill.", "thumb/c/c6/Korok559.png/200px-Korok559.png"}},
-    //     {560, {"Stand near the pinwheel, shoot the balloons.", "thumb/8/8e/Korok560.png/200px-Korok560.png"}},
-    //     {561, {"Roll the boulder into the hole.", "thumb/2/2b/Korok561.png/200px-Korok561.png"}},
-    //     {562, {"Bomb the nearby breakable wall in the mountainside, then lift the revealed stone.", "thumb/5/50/Korok562.png/200px-Korok562.png"}},
-    //     {563, {"Climb up the tree and lift the small rock.", "thumb/1/18/Korok563.png/200px-Korok563.png"}},
-    //     {564, {"Get the boulder off the pillar and to the corner, matching the other three surrounding the statue.", "thumb/4/4f/Korok564.png/200px-Korok564.png"}},
-    //     {565, {"Lift the stone above the small waterfall.", "thumb/0/07/Korok565.png/200px-Korok565.png"}},
-    //     {566, {"Interact with the fairy lights floating around the lake.", "thumb/6/61/Korok566.png/200px-Korok566.png"}},
-    //     {567, {"Interact with the fairy lights floating around the area.", "thumb/a/a2/Korok567.png/200px-Korok567.png"}},
-    //     {568, {"Stand near the pinwheel and shoot the balloons.", "thumb/7/75/Korok568.png/200px-Korok568.png"}},
-    //     {569, {"Complete the rock triangle on the island in the tar pit. Knock down a tree to make a bridge.", "thumb/b/bb/Korok569.png/200px-Korok569.png"}},
-    //     {571, {"Blow up the middle set of boulders, and then pick up the rock.", "thumb/b/b1/Korok571.png/200px-Korok571.png"}},
-    //     {572, {"Blow up the boulders, then lift up the small rock that was hidden beneath them.", "thumb/8/8e/Korok572.png/200px-Korok572.png"}},
-    //     {573, {"Shoot the balloon.", "thumb/0/0c/Korok573.png/200px-Korok573.png"}},
-    //     {574, {"Shoot the acorn hiding inside the end of the hollowed out log.", "thumb/f/fc/Korok574.png/200px-Korok574.png"}},
-    //     {575, {"Climb the lone tree to the very top and examine the fairy lights.", "thumb/2/23/Korok575.png/200px-Korok575.png"}},
-    //     {576, {"Shoot the small acorn hanging from the tall tree.", "thumb/7/7d/Korok576.png/200px-Korok576.png"}},
-    //     {577, {"Solve the Magnesis block puzzle.", "thumb/3/3e/Korok577.png/200px-Korok577.png"}},
-    //     {578, {"Stand near the pinwheel, shoot the balloons.", "thumb/7/71/Korok578.png/200px-Korok578.png"}},
-    //     {579, {"Climb the tree and examine the fairy lights.", "thumb/9/97/Korok579.png/200px-Korok579.png"}},
-    //     {580, {"Stand near the pinwheel and shoot the balloons.", "thumb/8/8c/Korok580.png/200px-Korok580.png"}},
-    //     {581, {"Shoot the balloon underneath the rock bridge.", "thumb/6/6e/Korok581.png/200px-Korok581.png"}},
-    //     {582, {"Pick up the rock on the first ledge from the top of the cliff.", "thumb/6/60/Korok582.png/200px-Korok582.png"}},
-    //     {583, {"Pick up the rock.", "thumb/7/7e/Korok583.png/200px-Korok583.png"}},
-    //     {585, {"Go to the westernmost part of the cliff behind the shrine, climb up 4 cliffs, then pick up the rock.", "thumb/e/e7/Korok585.png/200px-Korok585.png"}},
-    //     {586, {"Solve the block puzzle.", "thumb/1/16/Korok586.png/200px-Korok586.png"}},
-    //     {587, {"Climb the tree, lift the rock.", "thumb/f/f2/Korok587.png/200px-Korok587.png"}},
-    //     {588, {"Solve the Magnesis Block puzzle near the top of the cliff.", "thumb/7/73/Korok588.png/200px-Korok588.png"}},
-    //     {589, {"Shoot the balloon in the tree.", "thumb/5/53/Korok589.png/200px-Korok589.png"}},
-    //     {591, {"Climb to the highest point of the rib structure and examine the fairy lights.", "thumb/5/58/Korok591.png/200px-Korok591.png"}},
-    //     {592, {"Climb to the highest point of the rib structure and examine the fairy lights.", "thumb/7/71/Korok592.png/200px-Korok592.png"}},
-    //     {593, {"Complete the rock circle. The rock to use is in a corner of the cliff wall.", "thumb/8/83/Korok593.png/200px-Korok593.png"}},
-    //     {595, {"Offer a Mighty Banana to the offering bowl.", "thumb/0/09/Korok595.png/200px-Korok595.png"}},
-    //     {596, {"Offer Mighty Bananas to the two offering bowls.", "thumb/9/98/Korok596.png/200px-Korok596.png"}},
-    //     {597, {"Offer Mighty Bananas to the three offering bowls.", "thumb/8/8d/Korok597.png/200px-Korok597.png"}},
-    //     {598, {"Offer Mighty Bananas to the four offering bowls.", "thumb/3/31/Korok598.png/200px-Korok598.png"}},
-    //     {599, {"Offer Mighty Bananas to the five offering bowls.", "thumb/2/28/Korok599.png/200px-Korok599.png"}},
-    //     {600, {"Roll the...No, wait, pick up the snowball and place it in the hole.", "thumb/6/66/Korok600.png/200px-Korok600.png"}},
-    //     {601, {"This Magnesis puzzle is more spread out than most. Solution is on the west wall, puzzle on the east, and block's in the middle.", "thumb/c/c1/Korok601.png/200px-Korok601.png"}},
-    //     {602, {"Find a rock just to the east of the rock circle. Walk along the narrow cliff path to complete the pattern.", "thumb/2/26/Korok602.png/200px-Korok602.png"}},
-    //     {603, {"This is a rock circle made up of pieces of 3 rocks each, except for a large rock out of place. Put it in place.", "thumb/1/11/Korok603.png/200px-Korok603.png"}},
-    //     {604, {"At the top of this section of the mountain, lift up the small rock.", "thumb/8/85/Korok604.png/200px-Korok604.png"}},
-    //     {605, {"A circle of rocks on this ledge on the side of the mountain is incomplete. Grab the rock from the ledge slightly higher up and bring it down to the ring and complete the circle of rocks. Level 2 Cold Resistance recommended", "thumb/e/e3/Korok605.png/200px-Korok605.png"}},
-    //     {606, {"Melt the chunk of ice that's closest to the edge.", "thumb/2/2d/Korok606.png/200px-Korok606.png"}},
-    //     {607, {"Climb the tree and examine the fairy lights.", "thumb/5/59/Korok607.png/200px-Korok607.png"}},
-    //     {608, {"Complete the rock pattern.", "thumb/5/55/Korok608.png/200px-Korok608.png"}},
-    //     {609, {"Complete the magnetic block puzzle.", "thumb/e/eb/Korok609.png/200px-Korok609.png"}},
-    //     {610, {"Bomb the rock wall and pick up the rock behind it.", "thumb/a/a2/Korok610.png/200px-Korok610.png"}},
-    //     {611, {"Climb inside of the skeleton's north-facing eye socket, burn or bomb the leaves, then pick up the rock.", "thumb/3/31/Korok611.png/200px-Korok611.png"}},
-    //     {612, {"Complete the stone circle using a nearby rock (which is in a clump of bushes to the east as you head to the Lynel.  Stasis can help you see it.).", "thumb/a/a8/Korok612.png/200px-Korok612.png"}},
-    //     {613, {"Finish the magnetic block puzzle.", "thumb/e/ef/Korok613.png/200px-Korok613.png"}},
-    //     {614, {"Pick up the rock.", "thumb/c/c6/Korok614.png/200px-Korok614.png"}},
-    //     {615, {"Stand near the pinwheel and shoot the balloons.", "thumb/c/cb/Korok615.png/200px-Korok615.png"}},
-    //     {616, {"Finish the rock pattern with a nearby rock.", "thumb/1/18/Korok616.png/200px-Korok616.png"}},
-    //     {617, {"Dive into the circle of lilies at the bottom of the waterfall.", "thumb/3/3d/Korok617.png/200px-Korok617.png"}},
-    //     {618, {"Under a rock.", "thumb/f/f9/Korok618.png/200px-Korok618.png"}},
-    //     {619, {"Lift the rock on top of the structure surrounding the shrine.", "thumb/e/e8/Korok619.png/200px-Korok619.png"}},
-    //     {620, {"Shoot the balloon underneath the upper cliff.", "thumb/8/81/Korok620.png/200px-Korok620.png"}},
-    //     {621, {"Complete the magnetic block puzzle in the ruins.", "thumb/b/b0/Korok621.png/200px-Korok621.png"}},
-    //     {622, {"Thaw the ice block and examine the whirling glittering leaves.", "thumb/e/e6/Korok622.png/200px-Korok622.png"}},
-    //     {623, {"Thaw the ice and examine the fairy lights.", "thumb/e/e4/Korok623.png/200px-Korok623.png"}},
-    //     {624, {"Thaw the ice and examine the whirling glittering leaves.", "thumb/f/f6/Korok624.png/200px-Korok624.png"}},
-    //     {625, {"Roll a boulder into the hole. Boulders can be found on the nearby hill to the southeast. It is advised to kill the Lynel first.", "thumb/0/07/Korok625.png/200px-Korok625.png"}},
-    //     {626, {"Break the nut in the hole in the tree.", "thumb/7/74/Korok626.png/200px-Korok626.png"}},
-    //     {627, {"Shoot five balloons near the pinwheel.", "thumb/7/73/Korok627.png/200px-Korok627.png"}},
-    //     {628, {"Destroy the acorn in the hole in the side of the tree.", "thumb/c/ce/Korok628.png/200px-Korok628.png"}},
-    //     {629, {"Break the nut in the hole of the fallen tree.", "thumb/5/58/Korok629.png/200px-Korok629.png"}},
-    //     {630, {"Hidden under a small rock that is covered by the leaves.", "thumb/6/69/Korok630.png/200px-Korok630.png"}},
-    //     {631, {"Roll a boulder (found to the north) into the hole.", "thumb/9/9a/Korok631.png/200px-Korok631.png"}},
-    //     {632, {"Use a bladed weapon to clear the leaves and then lift the small rock that was hidden underneath.", "thumb/0/0c/Korok632.png/200px-Korok632.png"}},
-    //     {634, {"Finish the rock pattern using a rock on a nearby ledge to the south.", "thumb/8/8c/Korok634.png/200px-Korok634.png"}},
-    //     {635, {"Catch the fairy lights.", "thumb/3/35/Korok635.png/200px-Korok635.png"}},
-    //     {636, {"Push the nearby boulder into the hole.", "thumb/d/d4/Korok636.png/200px-Korok636.png"}},
-    //     {637, {"The pinwheel at the top of this section of wall spawns balloons to the north. Shoot them.", "thumb/d/d8/Korok637.png/200px-Korok637.png"}},
-    //     {638, {"Climb to the top of the flagpole.", "thumb/f/f0/Korok638.png/200px-Korok638.png"}},
-    //     {639, {"Pick up the rock on the peak of the mountain.", "thumb/e/eb/Korok639.png/200px-Korok639.png"}},
-    //     {641, {"Look near the cannons for a rock to pick up.", "thumb/d/da/Korok641.png/200px-Korok641.png"}},
-    //     {642, {"Climb to the top of the cabin and examine the swirling leaves. Cold Resistance Level 2 recommended", "thumb/4/4a/Korok642.png/200px-Korok642.png"}},
-    //     {643, {"Complete the circle using two nearby stones.", "thumb/b/bf/Korok643.png/200px-Korok643.png"}},
-    //     {644, {"Complete the rock circle from the rock next to a nearby lava flow.", "thumb/b/b1/Korok644.png/200px-Korok644.png"}},
-    //     {645, {"Roll the boulder into the lava at the end of the hill.", "thumb/a/ae/Korok645.png/200px-Korok645.png"}},
-    //     {646, {"Stand near the pinwheel, shoot the balloon.", "thumb/6/63/Korok646.png/200px-Korok646.png"}},
-    //     {647, {"Thaw the ice block and examine the glittering leaves. Cold Resistance Level 2 recommended", "thumb/9/9f/Korok647.png/200px-Korok647.png"}},
-    //     {648, {"Under a rock up the large curved tree.", "thumb/1/1c/Korok648.png/200px-Korok648.png"}},
-    //     {649, {"Shoot the acorn hanging from a tree.", "thumb/2/29/Korok649.png/200px-Korok649.png"}},
-    //     {650, {"Put an apple in every bowl.", "thumb/6/64/Korok650.png/200px-Korok650.png"}},
-    //     {651, {"Under a rock up in a tree.", "thumb/e/e3/Korok651.png/200px-Korok651.png"}},
-    //     {653, {"Move the metal door and pick up the rock under it.", "thumb/b/bf/Korok653.png/200px-Korok653.png"}},
-    //     {654, {"Shoot the 3 balloons hiding behind the Malice to reveal the Korok.", "thumb/b/b3/Korok654.png/200px-Korok654.png"}},
-    //     {655, {"Shoot the balloon in the far distance to reveal the Korok.", "thumb/9/97/Korok655.png/200px-Korok655.png"}},
-    //     {656, {"Dive into the ring in the water.", "thumb/e/e6/Korok656.png/200px-Korok656.png"}},
-    //     {657, {"Shoot the acorn hanging from the tree.", "thumb/a/a1/Korok657.png/200px-Korok657.png"}},
-    //     {658, {"Catch the fairy lights.", "thumb/a/a4/Korok658.png/200px-Korok658.png"}},
-    //     {659, {"Get one of the giant boulders to the east into the hole.", "thumb/9/98/Korok659.png/200px-Korok659.png"}},
-    //     {660, {"Shoot 3 balloons near the pinwheel.", "thumb/2/20/Korok660.png/200px-Korok660.png"}},
-    //     {661, {"Under a rock under a slab.", "thumb/2/29/Korok661.png/200px-Korok661.png"}},
-    //     {662, {"Complete the three stone circles using rocks that lie approximately in the direction of each circles gap.", "thumb/2/2d/Korok662.png/200px-Korok662.png"}},
-    //     {663, {"Find the missing rock to fill in the triangle.", "thumb/6/65/Korok663.png/200px-Korok663.png"}},
-    //     {665, {"Complete the block puzzle. Cold Resistance Level 2 recommended", "thumb/5/56/Korok665.png/200px-Korok665.png"}},
-    //     {666, {"Climb to the top of the hill to find a pinwheel. The three balloons constantly disappear and reappear over the nearby trees.", "thumb/d/d6/Korok666.png/200px-Korok666.png"}},
-    //     {667, {"Under a rock.", "thumb/1/13/Korok667.png/200px-Korok667.png"}},
-    //     {668, {"Destroy the acorn in the hollow of the tree log.", "thumb/3/37/Korok668.png/200px-Korok668.png"}},
-    //     {669, {"Under a rock between the pillars.", "thumb/a/a9/Korok669.png/200px-Korok669.png"}},
-    //     {670, {"Place an apple in the empty basket.", "thumb/1/19/Korok670.png/200px-Korok670.png"}},
-    //     {671, {"Complete the circle of rocks. the rock is hidden behind some bushes southwest of the circle.", "thumb/1/10/Korok671.png/200px-Korok671.png"}},
-    //     {672, {"At the bottom of the canyon, blow up the cracked boulders then lift the small rock hidden behind them.", "thumb/9/97/Korok672.png/200px-Korok672.png"}},
-    //     {673, {"Under a rock.", "thumb/0/06/Korok673.png/200px-Korok673.png"}},
-    //     {674, {"On top of the temple, use Magnesis to put the cube back in its rightful spot.", "thumb/f/fa/Korok674.png/200px-Korok674.png"}},
-    //     {675, {"Solve the block puzzle.", "thumb/e/e1/Korok675.png/200px-Korok675.png"}},
-    //     {677, {"Climb up to the top of the flagpole and examine the fairy lights.", "thumb/8/86/Korok677.png/200px-Korok677.png"}},
-    //     {678, {"Pick up the rock on a ledge about one-fourth of the way down the cliff.", "thumb/9/91/Korok678.png/200px-Korok678.png"}},
-    //     {679, {"Stand near the pinwheel and shoot the balloons.", "thumb/0/0d/Korok679.png/200px-Korok679.png"}},
-    //     {680, {"Solve the block puzzle, making the two patterns identical.", "thumb/a/a7/Korok680.png/200px-Korok680.png"}},
-    //     {681, {"Complete the box puzzle.", "thumb/9/94/Korok681.png/200px-Korok681.png"}},
-    //     {682, {"Roll a boulder (from uphill to the northwest) into the hole.", "thumb/8/86/Korok682.png/200px-Korok682.png"}},
-    //     {683, {"Stand near the pinwheel and shoot the balloons around you. Using a long ranged bow is recommended.", "thumb/c/cb/Korok683.png/200px-Korok683.png"}},
-    //     {684, {"Shoot a balloon in a tree.", "thumb/e/e5/Korok684.png/200px-Korok684.png"}},
-    //     {685, {"Jump into the water and go under the rock structure as far northwest as you can go. You'll find a pile of leaves to cut away, revealing a rock to pick up. Cold Resistance Level 2 recommended", "thumb/c/c0/Korok685.png/200px-Korok685.png"}},
-    //     {686, {"Run through flowers 1-5.", "thumb/c/c8/Korok686.png/200px-Korok686.png"}},
-    //     {687, {"Put an apple in the empty bowl.", "thumb/b/be/Korok687.png/200px-Korok687.png"}},
-    //     {688, {"Under a rock, a fourth down the canyon.", "thumb/a/a8/Korok688.png/200px-Korok688.png"}},
-    //     {689, {"Climb up to the top of the windmill and examine the fairy lights.", "thumb/1/1d/Korok689.png/200px-Korok689.png"}},
-    //     {690, {"Shoot an acorn hanging from the lower part of the windmill.", "thumb/6/6b/Korok690.png/200px-Korok690.png"}},
-    //     {692, {"Destroy the acorn hanging under an outcrop.", "thumb/6/6c/Korok692.png/200px-Korok692.png"}},
-    //     {693, {"Shoot the balloons near the windmill.", "thumb/3/38/Korok693.png/200px-Korok693.png"}},
-    //     {694, {"Complete the three circles, using the rock lying in one of the circles.", "thumb/7/7a/Korok694.png/200px-Korok694.png"}},
-    //     {695, {"Destroy the acorn in the hole in the side of the large tree.", "thumb/e/ef/Korok695.png/200px-Korok695.png"}},
-    //     {696, {"Stand on the stump, then shoot the flying acorns.", "thumb/2/22/Korok696.png/200px-Korok696.png"}},
-    //     {697, {"Roll a boulder from the west (up the hill) downhill to the east into a small hole.", "thumb/5/5c/Korok697.png/200px-Korok697.png"}},
-    //     {698, {"Under a rock behind some destructible boulders.", "thumb/2/27/Korok698.png/200px-Korok698.png"}},
-    //     {699, {"Catch the flying lights.", "thumb/8/8f/Korok699.png/200px-Korok699.png"}},
-    //     {700, {"Follow the flower order. The third flower is behind some bushes.", "thumb/d/de/Korok700.png/200px-Korok700.png"}},
-    //     {701, {"Lift the rock up.", "thumb/7/75/Korok701.png/200px-Korok701.png"}},
-    //     {703, {"Complete the magnetic puzzle here using Magnesis.", "thumb/7/71/Korok703.png/200px-Korok703.png"}},
-    //     {704, {"Stand on the tree stump with the pinwheel. There will be an acorn jumping at the top of one of the trees. Shoot it.", "thumb/1/15/Korok704.png/200px-Korok704.png"}},
-    //     {705, {"Pick up the rock on the shore.", "thumb/d/d2/Korok705.png/200px-Korok705.png"}},
-    //     {706, {"Shoot the acorn hidden in the tree.", "thumb/c/c4/Korok706.png/200px-Korok706.png"}},
-    //     {707, {"Solve the block puzzle.", "thumb/1/12/Korok707.png/200px-Korok707.png"}},
-    //     {708, {"Under a rock.", "thumb/0/06/Korok708.png/200px-Korok708.png"}},
-    //     {709, {"Shoot the acorn hanging under the bridge.", "thumb/3/3c/Korok709.png/200px-Korok709.png"}},
-    //     {710, {"Under a rock.", "thumb/d/d6/Korok710.png/200px-Korok710.png"}},
-    //     {711, {"Destroy the acorn in the hole in the side of a tree.", "thumb/4/44/Korok711.png/200px-Korok711.png"}},
-    //     {712, {"Pop the balloon on top of the tree.", "thumb/1/11/Korok712.png/200px-Korok712.png"}},
-    //     {713, {"Shoot the acorn hanging from the wreck of a carriage.", "thumb/5/56/Korok713.png/200px-Korok713.png"}},
-    //     {714, {"Examine the fairy lights at the top of the flagpole.", "thumb/0/05/Korok714.png/200px-Korok714.png"}},
-    //     {715, {"Catch the fairy lights.", "thumb/d/df/Korok715.png/200px-Korok715.png"}},
-    //     {716, {"Catch the fairy lights.", "thumb/d/d3/Korok716.png/200px-Korok716.png"}},
-    //     {717, {"Under a rock on top of the large tree.", "thumb/3/38/Korok717.png/200px-Korok717.png"}},
-    //     {718, {"Place a Rusty Shield in the offering bowl. One is nearby, to the southeast.", "thumb/e/ed/Korok718.png/200px-Korok718.png"}},
-    //     {719, {"Shoot the acorn that's at the end of the hollow log. Cold Resistance Level 2 recommended", "thumb/3/38/Korok719.png/200px-Korok719.png"}},
-    //     {720, {"Dive into the circle.", "thumb/9/97/Korok720.png/200px-Korok720.png"}},
-    //     {721, {"Shoot the balloon under the alcove where the river begins.", "thumb/8/8f/Korok721.png/200px-Korok721.png"}},
-    //     {722, {"Pick up the rock.", "thumb/a/ac/Korok722.png/200px-Korok722.png"}},
-    //     {723, {"Under a rock.", "thumb/5/50/Korok723.png/200px-Korok723.png"}},
-    //     {724, {"Under a rock.", "thumb/7/7e/Korok724.png/200px-Korok724.png"}},
-    //     {725, {"Climb up the long bare tree to examine the fairy lights.", "thumb/b/bc/Korok725.png/200px-Korok725.png"}},
-    //     {726, {"Under a rock.", "thumb/e/ec/Korok726.png/200px-Korok726.png"}},
-    //     {727, {"Under a rock.", "thumb/6/67/Korok727.png/200px-Korok727.png"}},
-    //     {728, {"Catch the fairy lights that run around in the area", "thumb/e/e6/Korok728.png/200px-Korok728.png"}},
-    //     {729, {"Under the rock on top of the tree.", "thumb/d/d5/Korok729.png/200px-Korok729.png"}},
-    //     {730, {"Lift up the rock.", "thumb/0/0b/Korok730.png/200px-Korok730.png"}},
-    //     {732, {"Throw a rock into the ring of rocks in the river.", "thumb/f/f0/Korok732.png/200px-Korok732.png"}},
-    //     {733, {"Under a rock behind some cracked boulders.", "thumb/a/a4/Korok733.png/200px-Korok733.png"}},
-    //     {734, {"Put a Spicy Pepper in the offering bowl that is missing one.", "thumb/a/a2/Korok734.png/200px-Korok734.png"}},
-    //     {735, {"Run through the flower patches in order from 1 to 5.", "thumb/f/f2/Korok735.png/200px-Korok735.png"}},
-    //     {736, {"In a cave with Luminous Ore, blow up the boulders and pick up the small rock behind them. the cave can be found next to the big tree.", "thumb/c/ce/Korok736.png/200px-Korok736.png"}},
-    //     {737, {"Stand by the pinwheel, shoot the three balloons.", "thumb/b/ba/Korok737.png/200px-Korok737.png"}},
-    //     {738, {"Three trees stand on top of this plateau. Pluck the apples one of them so that it matches the other two trees.", "thumb/2/22/Korok738.png/200px-Korok738.png"}},
-    //     {739, {"Move the large boulder surrounded by smaller rocks. Then lift up the rock underneath it to reveal a Korok.", "thumb/3/32/Korok739.png/200px-Korok739.png"}},
-    //     {740, {"Climb to the top of the tallest pine tree here and examine the sparkles.", "thumb/c/c7/Korok740.png/200px-Korok740.png"}},
-    //     {741, {"Examine the flying leaves at the top of the hill.", "thumb/a/af/Korok741.png/200px-Korok741.png"}},
-    //     {742, {"Pick up the rock on top of the large tree.", "thumb/e/ec/Korok742.png/200px-Korok742.png"}},
-    //     {743, {"On the side of the cliff, blow up the cracked boulders then lift the small rock hidden behind them.", "thumb/c/ca/Korok743.png/200px-Korok743.png"}},
-    //     {747, {"Under a rock.", "thumb/9/95/Korok747.png/200px-Korok747.png"}},
-    //     {748, {"Under a rock.", "thumb/b/bd/Korok748.png/200px-Korok748.png"}},
-    //     {750, {"On the side of the cliff, blow up the cracked boulders then lift the small rock hidden behind them.", "thumb/1/1d/Korok750.png/200px-Korok750.png"}},
-    //     {751, {"Under a rock.", "thumb/a/a8/Korok751.png/200px-Korok751.png"}},
-    //     {752, {"Catch the fairy lights at the top of the bare tree.", "thumb/3/3f/Korok752.png/200px-Korok752.png"}},
-    //     {753, {"At ground level, blow up the cracked boulders then lift the small rock hidden behind them.", "thumb/b/b7/Korok753.png/200px-Korok753.png"}},
-    //     {754, {"Blast the rock wall, enter the cave and pick up the rock.", "thumb/a/a2/Korok754.png/200px-Korok754.png"}},
-    //     {755, {"On top of the giant mushroom, complete the stone circle using 3 nearby rocks.", "thumb/5/5a/Korok755.png/200px-Korok755.png"}},
-    //     {758, {"Shoot the balloon hanging under the huge mushroom tree.", "thumb/2/2d/Korok758.png/200px-Korok758.png"}},
-    //     {759, {"Shoot the balloon hanging under the huge mushroom tree.", "thumb/a/a4/Korok759.png/200px-Korok759.png"}},
-    //     {760, {"Inside the Forgotten Temple, behind the Goddess Statue's head, north of the shrine, lift the rock.", "thumb/2/2c/Korok760.png/200px-Korok760.png"}},
-    //     {761, {"Shoot the acorn in the hole in the side of the tree.", "thumb/9/9e/Korok761.png/200px-Korok761.png"}},
-    //     {763, {"Run through the flower patches 1-5.", "thumb/b/b3/Korok763.png/200px-Korok763.png"}},
-    //     {764, {"Move the slab, and pick up the rock under it.", "thumb/a/ac/Korok764.png/200px-Korok764.png"}},
-    //     {766, {"Under a rock on top of the tree.", "thumb/1/18/Korok766.png/200px-Korok766.png"}},
-    //     {767, {"Use the updraft to float straight into the air. Look under the nearby rock formation and shoot the balloon.", "thumb/7/77/Korok767.png/200px-Korok767.png"}},
-    //     {769, {"One cactus has too many voltfruit. Make it look like the other two.", "thumb/d/d4/Korok769.png/200px-Korok769.png"}},
-    //     {770, {"Shoot the balloon in the tree.", "thumb/f/f9/Korok770.png/200px-Korok770.png"}},
-    //     {771, {"Solve the Magnesis puzzle on the side of the cliff wall.", "thumb/9/90/Korok771.png/200px-Korok771.png"}},
-    //     {772, {"Under a rock behind some destructible boulders.", "thumb/a/a1/Korok772.png/200px-Korok772.png"}},
-    //     {773, {"Shoot the balloons that appear near the pinwheel.", "thumb/6/68/Korok773.png/200px-Korok773.png"}},
-    //     {774, {"Under a rock on the top of the peak.", "thumb/e/e9/Korok774.png/200px-Korok774.png"}},
-    //     {775, {"Shoot the three balloons, standing next to the pinwheel.", "thumb/3/33/Korok775.png/200px-Korok775.png"}},
-    //     {776, {"Under a rock.", "thumb/e/e7/Korok776.png/200px-Korok776.png"}},
-    //     {779, {"Shoot the Hylian symbol on the north side of the wall, above the gate.", "thumb/9/9d/Korok779.png/200px-Korok779.png"}},
-    //     {781, {"Catch the fairy lights.", "thumb/b/b5/Korok781.png/200px-Korok781.png"}},
-    //     {782, {"Under a rock behind the shrine.", "thumb/9/95/Korok782.png/200px-Korok782.png"}},
-    //     {783, {"Go to the southeastern corner of the bridge and move underneath it, to where a single rock is. Pick up the rock to reveal the Korok.", "thumb/d/d1/Korok783.png/200px-Korok783.png"}},
-    //     {784, {"Complete the rock circle with the rock that is downhill from the circle, next to a dead guardian.", "thumb/3/39/Korok784.png/200px-Korok784.png"}},
-    //     {785, {"Pick up rock on top of destroyed structure.", "thumb/f/f0/Korok785.png/200px-Korok785.png"}},
-    //     {786, {"In a corridor under the First Gatehouse, break the bombable wall, then shoot the acorn with an arrow.", "thumb/0/02/Korok786.png/200px-Korok786.png"}},
-    //     {787, {"Place a Bird Egg in front of each statue.", "thumb/0/01/Korok787.png/225px-Korok787.png"}},
-    //     {788, {"Lift the rock found halfway down the shaft.", "thumb/8/8d/Korok788.png/225px-Korok788.png"}},
-    //     {789, {"On top of the gate to Hyrule Castle is a rock. Lift the rock.", "thumb/e/ea/Korok789.png/200px-Korok789.png"}},
-    //     {791, {"Get rid of the leaves and pick up the rock underneath.", "thumb/3/3c/Korok791.png/200px-Korok791.png"}},
-    //     {792, {"Thaw the ice block and examine the glittering leaves. Cold Resistance Level 2 recommended", "thumb/e/ec/Korok792.png/200px-Korok792.png"}},
-    //     {793, {"On top of the temple. Under a rock behind the bombable boulders.", "thumb/3/39/Korok793.png/200px-Korok793.png"}},
-    //     {794, {"Under a rock.", "thumb/e/ed/Korok794.png/200px-Korok794.png"}},
-    //     {795, {"Jump the three fences while riding. This can also be done with the Master Cycle Zero using the Zero Jump", "thumb/3/3e/Korok795.png/200px-Korok795.png"}},
-    //     {796, {"Catch the fairy lights.", "thumb/f/f0/Korok796.png/200px-Korok796.png"}},
-    //     {797, {"Pick up the rock.", "thumb/7/73/Korok797.png/200px-Korok797.png"}},
-    //     {798, {"Clear the apples on the tree with too many to have the same amount as the others.", "thumb/f/f1/Korok798.png/200px-Korok798.png"}},
-    //     {799, {"Complete the rock square.", "thumb/8/86/Korok799.png/200px-Korok799.png"}},
-    //     {800, {"Remove the rock slab, then pick up the rock.", "thumb/4/4c/Korok800.png/200px-Korok800.png"}},
-    //     {801, {"Knock the boulder off, then pick up the little rock.", "thumb/5/5b/Korok801.png/200px-Korok801.png"}},
-    //     {802, {"Look under the rock bridge to find a small ledge with a rock on it. Pick up the rock to reveal the Korok.", "thumb/e/e5/Korok802.png/200px-Korok802.png"}},
-    //     {803, {"Catch the fairy lights.", "thumb/d/d8/Korok803.png/200px-Korok803.png"}},
-    //     {804, {"Destroy the acorn inside the hollow of the tree log.", "thumb/b/b4/Korok804.png/200px-Korok804.png"}},
-    //     {806, {"Shoot the balloon down by the water.", "thumb/8/87/Korok806.png/200px-Korok806.png"}},
-    //     {807, {"Destroy the acorn in the hollow of the tree log.", "thumb/c/c3/Korok807.png/200px-Korok807.png"}},
-    //     {808, {"Located on a higher ledge than the nearby seed. There are two blocks and pile of leaves here. Disturb the leaves and pick up the rock.", "thumb/8/89/Korok808.png/200px-Korok808.png"}},
-    //     {809, {"Located on a lower ledge than the nearby seed. Move the door with Magnesis to uncover a rock to pick up.", "thumb/a/a5/Korok809.png/200px-Korok809.png"}},
-    //     {810, {"Drop down from the southern ledge with the cannons to find a pile of leaves. Disturb the leaves and pick up the rock.", "thumb/e/ef/Korok810.png/200px-Korok810.png"}},
-    //     {811, {"Under the bridge, move the rock slab, then pick up the rock.", "thumb/7/7b/Korok811.png/200px-Korok811.png"}},
-    //     {812, {"Blow up the rock wall and lift up the small rock that was hidden behind it.", "thumb/7/73/Korok812.png/200px-Korok812.png"}},
-    //     {813, {"Blow up the boulders, lift up the rock underneath.", "thumb/2/27/Korok813.png/200px-Korok813.png"}},
-    //     {814, {"Climb a tall pine tree and examine the glowing leaves to find the Korok.", "thumb/5/53/Korok814.png/200px-Korok814.png"}},
-    //     {815, {"Stand next to the pinwheel atop the tree and shoot the balloons.", "thumb/7/7d/Korok815.png/200px-Korok815.png"}},
-    //     {816, {"An invisible Korok will be running around the area. Interact with it and collect the Korok seed.", "thumb/5/57/Korok816.png/200px-Korok816.png"}},
-    //     {817, {"Clear the leaves and pick up the rock to find the Korok.", "thumb/d/d0/Korok817.png/200px-Korok817.png"}},
-    //     {818, {"Disturb the leaves with a bladed weapon then lift up the small rock hidden underneath them.", "thumb/e/e2/Korok818.png/200px-Korok818.png"}},
-    //     {820, {"Use a bomb on the breakable wall then lift the rock.", "thumb/2/28/Korok820.png/200px-Korok820.png"}},
-    //     {822, {"Throw one of the rocks into the rock circle.", "thumb/7/75/Korok822.png/200px-Korok822.png"}},
-    //     {823, {"Complete the Magnesis cube puzzle. The metal cube is located on the eastern edge of the canyon floor, the template on the northeast side of the pond, and the puzzle is found on the island center.", "thumb/8/86/Korok823.png/200px-Korok823.png"}},
-    //     {824, {"Destroy the acorn in the hollow of the log.", "thumb/6/6e/Korok824.png/200px-Korok824.png"}},
-    //     {825, {"Solve the block puzzle.", "thumb/7/76/Korok825.png/200px-Korok825.png"}},
-    //     {826, {"Lift the stone on top of the fountain.", "thumb/d/db/Korok826.png/200px-Korok826.png"}},
-    //     {827, {"Stand on the stump with the pinwheel and shoot the 3 targets that are circling the nearby trees.", "thumb/c/cc/Korok827.png/200px-Korok827.png"}},
-    //     {828, {"Lift the rock in the center of the dead trees.", "thumb/3/3a/Korok828.png/200px-Korok828.png"}},
-    //     {829, {"Shoot the acorn inside the hollow tree log.", "thumb/9/93/Korok829.png/200px-Korok829.png"}},
-    //     {830, {"Dive/jump/fall into the circle of water lilies.", "thumb/c/cf/Korok830.png/200px-Korok830.png"}},
-    //     {831, {"Under a rock behind some destructible boulders.", "thumb/c/c5/Korok831.png/200px-Korok831.png"}},
-    //     {832, {"Pick up the rock on the northernmost pillar and move it to the upper edge of the pillar so it matches the rock placement on the other pillars.", "thumb/2/22/Korok832.png/200px-Korok832.png"}},
-    //     {833, {"Under a rock under a pile of leaves.", "thumb/1/16/Korok833.png/200px-Korok833.png"}},
-    //     {834, {"Roll a boulder into the lava pond below.", "thumb/3/3f/Korok834.png/200px-Korok834.png"}},
-    //     {835, {"Complete the puzzle using Magnesis.", "thumb/a/ad/Korok835.png/200px-Korok835.png"}},
-    //     {836, {"Carry a rock through the shallow water to the rock circle and throw it in.", "thumb/f/fa/Korok836.png/200px-Korok836.png"}},
-    //     {839, {"Climb the dead tree and interact with the fairy lights.", "thumb/e/e5/Korok839.png/200px-Korok839.png"}},
-    //     {840, {"Examine the fairy lights on the top of the dead tree. Cold Resistance Level 2 recommended", "thumb/6/68/Korok840.png/200px-Korok840.png"}},
-    //     {841, {"Under a rock.", "thumb/d/d6/Korok841.png/200px-Korok841.png"}},
-    //     {842, {"Complete the rock pattern using a nearby rock.", "thumb/5/57/Korok842.png/200px-Korok842.png"}},
-    //     {843, {"Climb up the tallest pillar in the northeast section and pick up the rock at the top.", "thumb/f/f8/Korok843.png/200px-Korok843.png"}},
-    //     {844, {"Dive into the ring of flowers in the water next to the bridge.", "thumb/2/22/Korok844.png/200px-Korok844.png"}},
-    //     {845, {"Climb to the top of the tree and examine the swirling leaves.", "thumb/8/8a/Korok845.png/200px-Korok845.png"}},
-    //     {846, {"Stand near the pinwheel and shoot the acorn. Cold Resistance Level 2 recommended", "thumb/c/c9/Korok846.png/200px-Korok846.png"}},
-    //     {847, {"Thaw the ice block and examine the fairy lights. Cold Resistance Level 2 recommended", "thumb/a/a6/Korok847.png/200px-Korok847.png"}},
-    //     {848, {"Shoot the balloon that hangs high up under a cliff.", "thumb/2/2f/Korok848.png/200px-Korok848.png"}},
-    //     {849, {"Pick up a rock.", "thumb/7/76/Korok849.png/200px-Korok849.png"}},
-    //     {850, {"Thaw the ice block and examine the glittering leaves.", "thumb/2/22/Korok850.png/200px-Korok850.png"}},
-    //     {851, {"Under a rock.", "thumb/9/98/Korok851.png/200px-Korok851.png"}},
-    //     {852, {"Examine the glittering leaves at the top of the dead tree.", "thumb/1/1d/Korok852.png/200px-Korok852.png"}},
-    //     {853, {"Examine the fairy lights at the top of the tree.", "thumb/6/6a/Korok853.png/200px-Korok853.png"}},
-    //     {855, {"Under a rock.", "thumb/f/ff/Korok855.png/200px-Korok855.png"}},
-    //     {856, {"Snow boulders can be carried. Put one in the hole below.", "thumb/6/60/Korok856.png/200px-Korok856.png"}},
-    //     {857, {"Destroy the acorn in the hollow in the tree log.", "thumb/8/8b/Korok857.png/200px-Korok857.png"}},
-    //     {858, {"Under a rock.", "thumb/8/83/Korok858.png/200px-Korok858.png"}},
-    //     {859, {"Catch the fairy lights.", "thumb/9/91/Korok859.png/200px-Korok859.png"}},
-    //     {860, {"Pick up the rock.", "thumb/0/04/Korok860.png/200px-Korok860.png"}},
-    //     {861, {"Use the nearby rock to complete the rock circle.", "thumb/7/79/Korok861.png/200px-Korok861.png"}},
-    //     {862, {"Lift the rock.", "thumb/5/5f/Korok862.png/200px-Korok862.png"}},
-    //     {863, {"Lift the rock.", "thumb/0/00/Korok863.png/200px-Korok863.png"}},
-    //     {864, {"Break the wall, then lift the stone.", "thumb/4/4a/Korok864.png/200px-Korok864.png"}},
-    //     {865, {"Find the pinwheel inside the skull, look outside the eye to find the target balloon. Shoot it with an arrow to reveal the Korok.", "thumb/2/24/Korok865.png/200px-Korok865.png"}},
-    //     {866, {"Complete the stone circle.", "thumb/6/61/Korok866.png/200px-Korok866.png"}},
-    //     {867, {"Break the wall, lift the stone.", "thumb/5/5b/Korok867.png/200px-Korok867.png"}},
-    //     {868, {"Climb the pillar, pick up the rock.", "thumb/9/96/Korok868.png/200px-Korok868.png"}},
-    //     {869, {"Use the rock above to complete the stone circle below.", "thumb/c/c6/Korok869.png/200px-Korok869.png"}},
-    //     {870, {"Lift the rock to reveal the Korok.", "thumb/5/5c/Korok870.png/200px-Korok870.png"}},
-    //     {871, {"Lift the rock that's located under the rock sculpture's armpit.", "thumb/a/a1/Korok871.png/200px-Korok871.png"}},
-    //     {872, {"From the city entrance, look up and to the left. Climb into the mouth of the southwest goron in the rock structure, and examine the fairy lights.", "thumb/a/a2/Korok872.png/200px-Korok872.png"}},
-    //     {873, {"Examine the fairy lights on top of the stone ribcage.", "thumb/e/e8/Korok873.png/200px-Korok873.png"}},
-    //     {874, {"Shoot the acorn in the hole in the tree.", "thumb/8/8b/Korok874.png/200px-Korok874.png"}},
-    //     {875, {"Pick up the rock.", "thumb/9/99/Korok875.png/200px-Korok875.png"}},
-    //     {876, {"Roll the boulder to the hole.", "thumb/c/c4/Korok876.png/200px-Korok876.png"}},
-    //     {877, {"Shoot the acorn hidden in the alcove under the bridge to the gate to Hyrule Castle.", "thumb/c/c2/Korok877.png/200px-Korok877.png"}},
-    //     {879, {"Shoot the stone Coat of Arms to reveal the Korok.", "thumb/d/d5/Korok879.png/200px-Korok879.png"}},
-    //     {880, {"Climb the platform and lift the rock.", "thumb/6/66/Korok880.png/200px-Korok880.png"}},
-    //     {881, {"Shoot the acorn in the hole in the tree.", "thumb/2/24/Korok881.png/200px-Korok881.png"}},
-    //     {882, {"Lift the rock up.", "thumb/5/50/Korok882.png/200px-Korok882.png"}},
-    //     {883, {"Interact with the fairy lights.", "thumb/6/6d/Korok883.png/200px-Korok883.png"}},
-    //     {884, {"Shoot the acorn in the tree trunk.", "thumb/0/02/Korok884.png/200px-Korok884.png"}},
-    //     {885, {"Shoot the acorn in the log.", "thumb/2/2a/Korok885.png/200px-Korok885.png"}},
-    //     {886, {"Shoot the acorn in the hollow log.", "thumb/0/05/Korok886.png/200px-Korok886.png"}},
-    //     {887, {"Bomb the breakable wall high up on the cliffside, then lift the stone.", "thumb/1/1d/Korok887.png/200px-Korok887.png"}},
-    //     {888, {"Lift the stone.", "thumb/c/ca/Korok888.png/200px-Korok888.png"}},
-    //     {889, {"Enter the East Passage. Just before the room with the Talus, you find blocks of ice along a wall. Melt the largest ice block, then examine the fairy lights.", "thumb/c/c9/Korok889.png/200px-Korok889.png"}},
-    //     {890, {"This ledge is just below the last curve in the path before it enters the castle. Bomb the breakable wall, then lift the stone.", "thumb/6/62/Korok890.png/200px-Korok890.png"}},
-    //     {891, {"Climb to the top of the spire above the First Gatehouse.", "thumb/9/98/Korok891.png/200px-Korok891.png"}},
-    //     {892, {"Lift the rock.", "thumb/5/5e/Korok892.png/200px-Korok892.png"}},
-    //     {893, {"Throw a rock into the ring of stones in the water.", "thumb/1/14/Korok893.png/200px-Korok893.png"}},
-    //     {894, {"Lift the rock.", "thumb/e/ee/Korok894.png/200px-Korok894.png"}},
-    //     {895, {"Solve the block puzzle. Half of it is underwater nearby.", "thumb/f/fd/Korok895.png/200px-Korok895.png"}},
-    //     {896, {"On a rock ledge just above the water, bomb the breakable wall, then lift the stone.", "thumb/c/ca/Korok896.png/200px-Korok896.png"}},
-    //     {897, {"Lift the rock under the bridge.", "thumb/a/ab/Korok897.png/200px-Korok897.png"}},
-    //     {898, {"Pick apples on the third tree to make it match the other two.", "thumb/1/15/Korok898.png/200px-Korok898.png"}},
-    //     {899, {"Shoot the acorn.", "thumb/b/b6/Korok899.png/200px-Korok899.png"}},
-    //     {900, {"Stand near the pinwheel and shoot the balloon.", "thumb/0/02/Korok900.png/200px-Korok900.png"}}};
-
+    }*/
 }
 
 void Data::LoadFromJSON(const std::string& filepath)
 {
+    Log("loading");
     using namespace nlohmann;
 
     std::ifstream file(filepath);
@@ -1091,28 +66,34 @@ void Data::LoadFromJSON(const std::string& filepath)
         return glm::vec3((float)position["x"], (float)position["y"], (float)position["z"]);
     };  
 
+    auto vec3ToVec2 = [] (glm::vec3 position) -> glm::vec2 {
+        return glm::vec2(position.x, position.z);
+    };  
+
+
+    Log("shrines");
     // Shrines
     for (auto& entry : fileData["shrines"])
     {
-        ObjectWithName* obj = new ObjectWithName(
+        Object* obj = new Object(
             uint32_t(entry["completion_hash"]), 
-            ParseJSONPosition(entry["position"]), 
+            ParseJSONPosition(entry["position"]),
             std::string(entry["display_name"])
         );
 
-        m_Objects[ObjectType::Shrine].push_back((Object*)obj);
+        m_Objects[ObjectType::Shrine].push_back(obj);
     }
 
     // Lightroots
     for (auto& entry : fileData["lightroots"])
     {
-        ObjectWithName* obj = new ObjectWithName(
+        Object* obj = new Object(
             uint32_t(entry["completion_hash"]), 
-            ParseJSONPosition(entry["position"]), 
-            ""//std::string(entry["display_name"]) // Not all lightroots has a display name (or atleast they didn't)
+            ParseJSONPosition(entry["position"]),
+            std::string(entry["display_name"])
         );
 
-        m_Objects[ObjectType::Lightroot].push_back((Object*)obj);
+        m_Objects[ObjectType::Lightroot].push_back(obj);
     }
 
     // Single koroks
@@ -1121,9 +102,22 @@ void Data::LoadFromJSON(const std::string& filepath)
         Korok* obj = new Korok(
             uint32_t(entry["completion_hash"]), 
             ParseJSONPosition(entry["position"]), 
-            -1, 
-            false
+            false, // single korok
+            std::string(entry["type"])
         );
+
+        if (entry.contains("path"))
+        {
+            // Korok with Start -> End
+            if (entry["path"].contains("start") && entry["path"].contains("end")) 
+            {
+                glm::vec3 start = ParseJSONPosition(entry["path"]["start"]);
+                glm::vec3 end = ParseJSONPosition(entry["path"]["end"]);
+
+                obj->m_Path = new KorokPath(obj->m_CompletionHash, { start, end });
+            }
+            //if (entry["path"].contains("flowers"))
+        }
 
         m_Objects[ObjectType::HiddenKorok].push_back((Object*)obj);
     }
@@ -1134,44 +128,92 @@ void Data::LoadFromJSON(const std::string& filepath)
         Korok* obj = new Korok(
             uint32_t(entry["completion_hash"]), 
             ParseJSONPosition(entry["position"]), 
-            -1, 
-            true
+            true, // carry korok
+            std::string(entry["type"])
         );
+
+        if (entry.contains("path"))
+        {
+            // Korok with Start -> End
+            if (entry["path"].contains("start") && entry["path"].contains("end")) 
+            {
+                glm::vec3 start = ParseJSONPosition(entry["path"]["start"]);
+                glm::vec3 end = ParseJSONPosition(entry["path"]["end"]);
+
+                obj->m_Path = new KorokPath(obj->m_CompletionHash, { start, end });
+            }
+            //if (entry["path"].contains("flowers"))
+        }
 
         m_Objects[ObjectType::CarryKorok].push_back((Object*)obj);
     }
 
-    // Caves
-    for (auto& entry : fileData["caves"])
+    // Bubbuls
+    for (auto& entry : fileData["bubbuls"])
     {
-        Cave* obj = new Cave(
+        Object* obj = new Object(
             uint32_t(entry["completion_hash"]), 
-            ParseJSONPosition(entry["position"]), 
-            std::string(entry["display_name"]), 
-            uint32_t(entry["bubbul_defeated_hash"])
+            ParseJSONPosition(entry["position"]),
+            std::string(entry["display_name"]) 
         );
 
-        m_Objects[ObjectType::Cave].push_back((Object*)obj);
-
-        // Object* objBubbul = new Object(
-        //     uint32_t(entry["bubbul_defeated_hash"]), 
-        //     ParseJSONPosition(entry["position"])
-        // );
-
-        // m_Objects[ObjectType::Bubbul].push_back((Object*)objBubbul);
-
+        m_Objects[ObjectType::Bubbul].push_back(obj);
     }
 
-    // Wells
-    for (auto& entry : fileData["wells"])
+    Log("locations");
+    // Locations
+    for (auto& entry : fileData["locations"])
     {
-        ObjectWithName* obj = new ObjectWithName(
+        Object* obj = new Object(
             uint32_t(entry["completion_hash"]), 
-            ParseJSONPosition(entry["position"]), 
+            ParseJSONPosition(entry["position"]),
             std::string(entry["display_name"])
         );
 
-        m_Objects[ObjectType::Well].push_back((Object*)obj);   
+        m_Objects[ObjectType::Location].push_back(obj);
+    }
+
+    // Caves
+    Log("caves");
+    for (auto& entry : fileData["caves"])
+    {
+        // Skip duplicates
+        //if (ObjectExists(ObjectType::Cave, uint32_t(entry["completion_hash"])))
+          //  continue;
+
+        Object* obj = new Object(
+            uint32_t(entry["completion_hash"]), 
+            ParseJSONPosition(entry["position"]),
+            std::string(entry["display_name"])
+        );
+
+        m_Objects[ObjectType::Cave].push_back(obj);
+    }
+
+    // Wells
+    Log("well");
+    for (auto& entry : fileData["wells"])
+    {
+        Object* obj = new Object(
+            uint32_t(entry["completion_hash"]), 
+            ParseJSONPosition(entry["position"]),
+            std::string(entry["display_name"])
+        );
+
+        m_Objects[ObjectType::Well].push_back(obj);   
+    }
+
+    // Chasms
+    Log("chasm");
+    for (auto& entry : fileData["chasms"])
+    {
+        Object* obj = new Object(
+            uint32_t(entry["completion_hash"]), 
+            ParseJSONPosition(entry["position"]),
+            std::string(entry["display_name"])
+        );
+
+        m_Objects[ObjectType::Chasm].push_back(obj);
     }
 
     // Bosses
@@ -1190,6 +232,70 @@ void Data::LoadFromJSON(const std::string& filepath)
         }
     }
 
+    // Old maps
+    Log("old mpa");
+    for (auto& entry : fileData["old_maps"])
+    {
+        Object* obj = new Object(
+            uint32_t(entry["completion_hash"]), 
+            ParseJSONPosition(entry["position"])
+        );
+
+        m_Objects[ObjectType::OldMap].push_back(obj);
+    }
+
+    // Sages wills
+    Log("sagesw");
+    for (auto& entry : fileData["sages_wills"])
+    {
+        Object* obj = new Object(
+            0,
+            ParseJSONPosition(entry["position"])
+        );
+
+        obj->m_CompletionGuid = std::stoul(std::string(entry["guid_hash"]));
+
+        m_Objects[ObjectType::SagesWill].push_back(obj);
+    }
+
+    // Addison signposts
+    Log("addison");
+    for (auto& entry : fileData["addison_signposts"])
+    {
+        Object* obj = new Object(
+            0,
+            ParseJSONPosition(entry["position"])
+        );
+
+        obj->m_CompletionGuid = std::stoul(std::string(entry["guid_hash"]));
+
+        m_Objects[ObjectType::AddisonSign].push_back(obj);
+    }
+
+    // Schema stones
+    Log("schema");
+    for (auto& entry : fileData["schema_stones"])
+    {
+        Object* obj = new Object(
+            uint32_t(entry["completion_hash"]), 
+            ParseJSONPosition(entry["position"]),
+            std::string(entry["display_name"])
+        );
+
+        m_Objects[ObjectType::SchemaStone].push_back(obj);
+    }
+    // Yiga schematics
+    for (auto& entry : fileData["yiga_schematics"])
+    {
+        Object* obj = new Object(
+            uint32_t(entry["completion_hash"]), 
+            ParseJSONPosition(entry["position"]),
+            std::string(entry["display_name"])
+        );
+
+        m_Objects[ObjectType::YigaSchematic].push_back(obj);
+    }
+
     // Logging
     for (int i = 0; i < (int)ObjectType::Count; i++)
     {
@@ -1203,6 +309,15 @@ void Data::UnloadData()
     {
         for (auto entry : m_Objects[ObjectType(i)])
         {
+            // Delete korok paths if they exists
+            ObjectType type = ObjectType(i);
+            if (type == ObjectType::HiddenKorok || type == ObjectType::CarryKorok)
+            {
+                Data::Korok* korok = (Data::Korok*)entry;
+                if (korok->m_Path)
+                    delete korok->m_Path;
+            }
+
             if (entry != nullptr)
                 delete entry;
         }
@@ -1220,9 +335,25 @@ Data::Object* Data::GetObjectByHash(ObjectType type, uint32_t hash)
     return nullptr;
 }
 
+Data::Object* Data::GetObjectByGuid(ObjectType type, uint64_t guid)
+{
+    for (auto entry : m_Objects[type])
+    {
+        if (entry->m_CompletionGuid == guid)
+            return entry;        
+    }
+
+    return nullptr;
+}
+
 bool Data::ObjectExists(ObjectType type, uint32_t hash)
 {
     return GetObjectByHash(type, hash) != nullptr;
+}
+
+bool Data::ObjectExistsByGuid(ObjectType type, uint64_t guid)
+{
+    return GetObjectByGuid(type, guid) != nullptr;
 }
 
 std::unordered_map<Data::ObjectType, std::vector<Data::Object*>> Data::m_Objects;

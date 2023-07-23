@@ -21,6 +21,8 @@
 #include "Log.h"
 #include "MapObject.h"
 
+#define SETTINGS_VERSION "2"
+
 bool openGLInitialized = false;
 bool nxLinkInitialized = false;
 int s_nxlinkSock = -1;
@@ -44,11 +46,24 @@ void cleanUp()
     std::ofstream file("sdmc:/switch/totk-unexplored/settings.txt");
     if (file.is_open())
     {
+        file << SETTINGS_VERSION << "\n";
         file << Map::m_CameraPosition.x << "\n";
         file << Map::m_CameraPosition.y << "\n";
         file << Map::m_Zoom << "\n";
         file << (int)Map::m_Legend->m_IsOpen << "\n";
         file << (int)Map::m_CurrentLayer << "\n";
+
+        // Selected legend buttons
+        file << Map::m_Legend->m_HighlightedButton << "\n";
+        file << Map::m_Legend->m_Page << "\n"; // Legend page
+        for (int j = 0; j < Map::m_Legend->m_Buttons.size(); j++)
+        {
+            for (int i = 0; i < Map::m_Legend->m_Buttons[j].size(); i++)
+            {
+                file << Map::m_Legend->m_Buttons[j][i]->m_IsToggled << "\n";
+            }
+        }
+
         Log("Saved settings");
     }
     else
@@ -84,6 +99,7 @@ void cleanUp()
     }
 
     Map::Destory();
+    Data::UnloadData();
 
     // Cleanup
     romfsExit();
@@ -94,6 +110,79 @@ void cleanUp()
     // Deinitialize network
     deinitNxLink();
     socketExit();
+}
+
+void LoadSettings()
+{
+    // Load settings if they exist
+    std::ifstream settingsFile("sdmc:/switch/totk-unexplored/settings.txt");
+    if (settingsFile.is_open())
+    {
+        std::string line;
+
+        std::getline(settingsFile, line);
+        if (line != SETTINGS_VERSION)
+        {
+            // Settings saved in older version
+            settingsFile.close();
+            remove("sdmc:/switch/totk-unexplored/settings.txt");
+            Log("Old settings detected, removing them");
+
+            return;
+        }
+
+        std::getline(settingsFile, line);
+        Map::m_CameraPosition.x = std::stof(line);
+
+        std::getline(settingsFile, line);
+        Map::m_CameraPosition.y = std::stof(line);
+
+        std::getline(settingsFile, line);
+        Map::m_Zoom = std::stof(line);
+
+        std::getline(settingsFile, line);
+        Map::m_Legend->m_IsOpen = (bool)std::stoi(line);
+
+        std::getline(settingsFile, line);
+        int layer = std::stoi(line);
+        if (layer < 0) layer = 0;
+        if (layer > 2) layer = 2;
+        Map::m_CurrentLayer = (Map::Layers)layer;
+
+        // Selected legend buttons
+        std::getline(settingsFile, line);
+        Map::m_Legend->m_HighlightedButton = std::stoi(line); // highligted button
+
+        std::getline(settingsFile, line);
+        Map::m_Legend->m_Page = std::stoi(line); // Legend page
+        for (int j = 0; j < Map::m_Legend->m_Buttons.size(); j++)
+        {
+            for (int i = 0; i < Map::m_Legend->m_Buttons[j].size(); i++)
+            {
+                std::getline(settingsFile, line);
+                bool clicked = std::stoi(line);
+                Map::m_Legend->m_Buttons[j][i]->Click(Map::m_Legend, clicked);
+            }
+        }
+
+        Map::m_Legend->UpdateSelectedButton();
+
+
+        if (Map::m_CameraPosition.x > 1000.0f)
+            Map::m_CameraPosition.x = 1000.0f;
+        if (Map::m_CameraPosition.x < -1000.0f)
+            Map::m_CameraPosition.x = -1000.0f;
+        if (Map::m_CameraPosition.y > 1000.0f)
+            Map::m_CameraPosition.y = 1000.0f;
+        if (Map::m_CameraPosition.y < -1000.0f)
+            Map::m_CameraPosition.y = -1000.0f;
+    }
+    else
+    {
+        Log("Failed to open settings file");
+    }
+
+    settingsFile.close();
 }
 
 int main()
@@ -136,48 +225,12 @@ int main()
     PadState pad;
     padInitializeDefault(&pad);
 
+    std::cout << "Before map init\n";
+
     Map::Init();
     Map::m_Pad = &pad;
 
-    // Load settings if they exist
-    std::ifstream settingsFile("sdmc:/switch/totk-unexplored/settings.txt");
-    if (settingsFile.is_open())
-    {
-        std::string line;
-
-        std::getline(settingsFile, line);
-        Map::m_CameraPosition.x = std::stof(line);
-
-        std::getline(settingsFile, line);
-        Map::m_CameraPosition.y = std::stof(line);
-
-        std::getline(settingsFile, line);
-        Map::m_Zoom = std::stof(line);
-
-        std::getline(settingsFile, line);
-        Map::m_Legend->m_IsOpen = (bool)std::stoi(line);
-
-        std::getline(settingsFile, line);
-        int layer = std::stoi(line);
-        if (layer < 0) layer = 0;
-        if (layer > 2) layer = 2;
-        Map::m_CurrentLayer = (Map::Layers)layer;
-
-        if (Map::m_CameraPosition.x > 1000.0f)
-            Map::m_CameraPosition.x = 1000.0f;
-        if (Map::m_CameraPosition.x < -1000.0f)
-            Map::m_CameraPosition.x = -1000.0f;
-        if (Map::m_CameraPosition.y > 1000.0f)
-            Map::m_CameraPosition.y = 1000.0f;
-        if (Map::m_CameraPosition.y < -1000.0f)
-            Map::m_CameraPosition.y = -1000.0f;
-    }
-    else
-    {
-        Log("Failed to open settings file");
-    }
-
-    settingsFile.close();
+    LoadSettings();
 
     bool hasDoneFirstDraw = false;
     bool hasLoadedSave = false;
@@ -206,7 +259,7 @@ int main()
 
         if (hasDoneFirstDraw && !hasLoadedSave)
         {
-            std::cout << "will load save\n";
+            Log("Will load save");
             Log("LoadGamesave() status:", SavefileIO::Get().LoadGamesave() ? "true" : "false");
 
             hasLoadedSave = true;

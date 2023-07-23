@@ -12,6 +12,7 @@ public:
 
     void AddLine(glm::vec2 start, glm::vec2 end, float width = 1.0f, glm::vec4 color = glm::vec4(1.0f));
 
+    void Clear();
     void RenderLines(glm::mat4 projMat, glm::mat4 viewMat = glm::mat4(1.0f));
 
     ~LineRenderer();

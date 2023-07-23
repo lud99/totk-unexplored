@@ -13,9 +13,9 @@ public:
         Koroks = 0,
         Shrines,
         Lightroots,
-        Bubbuls,
         
         Caves,
+        Bubbuls,
         Wells,
         Chasms,
         Locations,
@@ -41,6 +41,8 @@ public:
 
     // Position is top-left corner
     IconButton(ButtonTypes type, glm::vec2 position, float width, float height, float iconScale = 1.0f);
+
+    static IconButton::ButtonTypes ObjectTypeToButtonType(Data::ObjectType objectType);
 
     void Render();
 
@@ -88,6 +90,7 @@ public:
 
 public:
     Quad m_Background;
+    TexturedQuad m_Arrow;
 
     std::vector<std::vector<IconButton*>> m_Buttons;
 

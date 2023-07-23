@@ -18,6 +18,19 @@ void MapObject::Init(const std::string& texturePath, Data::ObjectType type)
 {
     m_ObjectType = type;
 
+    if (m_ObjectType == Data::ObjectType::Location)
+    {
+        // Set the fonts matrices
+        //m_Font->m_ProjectionMatrix = &m_Map->m_ProjectionMatrix;
+        //m_Font->m_ViewMatrix = &m_Map->m_ViewMatrix;
+
+        // Set text font
+       // m_Text.m_Font = m_Font;
+
+        // Create text mesh
+        //m_Text.Create(m_LocationData->displayName);
+    }
+
     // Only load one texture
     if (!m_Textures[(int)m_ObjectType])
         m_Textures[(int)m_ObjectType] = new Texture2D(texturePath);
@@ -97,37 +110,53 @@ void MapObject::AddToMesh()
 
 void MapObject::Update(bool clear)
 {
-    auto& texture = m_Textures[(int)m_ObjectType];
-    auto& mesh = m_Meshes[(int)m_ObjectType];
-
-    const float skyThreshold = 1000.0f;
-    const float groundThreshold = -50.0f; 
     m_Scale = (0.85f / Map::m_Zoom) * 0.5f;
+
+    if (m_ObjectType == Data::ObjectType::Bubbul)
+        m_Scale *= 0.5f;
+
+    // For text
+    if (m_ObjectType == Data::ObjectType::Location)
+    {
+        float minScale = 0.125f * 1.25f;
+        if (m_Scale < minScale)
+            m_Scale = minScale;
+
+        if (clear)
+        {
+            Map::m_LocationsFont.BeginBatch();
+            Map::m_LocationsFont2.BeginBatch();
+        }
+
+        if (!IsVisible(false))
+            return;
+
+        float margin = 100.0f;
+        margin += margin * m_Scale;
+        if (!Map::IsInView(m_Position, margin)) 
+            return;
+
+        glm::vec3 color = glm::vec3(190.0f, 177.0f, 112.0f) / glm::vec3(255.0f);
+        //glm::vec3 colorOutline = glm::vec3(96.0f, 86.0f, 38.0f) / glm::vec3(255.0f);
+        Map::m_LocationsFont.AddTextToBatch(m_ObjectData->m_DisplayName, m_Position, m_Scale * 0.5f, color, ALIGN_CENTER);
+        //Map::m_LocationsFont2.AddTextToBatch(m_ObjectData->m_DisplayName, m_Position, m_Scale * 0.54f, colorOutline, ALIGN_CENTER);
+    
+        return;
+    }
 
     float minScale = 0.125f;
     if (m_Scale < minScale)
         m_Scale = minScale;
 
-    if (clear) mesh.Clear();
+    // For other objects
+    if (clear) 
+    {
+        auto& mesh = m_Meshes[(int)m_ObjectType];
+        mesh.Clear();
+    }
 
-    float y = ((Data::Object*)m_ObjectData)->m_Position.y;
-
-    if (Map::m_CurrentLayer == Map::Layers::Depths && y > groundThreshold)
+    if (!IsVisible())
         return;
-
-    if (Map::m_CurrentLayer == Map::Layers::Surface && (y < groundThreshold || y > skyThreshold))
-        return;
-
-    if (Map::m_CurrentLayer == Map::Layers::Sky && y < skyThreshold)
-        return;
-
-    if (m_Found && !Map::m_Legend->m_Show[IconButton::ShowCompleted]) 
-        return;
-    
-    // Culling 
-    float margin = texture->m_Width + 10.0f;
-    if (!Map::IsInView(m_Position, margin)) 
-      return;
 
     // Set dynamic mesh
     AddToMesh();
@@ -135,7 +164,19 @@ void MapObject::Update(bool clear)
 
 void MapObject::Render()
 {
-    auto& texture = m_Textures[(int)m_ObjectType];
+    if (m_ObjectType == Data::ObjectType::Location)
+    {
+        //Map::m_LocationsFont2.m_ViewMatrix = &Map::m_ViewMatrix;
+        //Map::m_LocationsFont2.RenderBatch();
+
+        Map::m_LocationsFont.m_ViewMatrix = &Map::m_ViewMatrix;
+        Map::m_LocationsFont.RenderBatch();
+
+
+
+        return;
+    }
+        
     auto& mesh = m_Meshes[(int)m_ObjectType];
 
     if (mesh.GetVertices().empty())
@@ -157,8 +198,10 @@ void MapObject::Render()
     mesh.GetIndices().clear();
 }
 
-bool MapObject::IsClicked(glm::vec2 position)
+bool MapObject::IsClicked(glm::vec2 position, bool ignoreVisibility)
 {
+    if (!IsVisible() && !ignoreVisibility) return false;
+
     auto& texture = m_Textures[(int)m_ObjectType];
 
     glm::vec2 worldPos = position / Map::m_Zoom + Map::m_CameraPosition;
@@ -176,6 +219,40 @@ bool MapObject::IsClicked(glm::vec2 position)
     }
 
     return false;
+}
+
+bool MapObject::IsVisible(bool culling)
+{
+    if (culling)
+    {
+        auto& texture = m_Textures[(int)m_ObjectType];
+        float margin = texture->m_Width + 10.0f;
+        if (!Map::IsInView(m_Position, margin)) 
+            return false;
+    }
+
+    // Check if it should be shown
+    if (!Map::m_Legend->m_Show[IconButton::ObjectTypeToButtonType(m_ObjectType)])
+        return false;
+
+    float y = m_ObjectData->m_Position.y;
+
+    const float skyThreshold = 750.0f;
+    const float groundThreshold = -50.0f; 
+
+    if (Map::m_CurrentLayer == Map::Layers::Depths && y > groundThreshold)
+        return false;
+
+    if (Map::m_CurrentLayer == Map::Layers::Surface && (y < groundThreshold || y > skyThreshold))
+        return false;
+
+    if (Map::m_CurrentLayer == Map::Layers::Sky && y < skyThreshold)
+        return false;
+
+    if (m_Found && !Map::m_Legend->m_Show[IconButton::ShowCompleted]) 
+        return false;
+
+    return true;
 }
 
 MapObject::~MapObject()
@@ -199,3 +276,55 @@ Shader MapObject::m_Shader;
 Mesh<TextureVertex> MapObject::m_Meshes[(int)Data::ObjectType::Count];
 
 float MapObject::m_Scale;
+
+const std::string MapObject::IconPaths[20] = {
+    "romfs:/icons/korok_hidden.png",
+    "romfs:/icons/korok_carry.png",
+    "romfs:/icons/shrine.png",
+    "romfs:/icons/lightroot.png",
+
+    "romfs:/icons/cave.png",
+    "romfs:/icons/bubbul.png",
+    "romfs:/icons/well.png",
+    "romfs:/icons/chasm.png",
+    "romfs:/icons/location.png",
+
+    "romfs:/icons/eye.png",
+    "romfs:/icons/talus.png",
+    "romfs:/icons/molduga.png",
+    "romfs:/icons/flux_construct.png",
+    "romfs:/icons/frox.png",
+    "romfs:/icons/gleeok.png",
+
+    "romfs:/icons/sages_will.png",
+    "romfs:/icons/old_map.png",
+    "romfs:/icons/addison_sign.png", 
+    "romfs:/icons/schema_stone.png",
+    "romfs:/icons/yiga_schematic.png"
+};
+
+const std::string MapObject::Names[20] = {
+    "Hidden Korok",
+    "Lonely Korok",
+    "Shrine",
+    "Lightroot",
+
+    "Cave",
+    "Bubbul",
+    "Well",
+    "Chasm",
+    "Location",
+
+    "Hinox",
+    "Talus",
+    "Molduga",
+    "Flux Construct",
+    "Frox",
+    "Gleeok",
+
+    "Sage's Will",
+    "Old Map",
+    "Addison Sign",
+    "Schema Stone",
+    "Yiga Schematic"
+};

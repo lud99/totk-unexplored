@@ -24,7 +24,11 @@ Legend::Legend()
 
     m_Background.m_Color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
 
-    float buttonPadding = 25.0f;
+    m_Arrow.Create("romfs:/icons/arrow.png");
+    m_Arrow.m_Position.y = -m_Arrow.m_Texture->m_Height / 2;
+    m_Arrow.m_ProjectionMatrix = &Map::m_ProjectionMatrix;
+
+    float buttonPadding = 40.0f;//25.0f;
     float buttonVerticalPadding = 12.5f;
 
     float topOffset = 80.0f;
@@ -56,8 +60,6 @@ Legend::Legend()
             IconButton* button = nullptr;
             if (i == end - 1)    
                 i = (int)IconButton::ShowCompleted;
-
-            std::cout << topY << "\n";
 
             button = new IconButton((IconButton::ButtonTypes)i, glm::vec2(posLeft, topY), buttonWidth, buttonHeight, 1.25f * 0.5f);
             
@@ -121,6 +123,41 @@ void Legend::Update()
             }
         }
     }
+        
+    HidAnalogStickState analog_stick_r = padGetStickPos(Map::m_Pad, 1);
+
+    // Get the stick position between -1.0f and 1.0f, instead of -32767 and 32767
+    glm::vec2 stickRPosition = glm::vec2((float)analog_stick_r.x / (float)JOYSTICK_MAX, (float)analog_stick_r.y / (float)JOYSTICK_MAX);
+   
+    float deadzone = 0.4f;
+    if (fabs(stickRPosition.x) >= deadzone)
+    {
+        if (stickRPosition.x > 0)  
+        {
+            if (m_Page < m_NumberOfPages - 1)
+            {
+                m_Page++;
+
+                // Clamp what button is selected
+                m_HighlightedButton = std::min(m_HighlightedButton, (int)m_Buttons[m_Page].size() - 1);
+
+                UpdateSelectedButton();
+            }
+        } 
+
+        if (stickRPosition.x < 0)  
+        {
+            if (m_Page > 0)
+            {
+                m_Page--;
+
+                // Clamp what button is selected
+                m_HighlightedButton = std::min(m_HighlightedButton, (int)m_Buttons[m_Page].size() - 1);
+
+                UpdateSelectedButton();
+            }
+        } 
+    }
 
     u64 buttonsPressed = padGetButtonsDown(Map::m_Pad);
     if (buttonsPressed & HidNpadButton_Down)
@@ -143,7 +180,7 @@ void Legend::Update()
     }
     if (buttonsPressed & HidNpadButton_Right)
     {
-        if (m_Page < m_NumberOfPages)
+        if (m_Page < m_NumberOfPages - 1)
         {
             m_Page++;
 
@@ -171,6 +208,19 @@ void Legend::Update()
         if (m_HighlightedButton >= 0 && m_HighlightedButton < (int)m_Buttons[m_Page].size())
             m_Buttons[m_Page][m_HighlightedButton]->Click(this);
     }
+
+    float arrowPadding = 3.0f;
+    if (m_Page == 0)
+    {
+        m_Arrow.m_Position.x = Map::m_ScreenLeft + m_Width - m_Arrow.m_Texture->m_Width - arrowPadding;
+        m_Arrow.m_Scale = -std::abs(m_Arrow.m_Scale);
+    }
+        
+    if (m_Page == 1)
+    {
+        m_Arrow.m_Position.x = Map::m_ScreenLeft + 10 + m_Arrow.m_Texture->m_Width / 2 + arrowPadding;
+        m_Arrow.m_Scale = std::abs(m_Arrow.m_Scale);
+    }
 }
 
 void Legend::UpdateSelectedButton()
@@ -181,6 +231,9 @@ void Legend::UpdateSelectedButton()
             if (m_Buttons[j][i]->m_Button.m_Color == IconButton::SelectedColor)
                 m_Buttons[j][i]->m_Button.m_Color = IconButton::DefaultColor;
 
+            //if (m_Buttons[j][i]->m_Button.m_Color == IconButton::HighlightedColor)
+              //  m_Show[(int)m_Buttons[j][i]->m_Type] = true;
+
             m_Buttons[j][i]->m_IsSelected = false;
         }
     }
@@ -190,8 +243,6 @@ void Legend::UpdateSelectedButton()
 
 void Legend::Render()
 {
-    std::cout << "Button: " << m_HighlightedButton << ", page: " << m_Page << "\n";
-
     m_Background.Render();
 
     glm::mat4 empty(1.0);
@@ -207,8 +258,7 @@ void Legend::Render()
         m_Buttons[m_Page][i]->Render();
     }
 
-    // Render the Show Complete button. it should alwa
-    //m_Buttons.back().back()->Render();
+    m_Arrow.Render();
 
     Map::m_Font.m_ViewMatrix = &Map::m_ViewMatrix;
 }
@@ -239,6 +289,14 @@ IconButton::IconButton()
 
 }
 
+IconButton::ButtonTypes IconButton::ObjectTypeToButtonType(Data::ObjectType objectType)
+{
+    if (objectType == Data::ObjectType::HiddenKorok || objectType == Data::ObjectType::CarryKorok) 
+        return IconButton::ButtonTypes::Koroks; 
+
+    return IconButton::ButtonTypes((int)objectType - 1);
+}
+
 IconButton::IconButton(ButtonTypes type, glm::vec2 position, float width, float height, float iconScale)
 {
     m_Width = width;
@@ -251,14 +309,14 @@ IconButton::IconButton(ButtonTypes type, glm::vec2 position, float width, float 
         "romfs:/icons/korok_hidden.png",
         "romfs:/icons/shrine.png",
         "romfs:/icons/lightroot.png",
-        "romfs:/icons/bubbul.png",
-
+        
         "romfs:/icons/cave.png",
+        "romfs:/icons/bubbul.png",
         "romfs:/icons/well.png",
         "romfs:/icons/chasm.png",
         "romfs:/icons/location.png",
 
-        "romfs:/icons/hinox.png",
+        "romfs:/icons/eye.png",
         "romfs:/icons/talus.png",
         "romfs:/icons/molduga.png",
         "romfs:/icons/flux_construct.png",
@@ -278,9 +336,9 @@ IconButton::IconButton(ButtonTypes type, glm::vec2 position, float width, float 
         "Koroks",
         "Shrines",
         "Lightroots",
-        "Bubbuls",
 
         "Caves",
+        "Bubbuls",
         "Wells",
         "Chasms",
         "Locations",
@@ -326,7 +384,7 @@ IconButton::IconButton(ButtonTypes type, glm::vec2 position, float width, float 
 
     m_Icon.m_Scale = iconScale;
 
-    float iconLeftMargin = 35.0f;
+    float iconLeftMargin = 25.0f;
     m_Icon.m_Position = glm::vec2(position.x + iconLeftMargin, position.y - height / 2.0f);
 
     m_Icon.m_ProjectionMatrix = &Map::m_ProjectionMatrix;
@@ -339,13 +397,13 @@ void IconButton::Render()
 
     m_Icon.Render();
 
-    float mainTextMargin = 35.0f;
+    float mainTextMargin = 25.0f;
     glm::vec2 mainTextPosition(
         m_Icon.m_Position.x + mainTextMargin, 
         m_Icon.m_Position.y - m_Height / 8.0f
     );
 
-    float countTextMargin = 20.0f;
+    float countTextMargin = 15.0f;
     glm::vec2 countTextPosition(
         m_Position.x + m_Width - countTextMargin, 
         mainTextPosition.y
@@ -355,7 +413,9 @@ void IconButton::Render()
 
     std::string countString = "";
 
-    Map::m_Font.AddTextToBatch(m_Text, mainTextPosition, 0.45f, glm::vec3(1.0));
+    float fontSize = 0.425f; 
+
+    Map::m_Font.AddTextToBatch(m_Text, mainTextPosition, fontSize, glm::vec3(1.0));
 
     if (!save.LoadedSavefile) return;
 
@@ -373,13 +433,9 @@ void IconButton::Render()
     default:
         countString = std::to_string(save.loadedData.found[ButtonTypeToObjectType(m_Type)].size()) + "/" + std::to_string(Data::m_Objects[ButtonTypeToObjectType(m_Type)].size());
         break;
-    
-    /*case Locations:
-        countString = std::to_string(save.visitedLocations.size()) + "/" + std::to_string(Data::LocationsCount);
-        break;*/
     }
 
-    Map::m_Font.AddTextToBatch(countString, countTextPosition, 0.45f, glm::vec3(1.0), ALIGN_RIGHT);
+    Map::m_Font.AddTextToBatch(countString, countTextPosition, fontSize, glm::vec3(1.0), ALIGN_RIGHT);
 }
 
 bool IconButton::Click(Legend* legend)
@@ -392,6 +448,20 @@ bool IconButton::Click(Legend* legend)
         m_Button.m_Color = IconButton::DefaultColor;
 
     legend->m_Show[m_Type] = m_IsToggled;
+
+    // If this button is show completed (that button is always last at the list)
+    if (legend->m_Buttons[legend->m_Page].back() == this)
+    {
+        // Propegate that change to all the other show completed buttons
+        for (int i = 0; i < legend->m_NumberOfPages; i++)
+        {
+            auto showCompletedButton = legend->m_Buttons[i].back();
+
+            // If it states is different from this, then click it. That should prevent infinite recursion
+            if (showCompletedButton->m_IsToggled != m_IsToggled)
+                showCompletedButton->Click(legend, m_IsToggled);
+        }
+    }
 
     return m_IsToggled;
 }
@@ -406,6 +476,20 @@ bool IconButton::Click(Legend* legend, bool toggled)
         m_Button.m_Color = IconButton::DefaultColor;
 
     legend->m_Show[m_Type] = m_IsToggled;
+
+    // If this button is show completed (that button is always last at the list)
+    if (legend->m_Buttons[legend->m_Page].back() == this)
+    {
+        // Propegate that change to all the other show completed buttons
+        for (int i = 0; i < legend->m_NumberOfPages; i++)
+        {
+            auto showCompletedButton = legend->m_Buttons[i].back();
+
+            // If it states is different from this, then click it. That should prevent infinite recursion
+            if (showCompletedButton->m_IsToggled != m_IsToggled)
+                showCompletedButton->Click(legend, m_IsToggled);
+        }
+    }
 
     return m_IsToggled;
 }

@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <stb/stb_image.h>
+#include <iostream>
 
 #include "../Log.h"
 
@@ -28,7 +29,7 @@ void Texture2D::Load(const std::string& filepath)
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	
+	//auto start = high_resolution_clock::now();
 	stbi_set_flip_vertically_on_load(true);
 
 	// load and generate the texture

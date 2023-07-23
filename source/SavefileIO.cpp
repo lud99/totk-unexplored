@@ -108,14 +108,29 @@ bool SavefileIO::LoadGamesave(bool loadMasterMode, bool chooseProfile)
     return true;
 }
 
-uint32_t SavefileIO::ReadU32(unsigned char *buffer, int offset)
+uint32_t SavefileIO::ReadU32(unsigned char *buffer, uint32_t offset)
 {
     // Little endian byte order
-    return ((buffer[offset + 0] << 0) +
-            (buffer[offset + 1] << 8) +
-            (buffer[offset + 2] << 16) +
-            (buffer[offset + 3] << 24)) >>
+    return ((buffer[offset + 0] << 0UL) +
+            (buffer[offset + 1] << 8UL) +
+            (buffer[offset + 2] << 16UL) +
+            (buffer[offset + 3] << 24UL)) >>
            0 /* Make it positive? */;
+}
+
+uint64_t SavefileIO::ReadU64(unsigned char *buffer, uint64_t offset)
+{
+    // Little endian byte order
+    uint64_t result = 0;
+    result |= buffer[offset + 7]; result <<= 8;
+    result |= buffer[offset + 6]; result <<= 8;
+    result |= buffer[offset + 5]; result <<= 8;
+    result |= buffer[offset + 4]; result <<= 8;
+    result |= buffer[offset + 3]; result <<= 8;
+    result |= buffer[offset + 2]; result <<= 8;
+    result |= buffer[offset + 1]; result <<= 8;
+    result |= buffer[offset + 0];
+    return result;
 }
 
 int SavefileIO::MountSavefile(bool openProfilePicker)
@@ -525,21 +540,6 @@ bool SavefileIO::ParseFile(const char *filepath)
     // Clear the current file data
     loadedData = {};
 
-    // foundKoroks.clear();
-    // missingKoroks.clear();
-    // foundShrines.clear();
-    // missingShrines.clear();
-    // foundLightroots.clear();
-    // missingLightroots.clear();
-    // //visitedLocations.clear();
-    // //unexploredLocations.clear();
-    // defeatedHinoxes.clear();
-    // undefeatedHinoxes.clear();
-    // defeatedTaluses.clear();
-    // undefeatedTaluses.clear();
-    // defeatedMoldugas.clear();
-    // undefeatedMoldugas.clear();
-
     if (!FileExists(filepath))
         return false;
 
@@ -558,6 +558,8 @@ bool SavefileIO::ParseFile(const char *filepath)
 
     file.close();
 
+    uint32_t guidsArrayOffset = 0;
+
     // Based on https://github.com/d4mation/botw-unexplored-viewer/blob/master/assets/js/zelda-botw.js
 
     // Iterate through the entire savefile to find the korok seed and location hashes
@@ -568,7 +570,8 @@ bool SavefileIO::ParseFile(const char *filepath)
 
         if (hashValue == 0xa3db7114) //found MetaData.SaveTypeHash
         {
-            Log("found MetaData.SaveTypeHash");
+            // The array of Globally Unique Identifiers should start here
+            guidsArrayOffset = ReadU32(buffer, offset + 4);
             break;
         }
 
@@ -576,10 +579,14 @@ bool SavefileIO::ParseFile(const char *filepath)
         {
             Data::ObjectType type = (Data::ObjectType)i;
 
+            // Filter out objects that use guids
+            if (type == Data::ObjectType::SagesWill || type == Data::ObjectType::AddisonSign)
+                continue;
+
             Data::Object* obj = Data::GetObjectByHash(type, hashValue);
             if (obj)
             {
-                // Read the 4 bytes after the hash. If it's not 0, then it has been found
+                // Read the 4 bytes after the hash
                 uint32_t status = ReadU32(buffer, offset + 4);
                 bool found = false;
 
@@ -587,9 +594,11 @@ bool SavefileIO::ParseFile(const char *filepath)
                 // More flags for shrines: 
                 // https://github.com/marcrobledo/savegame-editors/blob/fdcad683d64524f4e1ef774f01cad828a7ce3d0d/zelda-totk/zelda-totk.completism.js#L124C1-L124C124
                 if (type == Data::ObjectType::Shrine)
-                    found = (status == 1654019904); // The status flag if a shrine is cleared
+                    found = (status == 1654019904); // The status flag ('Clear') if a shrine is cleared
                 else if (type == Data::ObjectType::Lightroot)
-                    found = (status == 404286466); // The status flag if a lightroot is 'open'
+                    found = (status == 404286466); // The status flag ('Open') for if a lightroot is completed
+                else if (type == Data::ObjectType::CarryKorok)
+                    found = (status == 1654019904); // The status flag 'Clear' if it is completed
                 else
                     found = (status != 0); // General case. 0 means it is not found
 
@@ -597,12 +606,31 @@ bool SavefileIO::ParseFile(const char *filepath)
                 found ? loadedData.found[type].push_back(obj) : loadedData.missing[type].push_back(obj);
             }
         }
-        // Check if has the dlc
-        // uint32_t BalladOfHeroes_Ready = 1186840637; // Set to true if the DLC is owned
-        // if (hashValue == BalladOfHeroes_Ready) {
-        //     HasDLC = ReadU32(buffer, offset + 4) == 1;
-        //     Log("User has DLC:", HasDLC ? "true" : "false");
-        // }
+    }
+
+    // Iterate guids
+    for (unsigned int offset = guidsArrayOffset; offset < fileSize; offset += 8)
+    {
+        uint64_t guidValue = ReadU64(buffer, offset);
+
+        if (guidValue == 0) 
+            break;
+
+        for (int i = 0; i < (int)Data::ObjectType::Count; i++)
+        {
+            Data::ObjectType type = (Data::ObjectType)i;
+
+            // Filter out objects that use hash.
+            if (type != Data::ObjectType::SagesWill && type != Data::ObjectType::AddisonSign)
+                continue;
+
+            // If an object can be found with the read guid value, then the object has been found
+            Data::Object* obj = Data::GetObjectByGuid(type, guidValue);
+            if (obj)
+                loadedData.found[type].push_back(obj);
+            else
+                loadedData.missing[type].push_back(obj);
+        }
     }
 
     delete buffer;
@@ -613,31 +641,3 @@ bool SavefileIO::ParseFile(const char *filepath)
 
     return true;
 }
-
-// std::vector<Data::Korok *> SavefileIO::foundKoroks;
-// std::vector<Data::Korok *> SavefileIO::missingKoroks;
-// std::vector<Data::Shrine*> SavefileIO::foundShrines;
-// std::vector<Data::Shrine*> SavefileIO::missingShrines;
-// std::vector<Data::DLCShrine*> SavefileIO::foundDLCShrines;
-// std::vector<Data::DLCShrine*> SavefileIO::missingDLCShrines;
-// std::vector<Data::Location *> SavefileIO::visitedLocations;
-// std::vector<Data::Location *> SavefileIO::unexploredLocations;
-// std::vector<Data::Hinox *> SavefileIO::defeatedHinoxes;
-// std::vector<Data::Hinox *> SavefileIO::undefeatedHinoxes;
-// std::vector<Data::Talus *> SavefileIO::defeatedTaluses;
-// std::vector<Data::Talus *> SavefileIO::undefeatedTaluses;
-// std::vector<Data::Molduga *> SavefileIO::defeatedMoldugas;
-// std::vector<Data::Molduga *> SavefileIO::undefeatedMoldugas;
-
-// u64 SavefileIO::AccountUid1;
-// u64 SavefileIO::AccountUid2;
-// int SavefileIO::MostRecentNormalModeFile = -1;
-// int SavefileIO::MostRecentMasterModeFile = -1;
-// bool SavefileIO::LoadedSavefile = false;
-// bool SavefileIO::GameIsRunning = false;
-// bool SavefileIO::NoSavefileForUser = false;
-// bool SavefileIO::MasterModeFileExists = false;
-// bool SavefileIO::MasterModeFileLoaded = false;
-// bool SavefileIO::HasDLC = false;
-
-// int SavefileIO::MasterModeSlot;
