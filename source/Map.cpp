@@ -503,6 +503,11 @@ void Map::LoadLayerImage()
     m_MapBackgrounds[currentLayer].m_ViewMatrix = &m_ViewMatrix; 
 }
 
+MapObject* Map::GetObjectInCursor()
+{
+    
+}
+
 void Map::Destory()
 {
     //delete[] m_Locations;

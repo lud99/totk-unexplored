@@ -36,7 +36,7 @@ namespace Map
 
     void LoadLayerImage();
 
-    MapObject& GetObjectInCursor()
+    MapObject* GetObjectInCursor();
 
     void Destory();
 

@@ -21,5 +21,5 @@ public:
     Mesh<ColorVertex> m_Mesh;
     Shader m_Shader; 
 
-    const int MAX_LINES = 300;
+    const int MAX_LINES = 600;
 };
