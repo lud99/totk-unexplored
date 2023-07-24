@@ -29,15 +29,32 @@ float lerp(float a, float b, float t)
 
 void Map::Init()
 {
-    //Data::LoadPaths();
-
     Log("LoadFromJSON ");
     Data::LoadFromJSON("romfs:/map_data.json");
 
     m_ProjectionMatrix = glm::ortho(-m_CameraWidth / 2, m_CameraWidth / 2, -m_CameraHeight / 2, m_CameraHeight / 2, -1.0f, 1.0f);
 
+    // Create framebuffer
+    m_Framebuffer.Create(m_CameraWidth, m_CameraHeight);
+
+    // Create fullscreen quad that will render the framebuffers texture
+    {
+        float left = -Map::m_CameraWidth / 2.0f;
+        float right = Map::m_CameraWidth / 2.0f;
+        float top = Map::m_CameraHeight / 2.0f;
+        float bottom = -Map::m_CameraHeight / 2.0f;
+
+        m_FullscreenQuad.Create("",
+            glm::vec2(left, bottom),
+            glm::vec2(right, bottom),
+            glm::vec2(right, top),
+            glm::vec2(left, top)
+        );
+        m_FullscreenQuad.m_Texture = new Texture2D(m_Framebuffer.m_TextureColorbuffer, m_CameraWidth, m_CameraHeight);
+    }
+
     // Load font
-    m_Font.Load("romfs:/Roboto-Regular.ttf"/*"romfs:/arial.ttf"*/); 
+    m_Font.Load("romfs:/Roboto-Regular.ttf"); 
     m_Font.m_ProjectionMatrix = &m_ProjectionMatrix;
     m_Font.m_ViewMatrix = &m_ViewMatrix;
 
@@ -342,6 +359,8 @@ void Map::Update()
 
 void Map::Render()
 {
+    m_Framebuffer.Bind(); // Everything after renders to this
+
     m_MapBackgrounds[(int)m_LayerNavigation->GetLayer()].Render();
 
     if (SavefileIO::Get().LoadedSavefile)
@@ -486,6 +505,17 @@ void Map::Render()
     m_Font.RenderBatch();
 
     m_Font.m_ViewMatrix = &m_ViewMatrix;
+
+    m_Framebuffer.Unbind(); // Back to normal
+
+    // Render the framebuffer to the screen
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST); // The quad should always rendered in front of everything else
+
+    m_FullscreenQuad.Render();
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 bool Map::IsInView(glm::vec2 position, float margin = 100.0f)
@@ -580,6 +610,8 @@ TexturedQuad Map::m_MapBackgrounds[3];
 Font Map::m_Font;
 Font Map::m_LocationsFont;
 LineRenderer* Map::m_LineRenderer;
+FramebufferObject Map::m_Framebuffer;
+TexturedQuad Map::m_FullscreenQuad;
 //TexturedQuad Map::m_MasterModeIcon;
 
 float Map::m_Zoom = Map::m_DefaultZoom;

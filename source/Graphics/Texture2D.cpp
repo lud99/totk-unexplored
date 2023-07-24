@@ -16,6 +16,15 @@ Texture2D::Texture2D(const std::string& filepath)
 	Load(filepath);
 }
 
+Texture2D::Texture2D(unsigned int textureId, int width, int height)
+{
+    m_Texture = textureId;
+    m_Width = width;
+    m_Height = height;
+
+    m_ShouldDeleteTextureOnDestroy = false;
+}
+
 void Texture2D::Load(const std::string& filepath)
 {
 	glGenTextures(1, &m_Texture);
@@ -67,5 +76,6 @@ void Texture2D::Unbind()
 
 Texture2D::~Texture2D()
 {
-    glDeleteTextures(1, &m_Texture);
+    if (m_ShouldDeleteTextureOnDestroy)
+        glDeleteTextures(1, &m_Texture);
 }

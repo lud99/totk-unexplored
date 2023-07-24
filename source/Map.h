@@ -6,6 +6,7 @@
 #include "Graphics/Shader.h" 
 #include "Graphics/Font.h"
 #include "Graphics/Quad.h"
+#include "Graphics/FramebufferObject.h"
 
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
@@ -52,6 +53,8 @@ namespace Map
 
     extern Font m_Font, m_LocationsFont;
     extern LineRenderer* m_LineRenderer;
+    extern FramebufferObject m_Framebuffer;
+    extern TexturedQuad m_FullscreenQuad;
 
     extern float m_Zoom;
 
