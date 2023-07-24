@@ -1,5 +1,6 @@
 #pragma once
 
+// Written with information from https://learnopengl.com/Advanced-OpenGL/Framebuffers
 class FramebufferObject
 {
 public:
@@ -11,8 +12,6 @@ public:
 	void Unbind();
 
     void Delete();
-
-	~FramebufferObject();
 
 public:
     unsigned int m_Fbo; // Frame buffer object

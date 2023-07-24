@@ -2,6 +2,13 @@
 
 #include <algorithm>
 #include <switch.h>
+#include <stb/stb_image_write.h>
+
+#include <unistd.h>
+#include <cstdint>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 #include "Graphics/BasicVertices.h"
 #include "Graphics/LineRenderer.h"
@@ -12,6 +19,8 @@
 #include "ObjectInfo.h"
 #include "./UI/LayerNavigation.h"
 #include "Log.h"
+
+#include "qrcodegen.hpp"
 
 #include "SavefileIO.h" 
 
@@ -50,7 +59,8 @@ void Map::Init()
             glm::vec2(right, top),
             glm::vec2(left, top)
         );
-        m_FullscreenQuad.m_Texture = new Texture2D(m_Framebuffer.m_TextureColorbuffer, m_CameraWidth, m_CameraHeight);
+        m_FullscreenQuad.UpdateTexture(new Texture2D(m_Framebuffer.m_TextureColorbuffer, m_CameraWidth, m_CameraHeight));
+        m_FullscreenQuad.m_ProjectionMatrix = &m_ProjectionMatrix;
     }
 
     // Load font
@@ -70,8 +80,11 @@ void Map::Init()
     m_Legend = new Legend();
     m_NoSavefileDialog = new Dialog(glm::vec2(0.0f, 0.0f), 700.0f, 400.0f, Dialog::InvalidSavefile);
     m_GameRunningDialog = new Dialog(glm::vec2(0.0f, 0.0f), 700.0f, 400.0f, Dialog::GameIsRunning);
+    m_NoInternetDialog = new Dialog(glm::vec2(0.0f, 0.0f), 700.0f, 400.0f, Dialog::NoInternet);
 
     m_LayerNavigation = new LayerNavigation();
+
+    m_QrCodeImage.SetMatrices(&m_ProjectionMatrix);
 
     m_Cursor.Create("romfs:/icons/cursor.png");
     m_Cursor.m_Position = glm::vec2(0.0f, 0.0f);
@@ -134,6 +147,8 @@ void Map::UpdateMapObjects()
 void Map::SetCameraPosition(glm::vec2 position)
 {
     m_TargetCameraPosition = position;
+
+    m_QrCodeImage.m_Show = false;
 }
 
 void Map::Update()
@@ -164,6 +179,7 @@ void Map::Update()
     // Get the stick position between -1.0f and 1.0f, instead of -32767 and 32767
     glm::vec2 stickRPosition = glm::vec2((float)analog_stick_r.x / (float)JOYSTICK_MAX, (float)analog_stick_r.y / (float)JOYSTICK_MAX);
    
+    float _prevZoom = m_Zoom;
     float deadzone = 0.3f;
     if (fabs(stickRPosition.y) >= deadzone)
         m_Zoom *= 1.0f + zoomAmount * stickRPosition.y;
@@ -184,6 +200,9 @@ void Map::Update()
 
     if (m_Zoom < minZoom) m_Zoom = minZoom;
 
+    // Zoom has changed, hide qr code
+    if (_prevZoom != m_Zoom) m_QrCodeImage.m_Show = false;
+
     // Open profile picker
     if (buttonsPressed & HidNpadButton_Minus)
     {
@@ -200,7 +219,7 @@ void Map::Update()
     if (buttonsPressed & HidNpadButton_B)
     {
         // Open legend if all other dialogs are closed
-        if (!m_NoSavefileDialog->m_IsOpen && !m_ObjectInfo->m_IsOpen && !m_Legend->m_IsOpen)
+        if (!m_NoSavefileDialog->m_IsOpen && !m_ObjectInfo->m_IsOpen && !m_QrCodeImage.m_Show && !m_Legend->m_IsOpen)
             m_Legend->m_IsOpen = true;
         else
             m_Legend->m_IsOpen = false; // Close legend
@@ -208,6 +227,9 @@ void Map::Update()
         // Close object info
         if (m_ObjectInfo->m_IsOpen)
             m_ObjectInfo->m_IsOpen = false;
+
+        if (m_QrCodeImage.m_Show)
+            m_QrCodeImage.m_Show = false;
     }
 
     if (buttonsPressed & HidNpadButton_A)
@@ -240,9 +262,11 @@ void Map::Update()
         SetCameraPosition(m_TargetCameraPosition + stickLPosition * (analogStickMovementSpeed / m_Zoom));
         // SetCameraPosition(m_TargetCursorPosition);
         m_TargetCursorPosition = glm::vec2(0.0f, 0.0f);
+
+         // Hide qr code
+        //m_QrCodeImage.m_Show = false;
     }
         
-
     m_ViewMatrix = glm::mat4(1.0f); // Reset (important)
     m_ViewMatrix = glm::scale(m_ViewMatrix, glm::vec3(m_Zoom, m_Zoom, 0.0f));
     m_ViewMatrix = glm::translate(m_ViewMatrix, glm::vec3(-m_CameraPosition, 1.0));
@@ -262,6 +286,7 @@ void Map::Update()
             if (!(m_Legend->m_IsOpen && m_Legend->IsPositionOnLegend(touchPosition)) && 
                 !(m_NoSavefileDialog->m_IsOpen && m_NoSavefileDialog->IsPositionOn(touchPosition)) &&
                 !(m_GameRunningDialog->m_IsOpen && m_GameRunningDialog->IsPositionOn(touchPosition)) &&
+                !(m_NoInternetDialog->m_IsOpen && m_NoInternetDialog->IsPositionOn(touchPosition)) &&
                 !(m_LayerNavigation->IsPositionOn(touchPosition)))
             {
                 // Check if the finger was pressed
@@ -289,6 +314,8 @@ void Map::Update()
                                 //SetCameraPosition(mapObject.m_Position);
 
                                 m_Legend->m_IsOpen = false;
+                                m_QrCodeImage.m_Show = false;
+            
                             }
                         }
                     }
@@ -323,18 +350,23 @@ void Map::Update()
     m_ViewMatrix = glm::scale(m_ViewMatrix, glm::vec3(m_Zoom, m_Zoom, 0.0f));
     m_ViewMatrix = glm::translate(m_ViewMatrix, glm::vec3(-m_CameraPosition, 1.0));
 
-    if (m_Legend->m_IsOpen)
-        m_Legend->Update();
+    if (!m_QrCodeImage.m_Show)
+    {
+        if (m_Legend->m_IsOpen)
+            m_Legend->Update();
 
-    if (m_ObjectInfo->m_IsOpen)
-        m_ObjectInfo->Update();
+        if (m_ObjectInfo->m_IsOpen)
+            m_ObjectInfo->Update();
 
-    if (m_NoSavefileDialog->m_IsOpen) 
-        m_NoSavefileDialog->Update();
-    if (m_GameRunningDialog->m_IsOpen)
-        m_GameRunningDialog->Update();
+        if (m_NoSavefileDialog->m_IsOpen) 
+            m_NoSavefileDialog->Update();
+        if (m_GameRunningDialog->m_IsOpen)
+            m_GameRunningDialog->Update();
+        if (m_NoInternetDialog->m_IsOpen)
+            m_NoInternetDialog->Update();
 
-    m_LayerNavigation->Update(); 
+        m_LayerNavigation->Update(); 
+    }
 
     // Update objects
     if (SavefileIO::Get().LoadedSavefile)
@@ -359,10 +391,9 @@ void Map::Update()
 
 void Map::Render()
 {
-    m_Framebuffer.Bind(); // Everything after renders to this
-
     m_MapBackgrounds[(int)m_LayerNavigation->GetLayer()].Render();
 
+    // Render map obejcts and paths
     if (SavefileIO::Get().LoadedSavefile)
     {
         if (m_Legend->m_Show[IconButton::ButtonTypes::Koroks]) 
@@ -464,37 +495,90 @@ void Map::Render()
         }
     }
 
-    if (!m_Legend->m_IsOpen) 
-        m_Cursor.Render();
-
-    m_Font.RenderBatch();
-
-    m_Font.BeginBatch();
-    if (m_Legend->m_IsOpen) 
-        m_Legend->Render();
-
-    if (m_NoSavefileDialog->m_IsOpen) 
-        m_NoSavefileDialog->Render();
-    if (m_GameRunningDialog->m_IsOpen)
-        m_GameRunningDialog->Render();
-    
-    m_LayerNavigation->Render();
-
-    if (!m_Legend->m_IsOpen && !m_ObjectInfo->m_IsOpen && SavefileIO::Get().LoadedSavefile)
-        m_Font.AddTextToBatch("Press B to open legend", glm::vec2(m_ScreenLeft + 20, m_ScreenTop - 30), 0.5f);  
-
-    if (SavefileIO::Get().LoadedSavefile)
+    // Toggle QR code
+    if (padGetButtonsDown(m_Pad) & HidNpadButton_X)
     {
-        if (SavefileIO::Get().GameIsRunning)
+        if (!m_QrCodeImage.m_Show)
         {
-            m_Font.AddTextToBatch("Totk is running.", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 30), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);
-            m_Font.AddTextToBatch("Loaded older save", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 60), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);
+            u32 ip = gethostid();
+            if (ip == INADDR_LOOPBACK)
+            {
+                Log("Not connected to internet. Cant generate Qr code");
+                
+                m_NoInternetDialog->SetOpen(true);
+            }
+            else
+            {
+                std::string ipString = std::to_string(ip&0xFF)+"."+std::to_string((ip>>8)&0xFF)+"."
+                    +std::to_string((ip>>16)&0xFF)+"."+std::to_string((ip>>24)&0xFF);
+
+                std::string filename = "map" + std::to_string(m_ExportedImageNumber) + ".png";
+
+                m_ExportedImageNumber++;
+                m_ExportedImageNumber = m_ExportedImageNumber % m_MaxExportedImages; // Wrap around and override old images
+
+                // Render Object info
+                m_Font.BeginBatch();
+                m_ObjectInfo->Render(m_ProjectionMatrix, m_ViewMatrix);
+
+                glm::mat4 emptyViewMatrix(1.0);
+                m_Font.m_ViewMatrix = &emptyViewMatrix; // Don't draw the text relative to the camera 
+
+                m_Font.RenderBatch();
+
+                m_Font.m_ViewMatrix = &m_ViewMatrix;
+
+                std::string url = "http://" + ipString + ":1234/" + filename;
+                std::string filepath = "sdmc:/switch/totk-unexplored/" + filename;
+                SaveMapImage(filepath);
+
+                m_QrCodeImage.GenerateCode(url, 350.0f);
+            }
         }
+    }
 
-        float bottomTextX = m_ScreenRight - 30;
+    if (!m_QrCodeImage.m_Show)
+    {
+        if (!m_Legend->m_IsOpen) 
+            m_Cursor.Render();
 
-        m_Font.AddTextToBatch("L and R to zoom, (-) to change user, (+) to exit", 
+        m_Font.RenderBatch();
+
+        m_Font.BeginBatch();
+        if (m_Legend->m_IsOpen) 
+            m_Legend->Render();
+
+        if (m_NoSavefileDialog->m_IsOpen) 
+            m_NoSavefileDialog->Render();
+        if (m_GameRunningDialog->m_IsOpen)
+            m_GameRunningDialog->Render();
+        if (m_NoInternetDialog->m_IsOpen)
+            m_NoInternetDialog->Render();
+        
+        m_LayerNavigation->Render();
+
+        if (!m_Legend->m_IsOpen && !m_ObjectInfo->m_IsOpen && SavefileIO::Get().LoadedSavefile)
+            m_Font.AddTextToBatch("Press B to open legend", glm::vec2(m_ScreenLeft + 20, m_ScreenTop - 30), 0.5f);  
+        if (!m_QrCodeImage.m_Show && SavefileIO::Get().LoadedSavefile)
+            m_Font.AddTextToBatch("Press X show QR Code", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 30), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);  
+
+        if (SavefileIO::Get().LoadedSavefile)
+        {
+            if (SavefileIO::Get().GameIsRunning)
+            {
+                m_Font.AddTextToBatch("Totk is running.", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 30), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);
+                m_Font.AddTextToBatch("Loaded older save", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 60), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);
+            }
+
+            float bottomTextX = m_ScreenRight - 30;
+
+            m_Font.AddTextToBatch("L and R to zoom, (-) to change user, (+) to exit", 
             glm::vec2(bottomTextX, m_ScreenBottom + 20), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);  
+        }
+    } 
+    else
+    {
+        m_Font.AddTextToBatch("Scan QR code to view an image of the map on your phone (B to close)", glm::vec2(0, m_ScreenBottom + 100), 0.7f, glm::vec3(1.0f), ALIGN_CENTER);  
     }
 
     m_ObjectInfo->Render(m_ProjectionMatrix, m_ViewMatrix);
@@ -506,16 +590,15 @@ void Map::Render()
 
     m_Font.m_ViewMatrix = &m_ViewMatrix;
 
+    m_QrCodeImage.Render();
+
     m_Framebuffer.Unbind(); // Back to normal
 
     // Render the framebuffer to the screen
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST); // The quad should always rendered in front of everything else
 
     m_FullscreenQuad.Render();
-
-    glEnable(GL_DEPTH_TEST);
 }
 
 bool Map::IsInView(glm::vec2 position, float margin = 100.0f)
@@ -535,6 +618,26 @@ bool Map::IsInView(glm::vec2 position, float margin = 100.0f)
         return false;
 
     return true;
+}
+
+// https://lencerf.github.io/post/2019-09-21-save-the-opengl-rendering-to-image-file/
+void Map::SaveMapImage(std::string filepath)
+{
+    int width = m_CameraWidth;
+    int height = m_CameraHeight;
+
+    int nrChannels = 3;
+    int stride = nrChannels * width;
+    stride += (stride % 4) ? (4 - stride % 4) : 0;
+    int bufferSize = stride * height;
+    std::vector<char> buffer(bufferSize);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 4);
+    glReadBuffer(GL_FRONT);
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer.data());
+
+    stbi_flip_vertically_on_write(true);
+    stbi_write_png(filepath.c_str(), width, height, nrChannels, buffer.data(), stride);
 }
 
 void Map::LoadLayerImage()
@@ -600,10 +703,13 @@ void Map::Destory()
     delete m_Legend;
     delete m_NoSavefileDialog;
     delete m_GameRunningDialog;
+    delete m_NoInternetDialog;
 
     delete m_LayerNavigation;
 
     delete m_ObjectInfo;
+
+    m_QrCodeImage.Delete();
 }
 
 TexturedQuad Map::m_MapBackgrounds[3];
@@ -638,8 +744,12 @@ std::unordered_map<Data::ObjectType, std::vector<MapObject>> Map::m_MapObjects;
 
 TexturedQuad Map::m_Cursor;
 
+QrCodeImage Map::m_QrCodeImage;
+int Map::m_ExportedImageNumber = 0;
+
 Legend* Map::m_Legend;
 ObjectInfo* Map::m_ObjectInfo;
 Dialog* Map::m_NoSavefileDialog;
 Dialog* Map::m_GameRunningDialog;
+Dialog* Map::m_NoInternetDialog;
 LayerNavigation* Map::m_LayerNavigation;

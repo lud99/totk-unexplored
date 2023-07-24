@@ -60,8 +60,3 @@ void FramebufferObject::Delete()
     glDeleteTextures(1, &m_TextureColorbuffer);
     glDeleteRenderbuffers(1, &m_Rbo);
 }
-
-~FramebufferObject::FramebufferObject()
-{
-
-}

@@ -65,6 +65,20 @@ Dialog::Dialog(glm::vec2 position, float width, float height, DialogType type)
 
         m_SelectedButton = 1;
     }
+    else if (m_Type == DialogType::NoInternet)
+    {
+        m_ExitButton = nullptr;//new Button(glm::vec2(buttonX, buttonY), exitButtonWidth, buttonHeight, "No");
+        //m_ExitButton->m_Button.m_Color = Button::SelectedColor;//glm::vec4(197, 77, 77, 0.8f);
+        
+
+        float button2Width = exitButtonWidth;
+        float button2X = bgRight - sideMargin - button2Width;
+        m_ChooseProfileButton = new Button(glm::vec2(-exitButtonWidth / 2, buttonY), exitButtonWidth, buttonHeight, "Ok");
+        m_Title = "Cannot connect to the internet";
+        m_Description = "Please connect and try again if you want to use QR Codes";
+
+        m_SelectedButton = 0;
+    }
 
     UpdateSelectedButton();
 }
@@ -130,6 +144,12 @@ void Dialog::Update()
                         SavefileIO::Get().LoadGamesave(false, true);
                         Map::UpdateMapObjects();
                     } 
+                    else if (m_Type == DialogType::NoInternet) 
+                    {
+                        m_IsOpen = false;
+                        // SavefileIO::Get().LoadGamesave(false, true);
+                        // Map::UpdateMapObjects();
+                    } 
                     // else if (m_Type == DialogType::MasterModeChoose)
                     //     Map::m_ShouldLoadMastermodeFile = true;
                 }
@@ -184,6 +204,10 @@ void Dialog::Update()
             // else if (m_Type == DialogType::MasterModeChoose)
             //     Map::m_ShouldLoadMastermodeFile = true;
         }
+        else if (m_Type == DialogType::NoInternet) 
+        {
+            m_IsOpen = false;
+        }
     }
 }
 
@@ -202,7 +226,7 @@ void Dialog::Render()
     float descTop = top - titleTopMargin - titleSize.y - 10.0f; 
 
     Map::m_Font.RenderText(m_Description, glm::vec2(0.0f, descTop - 30.0f), 0.5f, glm::vec3(1.0f), ALIGN_CENTER);
-    Map::m_Font.RenderText(m_Description2, glm::vec2(0.0f, descTop - 70.0f), 0.5f, glm::vec3(1.0f), ALIGN_CENTER);
+    Map::m_Font.RenderText(m_Description2, glm::vec2(0.0f, descTop - 70.0f), 0.5f, glm::vec3(1.0f), ALIGN_CENTER );
 
     if (m_ExitButton) m_ExitButton->Render();
     if (m_ChooseProfileButton) m_ChooseProfileButton->Render();

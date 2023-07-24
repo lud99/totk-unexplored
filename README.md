@@ -7,6 +7,14 @@ The korok seeds that haven't been collected, the locations that are left to visi
 
 ## Main Features
 - 20 types of collectibles can be tracked
+- Legend to easily toggle what collectibles to see, and also switch between showing missing, showing completed or showing all
+- Scan a Qr Code in the app to see an image of the map on your phone to look at while playing 
+- Object info about collectibles. Name, position, and what type of korok it is (if korok)
+- Korok paths are drawn to easily complete flower trails, races and carry the lonely korok back to its friend
+- All entrances to caves are shown on the map and has a line drawn between them
+- Backup system to be able to use the app while playing the game (homebrew cant read savefiles of running games)
+- Quickly swap between the Depths, Surface and Sky layers
+- Optimized the interface and experience for both touch and controller 
 
 ## Why?
 This is an updated version to BotW Unexplored and has a few larger features but also so many small quality of life improvements

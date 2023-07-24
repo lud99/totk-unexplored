@@ -196,10 +196,15 @@ void TexturedQuad::Create(const std::string& texturePath, glm::vec2 bottomLeft, 
 
 void TexturedQuad::UpdateTexture(const std::string& texturePath)
 {
+    UpdateTexture(new Texture2D(texturePath));
+}
+
+void TexturedQuad::UpdateTexture(Texture2D* texture)
+{
     if (m_Texture)
         delete m_Texture;
 
-    m_Texture = new Texture2D(texturePath);
+    m_Texture = texture;
     m_Mesh.m_Texture = m_Texture;
 }
 

@@ -86,8 +86,8 @@ void LayerNavigation::SetLayer(Layer layer)
 {
     m_CurrentLayer = layer;
 
-    // if (m_CurrentLayer != m_PreviousLayer)
-    //     Map::m_TargetCursorPosition = glm::vec2(0.0f, 0.0f);
+    if (m_CurrentLayer != m_PreviousLayer)
+        Map::m_QrCodeImage.m_Show = false;
 
     m_PreviousLayer = m_CurrentLayer;
 }

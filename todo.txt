@@ -2,5 +2,11 @@
 - write changelog
 - take screenshots
 
-future:
-- qr coded
+qr code:
+- non blocking accept
+- reduce slowdown when saving img
+- fix opengl error 1282
+
+
+
+- generate qr codes

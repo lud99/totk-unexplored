@@ -21,12 +21,15 @@
 #include "Log.h"
 #include "MapObject.h"
 #include "UI/LayerNavigation.h"
+#include "Network/HttpServer.h"
 
-#define SETTINGS_VERSION "2.1.0"
+#define SETTINGS_VERSION "1.0"
 
 bool openGLInitialized = false;
 bool nxLinkInitialized = false;
 int s_nxlinkSock = -1;
+
+HttpServer http;
 
 static void deinitNxLink()
 {
@@ -51,6 +54,7 @@ void cleanUp()
         file << Map::m_CameraPosition.x << "\n";
         file << Map::m_CameraPosition.y << "\n";
         file << Map::m_Zoom << "\n";
+        file << Map::m_ExportedImageNumber << "\n";
         file << (int)Map::m_Legend->m_IsOpen << "\n";
         file << (int)Map::m_LayerNavigation->GetLayer() << "\n";
 
@@ -146,9 +150,13 @@ void LoadSettings()
 
         std::getline(settingsFile, line);
         Map::m_CameraPosition.y = std::stof(line);
+        Map::m_TargetCameraPosition = Map::m_CameraPosition;
 
         std::getline(settingsFile, line);
         Map::m_Zoom = std::stof(line);
+
+        std::getline(settingsFile, line);
+        Map::m_ExportedImageNumber = std::stoi(line);
 
         std::getline(settingsFile, line);
         Map::m_Legend->m_IsOpen = (bool)std::stoi(line);
@@ -253,6 +261,8 @@ int main()
     bool hasDoneFirstDraw = false;
     bool hasLoadedSave = false;
 
+    http.Start(1234);
+
     while (appletMainLoop())
     {
         // Scan the gamepad. This should be done once for each frame
@@ -266,9 +276,10 @@ int main()
         if (Map::m_ShouldExit)
             break;
 
+        Map::m_Framebuffer.Bind(); // Everything after renders to this
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        
         // Update
         Map::Update();
 
@@ -325,6 +336,8 @@ int main()
     }
 
     Log("Exiting...");
+
+    http.Stop();
 
     cleanUp();
 

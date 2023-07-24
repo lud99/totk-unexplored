@@ -56,9 +56,9 @@ ObjectInfo::ObjectInfo()
 void ObjectInfo::Update()
 {
     u64 buttonsPressed = padGetButtonsDown(Map::m_Pad);
-    if (buttonsPressed & HidNpadButton_Y)
+    if (buttonsPressed & HidNpadButton_Y )
     {
-        m_MapObject->m_Found = true;
+        if (SavefileIO::Get().GameIsRunning) m_MapObject->m_Found = true;
     }
 }
 
@@ -156,7 +156,7 @@ void ObjectInfo::Render(glm::mat4 projMat, glm::mat4 viewMat)
     Map::m_Font.AddTextToBatch("B to close", glm::vec2(Map::m_ScreenLeft + Width - 20.0f, Map::m_ScreenTop - 35.0f), 0.45f, glm::vec3(1.0f), ALIGN_RIGHT);
     
     //if (m_Type == Data::ObjectType::HiddenKorok || m_Type == Data::ObjectType::CarryKorok)
-    if (!m_MapObject->m_Found)
+    if (!m_MapObject->m_Found && SavefileIO::Get().GameIsRunning)
         Map::m_Font.AddTextToBatch("Y to mark as found", glm::vec2(Map::m_ScreenLeft + 15, Map::m_ScreenTop - 35.0f), 0.45f, glm::vec3(1.0f), ALIGN_LEFT);
 }
 

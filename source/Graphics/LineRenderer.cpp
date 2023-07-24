@@ -62,9 +62,6 @@ void LineRenderer::AddLine(glm::vec2 start, glm::vec2 end, float width, glm::vec
     glm::vec2 topLeft(start.x + width * cos(angle), start.y + width * sin(angle));
     glm::vec2 topRight(end.x + width * cos(angle), end.y + width * sin(angle));
 
-    glm::vec2 _topLeft = topLeft;
-    glm::vec2 _topRight = topRight;
-
     glm::vec2 verticies[4] = { 
         start,
         end,

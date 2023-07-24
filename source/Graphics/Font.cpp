@@ -162,7 +162,7 @@ int Font::Load(const std::string& filepath)
     m_Mesh.Update();
 
     // Set settings for the optimized mesh
-    int maxCountOfEachChar = 300; // Might need to be adjusted
+    int maxCountOfEachChar = 700; // Might need to be adjusted
     m_CharMesh.m_UseDynamicBuffer = true;
     m_CharMesh.m_DynamicBufferSize = sizeof(TextureVertex) * 4 * maxCountOfEachChar;
     m_CharMesh.CreateEmptyBuffer();

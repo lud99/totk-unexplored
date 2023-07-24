@@ -8,6 +8,8 @@
 #include "Graphics/Quad.h"
 #include "Graphics/FramebufferObject.h"
 
+#include "UI/QrCodeImage.h"
+
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 
@@ -34,6 +36,8 @@ namespace Map
 
     bool IsInView(glm::vec2 position, float margin);
 
+    void SaveMapImage(std::string filepath);
+
     void LoadLayerImage();
 
     MapObject* GetObjectInCursor();
@@ -48,6 +52,8 @@ namespace Map
     const float m_ScreenTop = m_CameraHeight / 2.0f;
     const float m_ScreenBottom = -m_CameraHeight / 2.0f;
     const float m_CameraLerpSpeed = 0.5f;
+
+    const int m_MaxExportedImages = 10;
 
     extern TexturedQuad m_MapBackgrounds[3];
 
@@ -81,10 +87,14 @@ namespace Map
 
     extern TexturedQuad m_Cursor;
 
+    extern QrCodeImage m_QrCodeImage;
+    extern int m_ExportedImageNumber;
+
     extern Legend* m_Legend;
     extern ObjectInfo* m_ObjectInfo;
     extern Dialog* m_NoSavefileDialog;
     extern Dialog* m_GameRunningDialog;
+    extern Dialog* m_NoInternetDialog;
     
     extern LayerNavigation* m_LayerNavigation;
 };

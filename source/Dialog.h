@@ -48,7 +48,8 @@ public:
     enum DialogType {
         InvalidSavefile,
         GameIsRunning,
-        MasterModeChoose
+        MasterModeChoose,
+        NoInternet
     };
 public:
     Dialog(glm::vec2 position, float width, float height, DialogType type);
