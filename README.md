@@ -1,15 +1,17 @@
 # Totk Unexplored
-Easily view what hasn't been discovered in your Breath of the Wild savefile, on your Nintendo Switch.
+Easily view what hasn't been discovered in your Tears of the Kingdom savefile on your Nintendo Switch.
 
-The korok seeds that haven't been collected and the locations that are left to visit are shown on a map, where it's easy to see koroks or locations you've missed. You can also see shrines, hinoxes, taluses and moldugas too. 
+The korok seeds that haven't been collected, the locations that are left to visit and the 18 other types of unexplored collectibles are shown on a map, where it's easy to see what you've missed.
 
-<img src="https://github.com/lud99/botw-unexplored/blob/master/map3_2.0.jpg?raw=true" width=600>
+<img src="https://github.com/lud99/totk-unexplored/blob/master/map3_2.0.jpg?raw=true" width=600>
+
+## Main Features
+- 20 types of collectibles can be tracked
 
 ## Why?
-There are other websites and tools to display and even edit your BotW savefile, but none of them run on your Switch. You would have to backup your savefile and then transfer it to a computer, which is unnecessarily complicated. That's why I created this homebrew app.
-
+This is an updated version to BotW Unexplored and has a few larger features but also so many small quality of life improvements
 ## Usage
-Download ```botw-unexplored.nro``` from the [releases](https://github.com/lud99/botw-unexplored/releases/download/2.0.0/botw-unexplored.nro), transfer it to your SD card and launch it. Most things should be self explanitory, but here's some information just in case:
+Download ```totk-unexplored.nro``` from the [releases](https://github.com/lud99/botw-unexplored/releases/download/2.0.0/botw-unexplored.nro), transfer it to your SD card and launch it. Most things should be self explanitory, but here's some information just in case:
 
 * Use the analog sticks or the touch screen to move around.  
 * Press X to open the legend and use either the touch screen or the D-pad to navigate the menu (note that the analog sticks won't work here) 
@@ -19,6 +21,30 @@ Download ```botw-unexplored.nro``` from the [releases](https://github.com/lud99/
 - Can mark anything as completed
 - Object info panel
 
+        Koroks
+        Shrines,
+        Lightroots,
+        
+        Caves,
+        Bubbuls,
+        Wells,
+        Chasms,
+        Locations,
+
+        Hinoxes,
+        Taluses,
+        Moldugas,
+        FluxConstructs,
+        Froxes,
+        Gleeoks,
+
+        SagesWills,
+        OldMaps,
+        AddisonSigns,
+        SchemaStones,
+        YigaSchematics,
+        ShowCompleted,
+        Count
 
 ## Version History
 
@@ -42,11 +68,14 @@ switch-mesa, switch-glad, switch-freetype and switch-glm are required for buildi
 Then run ```Make``` to build the .nro file.
 
 ### Credits
-Huge thanks to these kind people for making this project possible:
+Huge thanks to these kind people / groups for making this project possible:
 
-* https://github.com/marcrobledo/savegame-editors For most of the data and my primary inspiration.  
-* https://github.com/MrCheeze/botw-waypoint-map For all the location data. 
-* https://zeldadungeon.net for their amazing korok guides and images that i "borrowed" :) 
-* https://github.com/d4mation/botw-unexplored-viewer For the savefile parsing
+* https://github.com/marcrobledo/savegame-editors For most of the data used (savefile hashes and coordinates) and savefile parsing. Also thank you for taking your time to find out edge-cases and verifiying the data :)
+* https://github.com/zeldamods/objmap-totk For being a great tool for debugging and for getting names for collectibles
+* https://github.com/zeldamods/radar-totk For having data on all ingame objects so I could piece together the "korok paths"
+* https://zeldadungeon.net For their amazing interactive map
 
-Extra thanks to d4mation for all their suggestions and issues on github and helping me figure out other things about BotW (you're awesome!)
+### Libraries
+* https://github.com/nothings/stb For image loading and saving
+* https://github.com/nayuki/QR-Code-generator For the QR-code creation
+* https://github.com/nlohmann/json For parsing the gamedata from a JSON file
