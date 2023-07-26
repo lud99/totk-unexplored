@@ -77,7 +77,9 @@ Dialog::Dialog(glm::vec2 position, float width, float height, DialogType type)
         m_Title = "Cannot connect to the internet";
         m_Description = "Please connect and try again if you want to use QR Codes";
 
-        m_SelectedButton = 0;
+        m_SelectedButton = 1;
+
+        m_ChooseProfileButton->m_IsSelected = true;
     }
 
     UpdateSelectedButton();
@@ -182,8 +184,12 @@ void Dialog::Update()
     }
     if (buttonsPressed & HidNpadButton_A)
     {
+        if (m_Type == DialogType::NoInternet) 
+        {
+            m_IsOpen = false;
+        } 
         // Exit button
-        if (m_SelectedButton == 0)
+        else if (m_SelectedButton == 0)
         {
             if (m_Type != DialogType::MasterModeChoose) 
                 Map::m_ShouldExit = true;
@@ -203,10 +209,6 @@ void Dialog::Update()
                 
             // else if (m_Type == DialogType::MasterModeChoose)
             //     Map::m_ShouldLoadMastermodeFile = true;
-        }
-        else if (m_Type == DialogType::NoInternet) 
-        {
-            m_IsOpen = false;
         }
     }
 }

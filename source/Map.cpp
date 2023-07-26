@@ -225,7 +225,7 @@ void Map::Update()
             m_Legend->m_IsOpen = false; // Close legend
         
         // Close object info
-        if (m_ObjectInfo->m_IsOpen)
+        if (m_ObjectInfo->m_IsOpen && !m_QrCodeImage.m_Show)
             m_ObjectInfo->m_IsOpen = false;
 
         if (m_QrCodeImage.m_Show)
@@ -234,7 +234,7 @@ void Map::Update()
 
     if (buttonsPressed & HidNpadButton_A)
     {
-        if (!m_Legend->m_IsOpen)
+        if (!m_Legend->m_IsOpen && (!m_NoSavefileDialog->m_IsOpen && !m_NoInternetDialog->m_IsOpen && !m_NoInternetDialog->m_IsOpen))
         {
             MapObject* object = GetObjectInCursor();
             if (object)
@@ -539,7 +539,7 @@ void Map::Render()
 
     if (!m_QrCodeImage.m_Show)
     {
-        if (!m_Legend->m_IsOpen) 
+        if (!m_Legend->m_IsOpen && (!m_NoSavefileDialog->m_IsOpen && !m_NoInternetDialog->m_IsOpen && !m_NoInternetDialog->m_IsOpen)) 
             m_Cursor.Render();
 
         m_Font.RenderBatch();
