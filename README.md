@@ -38,8 +38,11 @@ This is an updated version of [BotW Unexplored](https://github.com/lud99/botw-un
 - Quickly swap between the Depths, Surface and Sky layers.
 - Optimized the interface and experience for both touch and controller. 
 
-<img src="./screenshots/bubbul.jpg" width=600>
-<img src="./screenshots/qr_code.jpg" width=600>
+## Screenshots
+<img src="./screenshots/bubbul.jpg" width=400>
+<img src="./screenshots/qr_code.jpg" width=400>
+<img src="./screenshots/depths_legend.jpg" width=400>
+<img src="./screenshots/korok_trail.jpg" width=400>
 
 (more screenshots in [screenshots](/screenshots))
 
