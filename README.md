@@ -49,7 +49,7 @@ This is an updated version of [BotW Unexplored](https://github.com/lud99/botw-un
 ## Why?
 There are many interactive maps online to track your progress, but nothing beats a map that automatically updates based on your progress. 
 ## Usage
-Download ```totk-unexplored.nro``` from the [releases](/releases/download/1.0.0/totok-unexplored.nro), transfer it to your SD card and launch it. Most things should be self explanitory, but here's some information just in case:
+Download ```totk-unexplored.nro``` from the [releases](https://github.com/lud99/totk-unexplored/releases/download/1.0.0/totk-unexplored.nro), transfer it to your SD card and launch it. Most things should be self explanitory, but here's some information just in case:
 
 * Use the left analog sticks or the touch screen to move around.  
 * Use L and R or the Y-axis on the right analog stick to zoom in and out. 
