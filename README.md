@@ -51,7 +51,6 @@ There are many interactive maps online to track your progress, but nothing beats
 ## Usage
 Download ```totk-unexplored.nro``` from the [releases](https://github.com/lud99/totk-unexplored/releases), transfer it to your SD card and launch it. The app is also available on the [Homebrew App Store](https://apps.fortheusers.org/switch/TotKUnexplored) as TotK Unexplored 
 
-
 Most things should be self explanitory, but here's some information just in case:
 
 * Use the left analog sticks or the touch screen to move around.  
@@ -71,7 +70,9 @@ To avoid using external services or my own database, the images the app generate
 10 images can be saved before the app starts overriding your old images, so the image can still be seen for some time even between app restarts. Note that the http-server is not run as a sys-module so it only works when the app is running, but your phones web browser can still view the image as long as you don't refresh the page.
 
 ## Version History
-
+### 1.01
+* Fixed caves with multiple entrances not being marked correctly as found
+* Fixed text overlap
 ### 1.0
 * Initial release
 
