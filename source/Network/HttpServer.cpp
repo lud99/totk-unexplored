@@ -5,6 +5,13 @@
 #include <iostream>
 #include <fstream>
 #include <fcntl.h> 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
 #include <unistd.h>
 #include <cstdint>
@@ -32,8 +39,28 @@ void HttpServer::Stop()
 void HttpServer::ThreadEntryPoint(int port)
 {
     // Check if online
-    u32 ip = gethostid();
-    if (ip == INADDR_LOOPBACK) // Offline
+    // char *ipBuffer;
+    // char hostbuffer[256];
+    // gethostname(hostbuffer, sizeof(hostbuffer));
+    // struct hostent* host_entry = gethostbyname(hostbuffer);
+
+    // ipBuffer = inet_ntoa(*((struct in_addr*)
+    //                     host_entry->h_addr_list[0]));
+
+    // std::string ipAdress = ipBuffer;
+
+    
+    // std::cout << ipAdress << "\n";
+                        
+    // if (ipAdress == "127.0.0.1")
+    // {
+    //     Log("Not connected to internet, not starting server");
+    //     return;
+    // }
+
+    // Check if online
+    uint32_t ip = gethostid();                 
+    if (ip == INADDR_LOOPBACK)
         return;
 
     // Create socket
@@ -49,7 +76,7 @@ void HttpServer::ThreadEntryPoint(int port)
         Log("Error calling fcntl");
         // handle the error.  By the way, I've never seen fcntl fail in this way
     }
-        
+
     // Prepare the sockaddr_in structure
     m_Server.sin_family = AF_INET; // TCP
     m_Server.sin_addr.s_addr = INADDR_ANY;

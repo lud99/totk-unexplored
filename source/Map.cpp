@@ -9,6 +9,11 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "Graphics/BasicVertices.h"
 #include "Graphics/LineRenderer.h"
@@ -34,6 +39,12 @@ glm::vec2 TransformPositionTo2DMap(glm::vec3 position)
 float lerp(float a, float b, float t)
 {
     return a * (1.0 - t) + (b * t);
+}
+
+bool IsApplet()
+{
+    AppletType at = appletGetAppletType();
+    return (at != AppletType_Application && at != AppletType_SystemApplication);
 }
 
 void Map::Init()
@@ -496,11 +507,25 @@ void Map::Render()
     }
 
     // Toggle QR code
-    if (padGetButtonsDown(m_Pad) & HidNpadButton_X)
+    if ((padGetButtonsDown(m_Pad) & HidNpadButton_X) && IsApplet()) // Fails to get local ip adress in application mode
     {
         if (!m_QrCodeImage.m_Show)
         {
-            u32 ip = gethostid();
+            Log("Checking internet connection");
+
+            /*char *ipBuffer;
+            char hostbuffer[256];
+            gethostname(hostbuffer, sizeof(hostbuffer));
+            struct hostent* host_entry = gethostbyname(hostbuffer);
+
+            ipBuffer = inet_ntoa(*((struct in_addr*)
+                                host_entry->h_addr_list[0]));
+
+            std::string ipAdress = ipBuffer;*/
+
+
+            uint32_t ip = gethostid();
+                                
             if (ip == INADDR_LOOPBACK)
             {
                 Log("Not connected to internet. Cant generate Qr code");
@@ -528,6 +553,7 @@ void Map::Render()
 
                 m_Font.m_ViewMatrix = &m_ViewMatrix;
 
+                Log("Creating qr code and saving it");
                 std::string url = "http://" + ipString + ":1234/" + filename;
                 std::string filepath = "sdmc:/switch/totk-unexplored/" + filename;
                 SaveMapImage(filepath);
@@ -559,15 +585,15 @@ void Map::Render()
 
         if (!m_Legend->m_IsOpen && !m_ObjectInfo->m_IsOpen && SavefileIO::Get().LoadedSavefile)
             m_Font.AddTextToBatch("Press B to open legend", glm::vec2(m_ScreenLeft + 20, m_ScreenTop - 30), 0.5f);  
-        if (!m_QrCodeImage.m_Show && SavefileIO::Get().LoadedSavefile)
+        if (!m_QrCodeImage.m_Show && SavefileIO::Get().LoadedSavefile && IsApplet())
             m_Font.AddTextToBatch("Press X show QR Code", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 30), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);  
 
         if (SavefileIO::Get().LoadedSavefile)
         {
             if (SavefileIO::Get().GameIsRunning)
             {
-                m_Font.AddTextToBatch("Totk is running.", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 30), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);
-                m_Font.AddTextToBatch("Loaded older save", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 60), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);
+                m_Font.AddTextToBatch("Totk is running.", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 60), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);
+                m_Font.AddTextToBatch("Loaded older save", glm::vec2(m_ScreenRight - 20, m_ScreenTop - 90), 0.5f, glm::vec3(1.0f), ALIGN_RIGHT);
             }
 
             float bottomTextX = m_ScreenRight - 30;
