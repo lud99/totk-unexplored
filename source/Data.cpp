@@ -66,11 +66,6 @@ void Data::LoadFromJSON(const std::string& filepath)
         return glm::vec3((float)position["x"], (float)position["y"], (float)position["z"]);
     };  
 
-    auto vec3ToVec2 = [] (glm::vec3 position) -> glm::vec2 {
-        return glm::vec2(position.x, position.z);
-    };  
-
-
     Log("shrines");
     // Shrines
     for (auto& entry : fileData["shrines"])
@@ -342,6 +337,17 @@ Data::Object* Data::GetObjectByHash(ObjectType type, uint32_t hash)
     }
 
     return nullptr;
+}
+std::vector<Object*> Data::GetObjectsByHash(ObjectType type, uint32_t hash)
+{
+    std::vector<Object*> found;
+    for (auto entry : m_Objects[type])
+    {
+        if (entry->m_CompletionHash == hash)
+            found.push_back(entry);    
+    }
+
+    return found;
 }
 
 Data::Object* Data::GetObjectByGuid(ObjectType type, uint64_t guid)

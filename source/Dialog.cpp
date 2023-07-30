@@ -72,7 +72,7 @@ Dialog::Dialog(glm::vec2 position, float width, float height, DialogType type)
         
 
         float button2Width = exitButtonWidth;
-        float button2X = bgRight - sideMargin - button2Width;
+        //float button2X = bgRight - sideMargin - button2Width;
         m_ChooseProfileButton = new Button(glm::vec2(-exitButtonWidth / 2, buttonY), exitButtonWidth, buttonHeight, "Ok");
         m_Title = "Cannot connect to the internet";
         m_Description = "Please connect and try again if you want to use QR Codes";

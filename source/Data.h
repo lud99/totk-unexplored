@@ -89,6 +89,8 @@ namespace Data
     extern std::unordered_map<ObjectType, std::vector<Object*>> m_Objects;
 
     Object* GetObjectByHash(ObjectType type, uint32_t hash);
+    std::vector<Object*> GetObjectsByHash(ObjectType type, uint32_t hash);
+    //Object* GetObjectByHash(ObjectType type, uint32_t hash), std::set<int>;
     bool ObjectExists(ObjectType type, uint32_t hash);
 
     Object* GetObjectByGuid(ObjectType type, uint64_t guid);

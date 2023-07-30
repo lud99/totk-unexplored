@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <iostream>
 #include <map>
+#include <set>
 #include <iostream>
 #include <stdio.h>
 
@@ -583,8 +584,13 @@ bool SavefileIO::ParseFile(const char *filepath)
             if (type == Data::ObjectType::SagesWill || type == Data::ObjectType::AddisonSign)
                 continue;
 
-            Data::Object* obj = Data::GetObjectByHash(type, hashValue);
-            if (obj)
+                
+            // Because caves have multiple entrances in the data with the same hash, the Data::GetObjectByHash function only finds the first one.
+            // This results in the first entrance being found, but the rest not since they are never returned by the function
+            // Return all objects in the dataset with the matching hash instead
+
+            std::vector<Data::Object*> objects = Data::GetObjectsByHash(type, hashValue);
+            if (!objects.empty())
             {
                 // Read the 4 bytes after the hash
                 uint32_t status = ReadU32(buffer, offset + 4);
@@ -602,8 +608,10 @@ bool SavefileIO::ParseFile(const char *filepath)
                 else
                     found = (status != 0); // General case. 0 means it is not found
 
-
-                found ? loadedData.found[type].push_back(obj) : loadedData.missing[type].push_back(obj);
+                
+                // Mark all the objects with the same hash
+                for (Data::Object* obj : objects)
+                    found ? loadedData.found[type].push_back(obj) : loadedData.missing[type].push_back(obj);
             }
         }
     }
