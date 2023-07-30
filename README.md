@@ -70,9 +70,10 @@ To avoid using external services or my own database, the images the app generate
 10 images can be saved before the app starts overriding your old images, so the image can still be seen for some time even between app restarts. Note that the http-server is not run as a sys-module so it only works when the app is running, but your phones web browser can still view the image as long as you don't refresh the page.
 
 ## Version History
-### 1.01
+### 1.0.1
 * Fixed caves with multiple entrances not being marked correctly as found
 * Fixed text overlap
+* Disabled Qr Codes-feature when running the app with title override. See [this issue](https://github.com/lud99/totk-unexplored/issues/2) for more info 
 ### 1.0
 * Initial release
 
