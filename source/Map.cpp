@@ -29,7 +29,7 @@
 
 #include "SavefileIO.h" 
 
-constexpr float MapScale = 0.125;
+float MapScale = 0.125;
 
 glm::vec2 TransformPositionTo2DMap(glm::vec3 position) 
 {
@@ -51,6 +51,9 @@ void Map::Init()
 {
     Log("LoadFromJSON ");
     Data::LoadFromJSON("romfs:/map_data.json");
+
+    if (!IsApplet())
+        MapScale = 0.125f * 4.0f;
 
     m_ProjectionMatrix = glm::ortho(-m_CameraWidth / 2, m_CameraWidth / 2, -m_CameraHeight / 2, m_CameraHeight / 2, -1.0f, 1.0f);
 
@@ -666,9 +669,13 @@ void Map::SaveMapImage(std::string filepath)
     stbi_write_png(filepath.c_str(), width, height, nrChannels, buffer.data(), stride);
 }
 
-void Map::LoadLayerImage()
+void Map::LoadLayerImage() 
 {
-    std::string mapImagePaths[3] = { "romfs:/map/depths-small.png", "romfs:/map/surface-small.png", "romfs:/map/sky-small.png" };
+    std::string suffix = "small";
+    if (!IsApplet())
+        suffix = "medium";
+
+    std::string mapImagePaths[3] = { "romfs:/map/depths-" + suffix + ".png", "romfs:/map/surface-" + suffix + ".png", "romfs:/map/sky-" + suffix + ".png" };
 
     int currentLayer = (int)m_LayerNavigation->GetLayer();
 
