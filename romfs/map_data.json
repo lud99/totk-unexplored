@@ -20006,15 +20006,6 @@
             }
         },
         {
-            "completion_hash": 446014147,
-            "display_name": "Restaurant",
-            "position": {
-                "x": 2895.14,
-                "y": 116.8,
-                "z": 3409.98
-            }
-        },
-        {
             "completion_hash": 2501568208,
             "display_name": "Sand-Seal Rental Shop",
             "position": {
@@ -20039,24 +20030,6 @@
                 "x": -251.26,
                 "y": 126.18,
                 "z": -155.25
-            }
-        },
-        {
-            "completion_hash": 1523957397,
-            "display_name": "Lucky Treasure Shop",
-            "position": {
-                "x": 2969.92,
-                "y": 135.36,
-                "z": 3377.71
-            }
-        },
-        {
-            "completion_hash": 3251703861,
-            "display_name": "Inn",
-            "position": {
-                "x": 2944.61,
-                "y": 134.65,
-                "z": 3437.03
             }
         },
         {
