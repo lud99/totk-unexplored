@@ -53,7 +53,7 @@ void Map::Init()
     Data::LoadFromJSON("romfs:/map_data.json");
 
     if (!IsApplet())
-        MapScale = 0.125f * 4.0f;
+        MapScale = 0.125f * 3.0f;
 
     m_ProjectionMatrix = glm::ortho(-m_CameraWidth / 2, m_CameraWidth / 2, -m_CameraHeight / 2, m_CameraHeight / 2, -1.0f, 1.0f);
 
