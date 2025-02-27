@@ -33,7 +33,7 @@ float MapScale = 0.125;
 
 glm::vec2 TransformPositionTo2DMap(glm::vec3 position) 
 {
-    return glm::vec2(position.x, -position.z) * MapScale;
+    return glm::vec2(position.x, -position.z) * MapScale; 
 }
 
 float lerp(float a, float b, float t)

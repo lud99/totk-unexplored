@@ -1,1 +1,1 @@
-C:\devkitPro\tools\bin\nxlink.exe -s totk-unexplored.nro -a 192.168.0.19
+C:\devkitPro\tools\bin\nxlink.exe -s totk-unexplored.nro -a 192.168.50.48

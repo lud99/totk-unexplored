@@ -343,10 +343,24 @@ bool SavefileIO::LoadBackup(bool masterMode)
     return ParseFile(savefilePath.c_str());
 }
 
+
+uint32_t SavefileIO::GetHashTableEnd(unsigned char* buffer, int fileSize) 
+{
+    for (int i=0x000028; i<fileSize; i+=8) {
+        if (ReadU32(buffer, i) == 0xa3db7114) { //found MetaData.SaveTypeHash
+            return i+4;
+        }
+    }
+    return 0x03c800;
+}
+
 uint32_t SavefileIO::GetSavefilePlaytime(const std::string& filepath)
 {
     if (!FileExists(filepath))
+    {
+        Log("GetSaveFileplaytime() " + filepath + " not existing");
         return 0;
+    }
 
     std::ifstream file;
     file.open(filepath, std::ios::binary);
@@ -365,9 +379,12 @@ uint32_t SavefileIO::GetSavefilePlaytime(const std::string& filepath)
 
     uint32_t playtimeHash = 0xe573f564;//0xe573f564;
     
+    
     // Iterate to find the location of the hash
+    size_t hashTableEnd = GetHashTableEnd(buffer, fileSize);
+    Log("Hash table end:", (int)hashTableEnd);
     uint32_t playtime = 0;
-    for (unsigned int offset = 0x000028; offset < 0x03c800 /*fileSize - 4*/; offset += 8)
+    for (unsigned int offset = 0x000028; offset < hashTableEnd /*fileSize - 4*/; offset += 8)
     {
         // Read the hash
         uint32_t hashValue = ReadU32(buffer, offset);
@@ -563,8 +580,11 @@ bool SavefileIO::ParseFile(const char *filepath)
 
     // Based on https://github.com/d4mation/botw-unexplored-viewer/blob/master/assets/js/zelda-botw.js
 
+    size_t hashTableEnd = GetHashTableEnd(buffer, fileSize);
+    Log("Hash table end:", (int)hashTableEnd);
+
     // Iterate through the entire savefile to find the korok seed and location hashes
-    for (unsigned int offset = 0x000028; offset < 0x03c800; offset += 8)
+    for (unsigned int offset = 0x000028; offset < hashTableEnd; offset += 8)
     {
         // Read the korok or location hash ('id')
         uint32_t hashValue = ReadU32(buffer, offset);

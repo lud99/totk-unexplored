@@ -71,7 +71,7 @@ Dialog::Dialog(glm::vec2 position, float width, float height, DialogType type)
         //m_ExitButton->m_Button.m_Color = Button::SelectedColor;//glm::vec4(197, 77, 77, 0.8f);
         
 
-        float button2Width = exitButtonWidth;
+        float button2Width = exitButtonWidth; 
         //float button2X = bgRight - sideMargin - button2Width;
         m_ChooseProfileButton = new Button(glm::vec2(-exitButtonWidth / 2, buttonY), exitButtonWidth, buttonHeight, "Ok");
         m_Title = "Cannot connect to the internet";

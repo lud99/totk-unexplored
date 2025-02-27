@@ -22,6 +22,8 @@ public:
 
     bool LoadBackup(bool masterMode = false);
 
+    uint32_t GetHashTableEnd(unsigned char* buffer, int fileSize);
+
     uint32_t GetSavefilePlaytime(const std::string& filepath);
     int GetMostRecentSavefile(const std::string& dir, bool masterMode = false); // Needs slash at end of dir
 

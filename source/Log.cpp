@@ -29,7 +29,7 @@ void Log(std::string thing, std::string arg)
 }
 
 void Log(std::string thing, int arg)
-{
+{ 
     std::string joined = thing + " " + std::to_string(arg);
     LogSave(joined);
 }
@@ -55,9 +55,9 @@ void LogSave(std::string thing)
     // Print to nxlink console
     std::cout << thing << "\n";
 
-    /*std::ofstream file("sdmc:/switch/totk-unexplored/log.txt", std::ios::app); // Open file at end
-    if (file.is_open())
-        file << thing << "\n";
+    // std::ofstream file("sdmc:/switch/totk-unexplored/log.txt", std::ios::app); // Open file at end
+    // if (file.is_open())
+    //     file << thing << "\n";
 
-    file.close();*/
+    // file.close();
 }
