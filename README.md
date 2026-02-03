@@ -70,6 +70,14 @@ To avoid using external services or my own database, the images the app generate
 10 images can be saved before the app starts overriding your old images, so the image can still be seen for some time even between app restarts. Note that the http-server is not run as a sys-module so it only works when the app is running, but your phones web browser can still view the image as long as you don't refresh the page.
 
 ## Version History
+### 1.0.4
+* Updated to support the latest homebrew ABI (FW 21.0.0+)
+* Updated to the latest libs (libnx 4.10.0+)
+### 1.0.3
+* Made loading of some (probably newer) savefiles work
+### 1.0.2
+* Added high resolution map images when using the app with title override (4500x4500 instead of 1500x1500)
+* Removed 3 locations that are not required to be visited for 100% completion
 ### 1.0.1
 * Fixed caves with multiple entrances not being marked correctly as found
 * Fixed text overlap

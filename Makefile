@@ -40,7 +40,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 
 APP_TITLE	:=	TotK Unexplored
 APP_AUTHOR	:=	BigBear
-APP_VERSION :=  1.0.3
+APP_VERSION :=  1.0.4
 
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
@@ -54,8 +54,10 @@ ROMFS		:=	romfs
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
+PKG_CONFIG	:=	$(DEVKITPRO)/portlibs/switch/bin/aarch64-none-elf-pkg-config
+
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
-			$(ARCH) $(DEFINES) `freetype-config --cflags`
+			$(ARCH) $(DEFINES) `$(PKG_CONFIG) --cflags freetype2`
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__
 
@@ -64,7 +66,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lglad -lEGL -lglapi -ldrm_nouveau -lnx `freetype-config --libs`
+LIBS	:= -lglad -lEGL -lglapi -ldrm_nouveau -lnx `$(PKG_CONFIG) --libs freetype2`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
