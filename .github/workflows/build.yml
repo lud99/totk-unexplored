@@ -1,0 +1,53 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+    tags:
+      - '*'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update devkitPro packages
+        run: dkp-pacman -Syu --noconfirm
+
+      - name: Build
+        run: make
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: totk-unexplored.nro
+          path: totk-unexplored.nro
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: totk-unexplored.nro
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: totk-unexplored.nro
+          generate_release_notes: true
